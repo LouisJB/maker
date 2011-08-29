@@ -1,32 +1,42 @@
 package maker.utils
 
-import org.apache.log4j.{Logger, Priority}
+import org.apache.log4j._
 
+import util.DynamicVariable
+import scalaz.Scalaz._
+
+case class RichLevel(level : Level) extends Ordered[Level] {
+  // Log4J levels have smaller numbers for higher levels. Reverse this here
+  def compare(rhs : Level) = if (level.toInt < rhs.toInt) 
+    1 
+  else if (level.toInt < rhs.toInt) 
+    -1
+  else
+    0
+}
+object RichLevel{
+  implicit def toRichLevel(level : Level) = new RichLevel(level)
+}
 
 class AdaptingLogger(val rootLogger: VarLogger) extends VarLogger {
+  override def name = rootLogger.name
   override def trace(msg: => AnyRef) = rootLogger.trace(msg)
   override def trace(msg: => AnyRef, t: => Throwable) = rootLogger.trace(msg, t)
   override def assertLog(assertion: Boolean, msg: => String) = rootLogger.assertLog(assertion, msg)
-  override def isEnabledFor(level: Levels.Value) = rootLogger.isEnabledFor(level)
-  override def isDebugEnabled = rootLogger.isDebugEnabled
+  override def isEnabledFor(level: Level) = rootLogger.isEnabledFor(level)
   override def debug(msg: => AnyRef) = rootLogger.debug(msg)
   override def debug(msg: => AnyRef, t: => Throwable) = rootLogger.debug(msg, t)
-  override def isErrorEnabled = rootLogger.isEnabledFor(Levels.Error)
   override def error(msg: => AnyRef) = rootLogger.error(msg)
   override def error(msg: => AnyRef, t: => Throwable) = rootLogger.error(msg, t)
   override def fatal(msg: AnyRef) = rootLogger.fatal(msg)
   override def fatal(msg: AnyRef, t: Throwable) = rootLogger.fatal(msg, t)
   override def level = rootLogger.level
-  override def level_=(level: Levels.Value) = rootLogger.level = level
-  override def level[T](newLevel: Levels.Value)(thunk: => T) = rootLogger.level(newLevel)(thunk)
-  override def name = rootLogger.name
-  override def isInfoEnabled = rootLogger.isInfoEnabled
+  override def level_=(level: Level) = rootLogger.level = level
+  override def level[T](newLevel: Level)(thunk: => T) = rootLogger.level(newLevel)(thunk)
   override def info(msg: => AnyRef) = rootLogger.info(msg)
   override def info(msg: => AnyRef, t: => Throwable) = rootLogger.info(msg, t)
-  override def isWarnEnabled = rootLogger.isWarnEnabled
   override def warn(msg: => AnyRef) = rootLogger.warn(msg)
   override def warn(msg: => AnyRef, t: => Throwable) = rootLogger.warn(msg, t)
-  override def isTraceEnabled = rootLogger.isTraceEnabled
 }
 
 /**
@@ -76,25 +86,18 @@ class ExtendedLog(adapted: VarLogger) extends AdaptingLogger(adapted) {
   def never(msg: => AnyRef) {}
   def neverF(msg: => AnyRef) {}
   def never(msg: => AnyRef, t: => Throwable) {}
-  //def logException[T](msg: String = "")(action: => T): Either[Throwable, T] = ClosureUtil.safely { action }.update(t => error(msg, t), identity)
 }
 
 trait VarLogger {
-  def isTraceEnabled: Boolean = true
-
   def trace(msg: => AnyRef): Unit = ()
 
   def trace(msg: => AnyRef, t: => Throwable): Unit = ()
 
   def assertLog(assertion: Boolean, msg: => String): Unit = ()
 
-  def isDebugEnabled: Boolean = true
-
   def debug(msg: => AnyRef): Unit = ()
 
   def debug(msg: => AnyRef, t: => Throwable): Unit = ()
-
-  def isErrorEnabled: Boolean = true
 
   def error(msg: => AnyRef): Unit = ()
 
@@ -104,123 +107,83 @@ trait VarLogger {
 
   def fatal(msg: AnyRef, t: Throwable): Unit = ()
 
-  def level: Levels.Value = Levels.All
+  def level: Level = Level.OFF
 
-  def level_=(level: Levels.Value): Unit = ()
+  def level_=(level: Level): Unit = ()
 
-  def level[T](newLevel: Levels.Value)(thunk: => T): T = thunk
-  def off[T](thunk: => T): T = level(Levels.Off) { thunk }
+  def level[T](newLevel: Level)(thunk: => T): T = thunk
+  def off[T](thunk: => T): T = level(Level.OFF) { thunk }
 
   def name: String = "Null"
-  // def parent = logger.getParent
-
-  def isInfoEnabled: Boolean = true
 
   def info(msg: => AnyRef): Unit = ()
 
   def info(msg: => AnyRef, t: => Throwable): Unit = ()
 
-  def isEnabledFor(level: Levels.Value): Boolean = true
-
-  def isWarnEnabled: Boolean = true
+  def isEnabledFor(level: Level): Boolean = false
 
   def warn(msg: => AnyRef): Unit = ()
 
   def warn(msg: => AnyRef, t: => Throwable): Unit = ()
 }
 
-object Levels extends Enumeration {
-  val All = Value(15, "All")
-  val Trace = Value(13, "Trace")
-  val Debug = Value(11, "Debug")
-  val Info = Value(9, "Info")
-  val Warn = Value(7, "Warn")
-  val Error = Value(5, "Error")
-  val Fatal = Value(3, "Fatal")
-  val Off = Value(1, "Off")
-}
 
 object Log4JLogger {
-  System.setProperty("log4j.configuration", "log4j.properties")
+  System.setProperty("log4j.configuration", "utils/resources/log4j.properties")
 
-  lazy val logger = new Log4JLogger(Logger.getRootLogger)
-  def forName(name: String) = new Log4JLogger(Logger.getLogger(name))
-  def forClass(clazz: Class[_]) = new Log4JLogger(Logger.getLogger(clazz))
+  lazy val logger = new Log4JLogger(Logger.getRootLogger, levelTransformer)
+  def forName(name: String) = new Log4JLogger(Logger.getLogger(name), levelTransformer)
+  def forClass(clazz: Class[_]) = new Log4JLogger(Logger.getLogger(clazz), levelTransformer)
 
+  private val levelTransformer = new DynamicVariable[Level](Level.OFF)
 }
 
 
-class Log4JLogger(val logger: Logger) extends VarLogger {
-  override def isTraceEnabled = isEnabledFor(Levels.Trace)
+class Log4JLogger(val logger: Logger, levelTransformer: DynamicVariable[Level]) extends VarLogger {
+  import RichLevel._
+  override def trace(msg: => AnyRef) = if (isEnabledFor(Level.TRACE)) logger.trace(msg)
 
-  override def trace(msg: => AnyRef) = if (isTraceEnabled) logger.trace(msg)
-
-  override def trace(msg: => AnyRef, t: => Throwable) = if (isTraceEnabled) logger.trace(msg, t)
+  override def trace(msg: => AnyRef, t: => Throwable) = if (isEnabledFor(Level.TRACE)) logger.trace(msg, t)
 
   override def assertLog(assertion: Boolean, msg: => String) = if (assertion) logger.assertLog(assertion, msg)
 
-  override def isDebugEnabled = isEnabledFor(Levels.Debug)
+  override def debug(msg: => AnyRef) = if (isEnabledFor(Level.DEBUG)) logger.debug(msg)
 
-  override def debug(msg: => AnyRef) = if (isDebugEnabled) logger.debug(msg)
+  override def debug(msg: => AnyRef, t: => Throwable) = if (isEnabledFor(Level.DEBUG)) logger.debug(msg, t)
 
-  override def debug(msg: => AnyRef, t: => Throwable) = if (isDebugEnabled) logger.debug(msg, t)
+  override def error(msg: => AnyRef) = if (isEnabledFor(Level.ERROR)) logger.error(msg)
 
-  override def isErrorEnabled = isEnabledFor(Levels.Error)
-
-  override def error(msg: => AnyRef) = if (isErrorEnabled) logger.error(msg)
-
-  override def error(msg: => AnyRef, t: => Throwable) = if (isErrorEnabled) logger.error(msg, t)
+  override def error(msg: => AnyRef, t: => Throwable) = if (isEnabledFor(Level.ERROR)) logger.error(msg, t)
 
   override def fatal(msg: AnyRef) = logger.fatal(msg)
 
   override def fatal(msg: AnyRef, t: Throwable) = logger.fatal(msg, t)
 
+  private def getInheritedLevel = {
+    def recurse(category: Category): Level = {
+      category.getLevel ?? recurse(category.getParent)
+    }
 
-  //override def level = levelTransformer.value(getInheritedLevel match {
-      //case Level.ALL => Levels.All
-      //case Level.DEBUG => Levels.Debug
-      //case Level.ERROR => Levels.Error
-      //case Level.WARN => Levels.Warn
-      //case Level.FATAL => Levels.Fatal
-      //case Level.INFO => Levels.Info
-      //case Level.TRACE => Levels.Trace
-      //case Level.OFF => Levels.Off
-      //case _ => Levels.Off
-      //})
-    //
-    //val liftToLog4J: PartialFunction[Levels.Value, Level] = {
-      //case Levels.All => Level.ALL
-      //case Levels.Debug => Level.DEBUG
-      //case Levels.Error => Level.ERROR
-      //case Levels.Warn => Level.WARN
-      //case Levels.Fatal => Level.FATAL
-      //case Levels.Info => Level.INFO
-      //case Levels.Trace => Level.TRACE
-      //case Levels.Off => Level.OFF
-      //case _ => Level.OFF
-      //}
+    recurse(logger)
+  }
 
-  override def isEnabledFor(level: Levels.Value): Boolean = this.level >= level
+  override def level = levelTransformer.value
 
-  //override def level_=(level: Levels.Value) = logger.setLevel(liftToLog4J(level))
+  override def isEnabledFor(level: Level): Boolean = this.level >= level
 
-//  override def level[T](newLevel: Levels.Value)(thunk: => T) = levelTransformer.withValue(_ => newLevel) { thunk }
+  override def level_=(level: Level) = logger.setLevel(level)
+
+  override def level[T](newLevel: Level)(thunk: => T) = levelTransformer.withValue(newLevel) { thunk }
 
   override def name = logger.getName
 
-  override def isInfoEnabled = isEnabledFor(Levels.Info)
+  override def info(msg: => AnyRef) = if (isEnabledFor(Level.INFO)) logger.info(msg)
 
-  override def info(msg: => AnyRef) = if (isInfoEnabled) logger.info(msg)
-
-  override def info(msg: => AnyRef, t: => Throwable) = if (isInfoEnabled) logger.info(msg, t)
+  override def info(msg: => AnyRef, t: => Throwable) = if (isEnabledFor(Level.INFO)) logger.info(msg, t)
 
   def isEnabledFor(level: Priority) = logger.isEnabledFor(level)
 
-  override def isWarnEnabled = isEnabledFor(Levels.Warn)
-
-  override def warn(msg: => AnyRef) = if (isWarnEnabled) logger.warn(msg)
-
-  override def warn(msg: => AnyRef, t: => Throwable) = if (isWarnEnabled) logger.warn(msg, t)
+  override def warn(msg: => AnyRef, t: => Throwable) = if (isEnabledFor(Level.WARN)) logger.warn(msg, t)
 }
 
 
