@@ -56,12 +56,10 @@ object Project{
   }
 
   def compileFromInstructionFile(compileInstructionFile : File) : String = {
-    val procBuilder = new ProcessBuilder("fsc", "@" + compileInstructionFile.getAbsolutePath)
+    val procBuilder = new ProcessBuilder("/usr/local/scala/bin/fsc", "@" + compileInstructionFile.getAbsolutePath)
     //procBuilder.redirectErrorStream
     val proc = procBuilder.start
     val procResult = proc.waitFor
-    println("proc result was " + procResult)
-    println("Exit status was " + proc.exitValue)
     Project.getStringFromInputStream(proc.getInputStream)
   }
 }
@@ -80,6 +78,8 @@ case class Project(root : File, srcDirs : List[File], jars : List[File], outputD
   }
 
   def compile: String = {
+    if (!outputDir.exists)
+      outputDir.mkdirs
     Log.info("Compiling")
     val compileInstructionFile = new File(root, "compile")
     writeCompileInstructionsFile(compileInstructionFile, classpath, outputDir, srcFiles)

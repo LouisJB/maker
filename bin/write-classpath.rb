@@ -9,6 +9,6 @@ Find.find("jars") do |f|
 end
 
 File.open("set-classpath.sh", "w") do |s|
-  s.puts("export CLASSPATH=resources/:target/scala_2.9.0-1/test-classes:target/scala_2.9.0-1/classes/:#{jars.join(":")}")
+  s.puts("export CLASSPATH=resources/:out/:#{jars.join(":")}")
 end
 
