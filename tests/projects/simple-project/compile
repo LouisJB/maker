@@ -1,4 +1,4 @@
--cp /Users/alex/github/maker/tests/projects/simple-project/out
--d /Users/alex/github/maker/tests/projects/simple-project/out
-tests/projects/simple-project/src/code/bar/Bar.scala
-tests/projects/simple-project/src/code/Code.scala
+-cp /home/alex/repos/maker/tests/projects/simple-project/out
+-d /home/alex/repos/maker/tests/projects/simple-project/out
+/home/alex/repos/maker/tests/projects/simple-project/src/code/bar/Bar.scala
+/home/alex/repos/maker/tests/projects/simple-project/src/code/Code.scala

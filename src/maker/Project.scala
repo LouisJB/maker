@@ -9,54 +9,16 @@ import java.io.BufferedInputStream
 import java.io.ByteArrayOutputStream
 import java.io.InputStream
 
-
-case class Project(root : File, srcDirs : List[File], jars : List[File], outputDir : File){
-
-  private def findFiles(pred : File => Boolean, dirs : File*) : List[File] = {
-    def rec(file : File) : List[File] = {
-      if (file.isDirectory)
-        file.listFiles.toList.flatMap(rec)
-      else if (pred(file))
-        List(file)
-      else
-        Nil
+object Project{
+  var projects : List[Project] = Nil
+  var currentProject : Option[Project] = None
+  def current = currentProject match {
+    case None => {
+      currentProject = projects.headOption
+      currentProject.get
     }
-    dirs.toList.flatMap(rec)
+    case Some(proj) => proj
   }
-
-  def srcFiles = findFiles({f : File => f.getName.endsWith(".scala")}, srcDirs : _*)
-  def classFiles = findFiles({f : File => f.getName.endsWith(".class")}, outputDir)
-  def classpath = (outputDir :: jars).map(_.getAbsolutePath).mkString(":")
-  def compileText = "-cp " + classpath + "\n" + "-d " + outputDir.getAbsolutePath + "\n" + srcFiles.mkString("\n") + "\n"
-  def clean {
-    Log.info("cleaning")
-    classFiles.foreach(_.delete)
-  }
-  def compile : String = {
-    Log.info("Compiling")
-    val compileInstructionFile = new File(root, "compile")
-    val fstream = new FileWriter(compileInstructionFile)
-    val out = new BufferedWriter(fstream)
-    out.write(compileText)
-    out.flush
-    out.close()
-    val procBuilder = new ProcessBuilder("fsc", "@" + compileInstructionFile.getAbsolutePath)
-    procBuilder.redirectErrorStream
-    val proc = procBuilder.start
-    val procResult = proc.waitFor
-    if (procResult != 0){
-      Project.getStringFromInputStream(proc.getInputStream)
-    } else {
-      ""
-    }
-  }
-}
-
-object Project extends App{
-  val root = new File(System.getenv("HOME") + "/github/maker")
-  val proj = new Project(root, List(new File(root, "src")), Nil, new File(root, "/target/scala_2.9.0-1/classes"))
-  proj.srcFiles.foreach(println)
-  proj.compile
 
   def getStringFromInputStream(s : InputStream) : String = {
     val bis = new BufferedInputStream(s)
@@ -70,7 +32,59 @@ object Project extends App{
     buf.toString()
   }
 
+  def findFiles(pred : File => Boolean, dirs : File*) : List[File] = {
+    def rec(file : File) : List[File] = {
+      if (file.isDirectory)
+        file.listFiles.toList.flatMap(rec)
+      else if (pred(file))
+        List(file)
+      else
+        Nil
+    }
+    dirs.toList.flatMap(rec)
+  }
+
+  def writeCompileInstructionsFile(compileInstructionFile: File, classpath : String, outputDir : File, srcFiles : List[File]){
+    val fstream = new FileWriter(compileInstructionFile)
+    val out = new BufferedWriter(fstream)
+
+    out.write("-cp " + classpath + "\n")
+    out.write("-d " + outputDir.getAbsolutePath + "\n")
+    srcFiles.foreach{f : File => out.write(f.getAbsolutePath + "\n")}
+    out.flush
+    out.close()
+  }
+
+  def compileFromInstructionFile(compileInstructionFile : File) : String = {
+    val procBuilder = new ProcessBuilder("fsc", "@" + compileInstructionFile.getAbsolutePath)
+    //procBuilder.redirectErrorStream
+    val proc = procBuilder.start
+    val procResult = proc.waitFor
+    println("proc result was " + procResult)
+    println("Exit status was " + proc.exitValue)
+    Project.getStringFromInputStream(proc.getInputStream)
+  }
 }
 
+case class Project(root : File, srcDirs : List[File], jars : List[File], outputDir : File){
+  import Project._
 
+
+  def srcFiles = findFiles({f : File => f.getName.endsWith(".scala")}, srcDirs : _*)
+  def classFiles = findFiles({f : File => f.getName.endsWith(".class")}, outputDir)
+  def classpath = (outputDir :: jars).map(_.getAbsolutePath).mkString(":")
+  def compileText = "-cp " + classpath + "\n" + "-d " + outputDir.getAbsolutePath + "\n" + srcFiles.mkString("\n") + "\n"
+  def clean {
+    Log.info("cleaning")
+    classFiles.foreach(_.delete)
+  }
+
+  def compile: String = {
+    Log.info("Compiling")
+    val compileInstructionFile = new File(root, "compile")
+    writeCompileInstructionsFile(compileInstructionFile, classpath, outputDir, srcFiles)
+    compileFromInstructionFile(compileInstructionFile)
+
+  }
+}
 

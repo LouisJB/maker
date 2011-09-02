@@ -1,1 +1,2 @@
-let g:relative_compile_directory="/target/scala_2.9.0-1/"
+let g:relative_class_dir="/out/"
+let g:relative_test_class_dir="/out"
