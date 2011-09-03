@@ -8,19 +8,22 @@ import java.lang.ProcessBuilder
 import java.io.BufferedInputStream
 import java.io.ByteArrayOutputStream
 import java.io.InputStream
+import java.lang.System
+import scala.collection.JavaConversions._
 
-object Project{
-  var projects : List[Project] = Nil
-  var currentProject : Option[Project] = None
-  def current = currentProject match {
-    case None => {
-      currentProject = projects.headOption
-      currentProject.get
-    }
-    case Some(proj) => proj
+case class Command(args : String*){
+  override def toString = "Command: " + args.mkString(" ")
+
+  def exec : (Int, String) = {
+    val procBuilder = new ProcessBuilder(args)
+    procBuilder.redirectErrorStream
+    val proc = procBuilder.start
+    val procResult = proc.waitFor
+    val output = getStringFromInputStream(proc.getInputStream)
+    (procResult, output)
   }
 
-  def getStringFromInputStream(s : InputStream) : String = {
+  private def getStringFromInputStream(s : InputStream) : String = {
     val bis = new BufferedInputStream(s)
     val buf = new ByteArrayOutputStream()
     var result = bis.read()
@@ -31,6 +34,17 @@ object Project{
     }        
     buf.toString()
   }
+}
+
+object Project{
+
+  private def scala_home = ("/usr/local/scala" :: List("SCALA_HOME", "MAKER_SCALA_HOME").flatMap{e : String => Option(System.getenv(e))}).filter(new File(_).exists).headOption.getOrElse(throw new Exception("Can't find scala home"))
+  private def java_home = ("/usr/local/jdk" :: List("JAVA_HOME", "MAKER_JAVA_HOME").flatMap{e : String => Option(System.getenv(e))}).filter(new File(_).exists).headOption.getOrElse(throw new Exception("Can't find scala home"))
+
+  private def jar : String = java_home + "/bin/jar"
+  private def fsc : String = scala_home + "/bin/fsc"
+
+
 
   def findFiles(pred : File => Boolean, dirs : File*) : List[File] = {
     def rec(file : File) : List[File] = {
@@ -55,18 +69,23 @@ object Project{
     out.close()
   }
 
-  def compileFromInstructionFile(compileInstructionFile : File) : String = {
-    val procBuilder = new ProcessBuilder("/usr/local/scala/bin/fsc", "@" + compileInstructionFile.getAbsolutePath)
-    //procBuilder.redirectErrorStream
-    val proc = procBuilder.start
-    val procResult = proc.waitFor
-    Project.getStringFromInputStream(proc.getInputStream)
+
+  def compileFromInstructionFile(compileInstructionFile : File) : (Int, String) = {
+    Command(fsc, "@" + compileInstructionFile.getAbsolutePath).exec
   }
 }
 
-case class Project(root : File, srcDirs : List[File], jars : List[File], outputDir : File){
+case class Project(name : String, root : File, srcDirs : List[File], jars : List[File], outputDir : File, packageDir : File){
   import Project._
 
+  def compileRequired = {
+    if (srcFiles.isEmpty)
+      false
+    else if (classFiles.isEmpty)
+      true
+    else 
+      srcFiles.map(_.lastModified).max > classFiles.map(_.lastModified).min
+  }
 
   def srcFiles = findFiles({f : File => f.getName.endsWith(".scala")}, srcDirs : _*)
   def classFiles = findFiles({f : File => f.getName.endsWith(".class")}, outputDir)
@@ -75,16 +94,33 @@ case class Project(root : File, srcDirs : List[File], jars : List[File], outputD
   def clean {
     Log.info("cleaning")
     classFiles.foreach(_.delete)
+    outputJar.delete
   }
 
-  def compile: String = {
+  def compile: (Int, String) = {
     if (!outputDir.exists)
       outputDir.mkdirs
     Log.info("Compiling")
-    val compileInstructionFile = new File(root, "compile")
-    writeCompileInstructionsFile(compileInstructionFile, classpath, outputDir, srcFiles)
-    compileFromInstructionFile(compileInstructionFile)
-
+    if (compileRequired){
+      val compileInstructionFile = new File(root, "compile")
+      writeCompileInstructionsFile(compileInstructionFile, classpath, outputDir, srcFiles)
+      compileFromInstructionFile(compileInstructionFile)
+    } else {
+      (0, "Already compiled")
+    }
   }
+
+  def outputJar = new File(packageDir.getAbsolutePath, name + ".jar")
+
+  def pack : Int = {
+    if (!packageDir.exists)
+      packageDir.mkdirs
+    compile
+
+    val cmd = Command(jar, "cf", outputJar.getAbsolutePath, "-C", new File(outputDir.getAbsolutePath).getParentFile.toString, outputDir.getName)
+    val (result, output) = cmd.exec
+    result
+  }
+
 }
 
