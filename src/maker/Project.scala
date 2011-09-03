@@ -11,31 +11,6 @@ import java.io.InputStream
 import java.lang.System
 import scala.collection.JavaConversions._
 
-case class Command(args : String*){
-  override def toString = "Command: " + args.mkString(" ")
-
-  def exec : (Int, String) = {
-    val procBuilder = new ProcessBuilder(args)
-    procBuilder.redirectErrorStream
-    val proc = procBuilder.start
-    val procResult = proc.waitFor
-    val output = getStringFromInputStream(proc.getInputStream)
-    (procResult, output)
-  }
-
-  private def getStringFromInputStream(s : InputStream) : String = {
-    val bis = new BufferedInputStream(s)
-    val buf = new ByteArrayOutputStream()
-    var result = bis.read()
-    while(result != -1) {
-      val b = result.asInstanceOf[Byte]
-      buf.write(b)
-      result = bis.read()
-    }        
-    buf.toString()
-  }
-}
-
 object Project{
 
   private def scala_home = ("/usr/local/scala" :: List("SCALA_HOME", "MAKER_SCALA_HOME").flatMap{e : String => Option(System.getenv(e))}).filter(new File(_).exists).headOption.getOrElse(throw new Exception("Can't find scala home"))
