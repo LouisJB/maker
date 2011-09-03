@@ -2,3 +2,5 @@ set-classpath.sh
 tags
 .maker
 target
+out
+tests/projects/simple-project/out-jar/
