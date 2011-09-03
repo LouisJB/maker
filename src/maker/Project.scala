@@ -50,6 +50,13 @@ object Project{
   }
 }
 
+trait Task{
+  def exec : (Int, String)
+  def dependencies : Seq[Task]
+  def dependsOn(tasks : Task*) : Task
+}
+
+
 case class Project(name : String, root : File, srcDirs : List[File], jars : List[File], outputDir : File, packageDir : File){
   import Project._
 

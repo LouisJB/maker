@@ -129,7 +129,7 @@ trait VarLogger {
 
 
 object Log4JLogger {
-  System.setProperty("log4j.configuration", "utils/resources/log4j.properties")
+  System.setProperty("log4j.configuration", "log4j.properties")
 
   lazy val logger = new Log4JLogger(Logger.getRootLogger, levelTransformer)
   def forName(name: String) = new Log4JLogger(Logger.getLogger(name), levelTransformer)

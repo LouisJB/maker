@@ -2,12 +2,14 @@
 
 require 'find'
 src_files = []
-Find.find("src") do |f|
-  if f =~ /.scala$/ then
-    src_files.unshift(f)
+["src", "tests"].each do |dir|
+  Find.find(dir) do |f|
+    if f =~ /.scala$/ then
+      src_files.unshift(f)
+    end
   end
 end
-jars = `ls jars`.split("\n")
+jars = `ls jars`.split("\n").collect{|jar| "jars/#{jar}"}
 
 cmd = "scalac -cp #{jars.join(":")}:resources -d out #{src_files.join(" ")}"
 
