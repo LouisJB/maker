@@ -1,5 +1,4 @@
-package maker
-
+package maker.project
 import org.scalatest.FunSuite
 import java.io.File
 

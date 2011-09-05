@@ -1,4 +1,4 @@
-package maker
+package maker.os
 
 import java.io.BufferedWriter
 import java.lang.ProcessBuilder

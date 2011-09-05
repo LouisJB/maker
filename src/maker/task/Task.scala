@@ -1,9 +1,12 @@
-package maker
+package maker.task
 
 import maker.utils.Log
 import java.io.File
 import java.io.FileWriter
 import java.io.BufferedWriter
+import maker.project.Project
+import maker.os.Environment
+import maker.os.Command
 
 trait Task{
   def exec : (Int, String) = {

@@ -2,6 +2,11 @@
 
 scala_home=ENV["SCALA_HOME"] || "/usr/local/scala/"
 fsc = scala_home + "/bin/fsc"
+
+require 'fileutils'
+
+FileUtils.mkdir("out") unless File.exist?("out")
+
 require 'find'
 src_files = []
 ["src", "tests"].each do |dir|
