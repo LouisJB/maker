@@ -11,7 +11,7 @@ src_files = []
 end
 jars = `ls jars`.split("\n").collect{|jar| "jars/#{jar}"}
 
-cmd = "scalac -cp #{jars.join(":")}:resources -d out #{src_files.join(" ")}"
+cmd = "fsc -cp #{jars.join(":")}:resources -d out #{src_files.join(" ")}"
 
 puts cmd
 puts `#{cmd}`
