@@ -9,6 +9,7 @@ import maker.os.Environment
 import maker.os.Command
 
 trait Task{
+  def lock : Object
   def exec : (Int, String) = {
     dependencies.foreach{
       dep =>
@@ -16,7 +17,9 @@ trait Task{
         if (depResult != 0)
           return (1, "")
     }
-    execSelf
+    lock.synchronized{
+      execSelf
+    }
   }
   protected def execSelf : (Int, String)
   def dependencies : Seq[Task]
@@ -40,6 +43,7 @@ case class Compile(project : Project, dependencies : List[Task] = Nil) extends T
   import Environment._
   import project._
   import Compile._
+  val lock = new Object
 
   def dependsOn(tasks : Task*) = copy(dependencies = (dependencies ::: tasks.toList).distinct)
 
@@ -53,15 +57,17 @@ case class Compile(project : Project, dependencies : List[Task] = Nil) extends T
   }
   def compileText = "-cp " + classpath + "\n" + "-d " + outputDir.getAbsolutePath + "\n" + srcFiles.mkString("\n") + "\n"
 
+
   protected def execSelf: (Int, String) = {
     if (!outputDir.exists)
       outputDir.mkdirs
-    Log.info("Compiling")
     if (compileRequired){
+      Log.info("Compiling")
       val compileInstructionFile = new File(root, "compile")
       writeCompileInstructionsFile(compileInstructionFile, classpath, outputDir, srcFiles)
       compileFromInstructionFile(compileInstructionFile)
     } else {
+      Log.info("Already Compiling")
       (0, "Already compiled")
     }
   }
@@ -76,6 +82,7 @@ case class Compile(project : Project, dependencies : List[Task] = Nil) extends T
 case class Package(project : Project, dependencies : List[Task] = Nil) extends Task{
   import Environment._
   import project._
+  val lock = new Object
   def dependsOn(tasks : Task*) = copy(dependencies = (dependencies ::: tasks.toList).distinct)
 
   def execSelf : (Int, String) = {
@@ -89,6 +96,7 @@ case class Package(project : Project, dependencies : List[Task] = Nil) extends T
 
 case class Clean(project : Project, dependencies : List[Task] = Nil) extends Task{
   import project._
+  val lock = new Object
   def dependsOn(tasks : Task*) = copy(dependencies = (dependencies ::: tasks.toList).distinct)
   def execSelf =  {
     Log.info("cleaning")

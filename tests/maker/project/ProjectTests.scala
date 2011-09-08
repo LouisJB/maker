@@ -6,7 +6,7 @@ class ProjectTests extends FunSuite{
   val root = new File("tests/projects/simple-project")
   val proj = Project("foo", root, List(new File(root, "src")), Nil, new File(root, "out"), new File(root, "out-jar"))
 
-  test("Copilation makes class files"){
+  test("Compilation makes class files"){
     proj.clean
     assert(proj.classFiles.size === 0)
     proj.compile
