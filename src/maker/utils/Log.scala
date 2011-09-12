@@ -24,6 +24,7 @@ class AdaptingLogger(val rootLogger: VarLogger) extends VarLogger {
   override def trace(msg: => AnyRef, t: => Throwable) = rootLogger.trace(msg, t)
   override def assertLog(assertion: Boolean, msg: => String) = rootLogger.assertLog(assertion, msg)
   override def isEnabledFor(level: Level) = rootLogger.isEnabledFor(level)
+  def isDebugEnabled = isEnabledFor(Level.DEBUG)
   override def debug(msg: => AnyRef) = rootLogger.debug(msg)
   override def debug(msg: => AnyRef, t: => Throwable) = rootLogger.debug(msg, t)
   override def error(msg: => AnyRef) = rootLogger.error(msg)
