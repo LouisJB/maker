@@ -1,6 +1,7 @@
 package plugin
 
-import scala.tools.nsc._
+//import scala.tools.nsc._
+import scala.tools.nsc.{Global, Phase}
 import scala.tools.nsc.plugins.PluginComponent
 import scala.tools.nsc.plugins.Plugin
 
@@ -8,8 +9,11 @@ import scala.tools.nsc.plugins.Plugin
  *  traverser */
  //class TemplateTraverse(val global: Global) extends PluginComponent {
 class TemplateTraverse(val global: Global) extends Plugin {
+  //import global._
+  import global.{CompilationUnit, Traverser, Tree, Apply, ForeachTreeTraverser, TypeTree, ForEachTypeTraverser, Type, Typed}
+  import global.TypeTraverser
   import global._
-  import global.definitions._
+  //import global.definitions._
   val name = "traverser"
   val description = "code walker"
   
@@ -26,7 +30,9 @@ class TemplateTraverse(val global: Global) extends Plugin {
     def newPhase(prev: Phase): Phase = new TraverserPhase(prev)
     class TraverserPhase(prev: Phase) extends StdPhase(prev) {
       def apply(unit: CompilationUnit) {
+        println("Compilation unit is " + unit + ", " + unit.getClass)
         newTraverser().traverse(unit.body)
+        //newTypeTraverser().traverse(unit.body)
       }
     }
 
@@ -34,9 +40,25 @@ class TemplateTraverse(val global: Global) extends Plugin {
 
     def check(tree: Tree): Unit = tree match {
       case Apply(fun, args) =>
-        println("traversing application of "+ fun)
-      case _ => ()
+        println("traversing application of "+ fun + ",  " + tree.getClass)
+      case Typed(expr, tpt) =>
+        println("Typed exp " + expr + ", " + tpt)
+      case tt : TypeTree => 
+        tt.symbol match {
+          case cs : ClassSymbol => {
+            println( "\tclass symbol:" + tt)
+            println("\t\t enclosingPackage " + cs.enclosingPackage)
+            println("\t\t sourceFile       " + cs.sourceFile)
+            println("\t\t owner            " + cs.owner)
+            println("\t\t owner parent     " + cs.owner.owner)
+          }
+          case _ => 
+            println("Typed tree " + tt + ", " + tt.getClass + ", " + tt.symbol + ", " + tt.symbol.getClass)
+        }
+      case _ => ()//println(tree.getClass + ",     "  + tree)
     }
+    def checkType(tp : Type) = println("Type is " + tp + ", " + tp.getClass)
+    def newTypeTraverser() : TypeTraverser = new ForEachTypeTraverser(checkType)
   }
 }
 
