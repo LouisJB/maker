@@ -1,4 +1,4 @@
 <plugin>
   <name>traverser</name>
-  <classname>plugin.TemplateTraverse</classname>
+  <classname>plugin.WriteDependencies</classname>
 </plugin>
