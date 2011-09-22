@@ -1,4 +1,0 @@
-<plugin>
-  <name>traverser</name>
-  <classname>plugin.TemplateTraverse</classname>
-</plugin>
