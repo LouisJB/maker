@@ -48,8 +48,6 @@ class WriteDependencies(val global: Global) extends Plugin {
           dep => out.write(dep + "\n")
         }
         out.close
-        if (1 == 1)
-          System.exit(99)
       }
     }
 
