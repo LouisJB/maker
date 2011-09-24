@@ -5,3 +5,4 @@ case class MultiProject(projects : Project*){
   def compile = projects.par.foreach(_.compile)
   def pack = projects.par.foreach(_.pack)
 }
+

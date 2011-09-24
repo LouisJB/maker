@@ -1,3 +1,3 @@
-let g:relative_class_dir="/out"
-let g:relative_test_class_dir="/out"
+let g:relative_class_dir="/classes"
+let g:relative_test_class_dir="/test-classes"
 let g:scalatest_reporter=""

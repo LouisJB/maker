@@ -31,6 +31,7 @@ object Compile{
     val fstream = new FileWriter(compileInstructionFile)
     val out = new BufferedWriter(fstream)
 
+    out.write("-unchecked\n")
     out.write("-cp " + classpath + "\n")
     out.write("-d " + outputDir.getAbsolutePath + "\n")
     srcFiles.foreach{f : File => out.write(f.getAbsolutePath + "\n")}
@@ -48,17 +49,20 @@ case class Compile(project : Project, dependencies : List[Task] = Nil) extends T
   def dependsOn(tasks : Task*) = copy(dependencies = (dependencies ::: tasks.toList).distinct)
 
   def compileRequired = {
-    if (srcFiles.isEmpty)
+    if (srcFiles.isEmpty){
+      Log.warn("No source files found")
       false
+    }
     else if (classFiles.isEmpty)
       true
     else 
       srcFiles.map(_.lastModified).max > classFiles.map(_.lastModified).min
   }
-  def compileText = "-cp " + classpath + "\n" + "-d " + outputDir.getAbsolutePath + "\n" + srcFiles.mkString("\n") + "\n"
+  def compileText = "-unchecked\n" + "-cp " + classpath + "\n" + "-d " + outputDir.getAbsolutePath + "\n" + srcFiles.mkString("\n") + "\n"
 
 
   protected def execSelf: (Int, String) = {
+    println("Compiling")
     if (!outputDir.exists)
       outputDir.mkdirs
     if (compileRequired){
