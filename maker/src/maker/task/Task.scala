@@ -31,7 +31,9 @@ object Compile{
     val fstream = new FileWriter(compileInstructionFile)
     val out = new BufferedWriter(fstream)
 
+    val pluginJar = "out/artifacts/plugin_jar/plugin.jar"
     out.write("-unchecked\n")
+    out.write("-Xplugin:" + pluginJar + "\n")
     out.write("-cp " + classpath + "\n")
     out.write("-d " + outputDir.getAbsolutePath + "\n")
     srcFiles.foreach{f : File => out.write(f.getAbsolutePath + "\n")}
@@ -58,7 +60,6 @@ case class Compile(project : Project, dependencies : List[Task] = Nil) extends T
     else 
       srcFiles.map(_.lastModified).max > classFiles.map(_.lastModified).min
   }
-  def compileText = "-unchecked\n" + "-cp " + classpath + "\n" + "-d " + outputDir.getAbsolutePath + "\n" + srcFiles.mkString("\n") + "\n"
 
 
   protected def execSelf: (Int, String) = {
