@@ -20,7 +20,7 @@
   </component>
   <component name="DebuggerManager">
     <line_breakpoints>
-      <breakpoint url="file://$PROJECT_DIR$/plugin/src/plugin/WriteDependencies.scala" line="42" class="plugin.WriteDependencies.Component.TraverserPhase" package="plugin">
+      <breakpoint url="file://$PROJECT_DIR$/plugin/src/plugin/WriteDependencies.scala" line="42" class="plugin.WriteDependencies.Component.TraverserPhase" package="">
         <option name="ENABLED" value="true" />
         <option name="LOG_ENABLED" value="false" />
         <option name="LOG_EXPRESSION_ENABLED" value="false" />
@@ -92,10 +92,19 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="WriteDependencies.scala" pinned="false" current="true" current-in-tab="true">
+      <file leaf-file-name="WriteDependencies.scala" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/plugin/src/plugin/WriteDependencies.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="42" column="0" selection-start="1522" selection-end="1522" vertical-scroll-proportion="0.30097088">
+            <state line="47" column="41" selection-start="1856" selection-end="1856" vertical-scroll-proportion="0.0">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="ProjectTests.scala" pinned="false" current="true" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/maker/tests/maker/project/ProjectTests.scala">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="19" column="98" selection-start="537" selection-end="537" vertical-scroll-proportion="0.67058825">
               <folding />
             </state>
           </provider>
@@ -121,6 +130,7 @@
         <option value="$PROJECT_DIR$/maker/starling_script/Starling.scala" />
         <option value="$PROJECT_DIR$/caller/src/invoke/Invoke.scala" />
         <option value="$PROJECT_DIR$/maker/src/maker/project/MultiProject.scala" />
+        <option value="$PROJECT_DIR$/maker/tests/maker/project/ProjectTests.scala" />
       </list>
     </option>
   </component>
@@ -331,7 +341,7 @@
     <property name="options.searchVisible" value="true" />
     <property name="dynamic.classpath" value="false" />
   </component>
-  <component name="RunManager" selected="Application.Invoke">
+  <component name="RunManager" selected="ScalaTest.ProjectTests">
     <configuration default="false" name="Invoke" type="Application" factoryName="Application" temporary="true">
       <option name="MAIN_CLASS_NAME" value="invoke.Invoke" />
       <option name="VM_PARAMETERS" value="-Dscala.usejavacp=true" />
@@ -366,6 +376,18 @@
       <option name="PASS_PARENT_ENVS" value="true" />
       <module name="maker" />
       <envs />
+      <RunnerSettings RunnerId="Run" />
+      <ConfigurationWrapper RunnerId="Run" />
+      <method />
+    </configuration>
+    <configuration default="false" name="ProjectTests" type="ScalaTestRunConfiguration" factoryName="ScalaTest" temporary="true">
+      <module name="maker" />
+      <setting name="path" value="maker.project.ProjectTests" />
+      <setting name="package" value="" />
+      <setting name="vmparams" value="" />
+      <setting name="params" value="" />
+      <setting name="version" value="false" />
+      <setting name="workingDirectory" value="$PROJECT_DIR$" />
       <RunnerSettings RunnerId="Run" />
       <ConfigurationWrapper RunnerId="Run" />
       <method />
@@ -499,10 +521,11 @@
         <option name="Maven.BeforeRunTask" enabled="false" />
       </method>
     </configuration>
-    <list size="3">
+    <list size="4">
       <item index="0" class="java.lang.String" itemvalue="Application.Invoke" />
       <item index="1" class="java.lang.String" itemvalue="Application.LoadStarling" />
       <item index="2" class="java.lang.String" itemvalue="Scala Compilation Server.FSC" />
+      <item index="3" class="java.lang.String" itemvalue="ScalaTest.ProjectTests" />
     </list>
     <configuration name="&lt;template&gt;" type="WebApp" default="true" selected="false">
       <Host>localhost</Host>
@@ -678,7 +701,14 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/plugin/src/plugin/WriteDependencies.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="42" column="0" selection-start="1522" selection-end="1522" vertical-scroll-proportion="0.30097088">
+        <state line="47" column="41" selection-start="1856" selection-end="1856" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/maker/tests/maker/project/ProjectTests.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="19" column="98" selection-start="537" selection-end="537" vertical-scroll-proportion="0.67058825">
           <folding />
         </state>
       </provider>
@@ -743,6 +773,7 @@
             <option name="proportions">
               <list>
                 <option value="0.2" />
+                <option value="0.5" />
               </list>
             </option>
           </splitter-proportions>

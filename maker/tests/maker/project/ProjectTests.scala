@@ -10,7 +10,7 @@ class ProjectTests extends FunSuite with BeforeAndAfterEach{
 
   override def beforeEach{
     val root = tempDir("fred")
-    proj = Project("foo", root, List(new File(root, "src")), Nil, new File(root, "out"), new File(root, "out-jar"))
+    proj = Project("foox", root, List(new File(root, "src")), Nil, new File(root, "out"), new File(root, "out-jar"))
 
     writeToFile(
       new File(root, "src/foo/Foo.scala"),
@@ -38,6 +38,7 @@ class ProjectTests extends FunSuite with BeforeAndAfterEach{
     proj.compile
     assert(proj.classFiles.size > 0)
     proj.clean
+    assert(proj.classFiles.size === 0)
   }
 
   test("Package makes jar"){
@@ -45,6 +46,8 @@ class ProjectTests extends FunSuite with BeforeAndAfterEach{
     assert(!proj.outputJar.exists)
     proj.pack
     assert(proj.outputJar.exists)
+    proj.clean
+    assert(!proj.outputJar.exists)
   }
 
   override def afterEach(){
