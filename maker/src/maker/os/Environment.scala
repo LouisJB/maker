@@ -7,7 +7,9 @@ object Environment{
   private def java_home = ("/usr/local/jdk" :: List("JAVA_HOME", "MAKER_JAVA_HOME").flatMap{e : String => Option(System.getenv(e))}).filter(new File(_).exists).headOption.getOrElse(throw new Exception("Can't find scala home"))
 
   def jar : String = java_home + "/bin/jar"
+  def javap : String = java_home + "/bin/javap"
   def fsc : String = scala_home + "/bin/fsc"
+  val xargs = "/usr/bin/xargs"
 
 
 

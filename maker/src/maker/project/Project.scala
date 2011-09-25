@@ -10,9 +10,7 @@ import java.io.ByteArrayOutputStream
 import java.io.InputStream
 import java.lang.System
 import scala.collection.JavaConversions._
-import maker.task.Clean
-import maker.task.Compile
-import maker.task.Package
+import maker.task._
 
 object Project{
 
@@ -38,16 +36,26 @@ case class Project(
 
   def srcFiles = findSourceFiles(srcDirs : _*)
   def classFiles = findClasses(outputDir)
+  def compilationTime = classFiles.map(_.lastModified).sortWith(_>_).headOption
+  def changedFiles = compilationTime match {
+    case Some(time) => srcFiles.filter(_.lastModified >= time)
+    case None => srcFiles
+  }
+
   def jars = findJars(jarDirs : _*)
   def classpath = (outputDir :: jars).map(_.getAbsolutePath).mkString(":")
   def outputJar = new File(packageDir.getAbsolutePath, name + ".jar")
 
   private val cleanTask = Clean(this)
   private val compileTask = Compile(this)
+  private val writeSignaturesTask = WriteSignatures(this) dependsOn (compileTask)
   private val packageTask = Package(this) dependsOn(compileTask)
   
   def clean: (Int, String) = cleanTask.exec
   def compile: (Int, String) = compileTask.exec
   def pack : (Int, String) = packageTask.exec
+  def writeSignatures = writeSignaturesTask.exec
+  def delete = recursiveDelete(root)
+  override def toString = "Project " + name
 }
 

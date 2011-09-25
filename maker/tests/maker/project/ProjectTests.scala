@@ -1,10 +1,36 @@
 package maker.project
 import org.scalatest.FunSuite
 import java.io.File
+import maker.utils.FileUtils._
+import org.scalatest.BeforeAndAfterEach
 
-class ProjectTests extends FunSuite{
-  val root = new File("tests/projects/simple-project")
-  val proj = Project("foo", root, List(new File(root, "src")), Nil, new File(root, "out"), new File(root, "out-jar"))
+class ProjectTests extends FunSuite with BeforeAndAfterEach{
+
+  var proj : Project = _
+
+  override def beforeEach{
+    val root = tempDir("fred")
+    proj = Project("foo", root, List(new File(root, "src")), Nil, new File(root, "out"), new File(root, "out-jar"))
+
+    writeToFile(
+      new File(root, "src/foo/Foo.scala"),
+      """
+      package foo
+      case class Foo(x : Double){
+      }
+      """
+    )
+    writeToFile(
+      new File(root, "src/foo/bar/Foo.scala"),
+      """
+      package foo.bar
+      import foo.Foo
+
+      case class Bar(x : Foo){
+      }
+      """
+    )
+  }
 
   test("Compilation makes class files"){
     proj.clean
@@ -19,5 +45,9 @@ class ProjectTests extends FunSuite{
     assert(!proj.outputJar.exists)
     proj.pack
     assert(proj.outputJar.exists)
+  }
+
+  override def afterEach(){
+    proj.delete
   }
 }
