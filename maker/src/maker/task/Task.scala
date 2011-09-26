@@ -51,16 +51,6 @@ case class Compile(project : Project, dependencies : List[Task] = Nil) extends T
 
   def dependsOn(tasks : Task*) = copy(dependencies = (dependencies ::: tasks.toList).distinct)
 
-  def compileRequired = {
-    if (srcFiles.isEmpty){
-      Log.warn("No source files found")
-      false
-    }
-    else if (classFiles.isEmpty)
-      true
-    else 
-      srcFiles.map(_.lastModified).max > classFiles.map(_.lastModified).min
-  }
 
 
   protected def execSelf: (Int, String) = {

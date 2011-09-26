@@ -57,5 +57,19 @@ case class Project(
   def writeSignatures = writeSignaturesTask.exec
   def delete = recursiveDelete(root)
   override def toString = "Project " + name
+
+  def compileRequired = {
+    if (srcFiles.isEmpty){
+      Log.warn("No source files found")
+      false
+    }
+    else if (classFiles.isEmpty)
+      true
+    else {
+      println(srcFiles.map(_.lastModified).max)
+    println(classFiles.map(_.lastModified).min)
+      srcFiles.map(_.lastModified).max > classFiles.map(_.lastModified).min
+    }
+  }
 }
 
