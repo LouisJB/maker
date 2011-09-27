@@ -3,6 +3,8 @@ package maker.utils
 import java.io.File
 import java.io.FileWriter
 import java.io.BufferedWriter
+import java.io.BufferedReader
+import java.io.FileReader
 
 object FileUtils{
 
@@ -34,11 +36,22 @@ object FileUtils{
   def findClasses(dirs : File*) = findFilesWithExtension("class", dirs : _*)
   def findSourceFiles(dirs : File*) = findFilesWithExtension("scala", dirs : _*)
 
-  def outputStream(file : File) = {
+  def withFileWriter(file : File)(f : BufferedWriter => _){
+    if (! file.getParentFile.exists)
+      file.getParentFile.mkdirs
     val fstream = new FileWriter(file)
-    new BufferedWriter(fstream)
+    val out = new BufferedWriter(fstream)
+    f(out)
+    out.close
   }
 
+  def withFileReader(file : File)(f : BufferedReader => _){
+    val fstream = new FileReader(file)
+    val in = new BufferedReader(fstream)
+    f(in)
+    in.close
+  }
+  
   def tempDir(name : String = "") = {
     val temp = File.createTempFile(name, java.lang.Long.toString(System.nanoTime))
     temp.delete
@@ -55,9 +68,16 @@ object FileUtils{
   }
 
   def writeToFile(file : File, text : String){
-    file.getParentFile.mkdirs
-    val out = outputStream(file)
-    out.write(text)
-    out.close
+    withFileWriter(file){
+      out : BufferedWriter =>
+        out.write(text)
+    }
+  }
+
+  def withTempFile(f : File => _, deleteOnExit : Boolean = true){
+    val file = File.createTempFile("maker-temp", java.lang.Long.toString(System.nanoTime))
+    f(file)
+    if (deleteOnExit)
+      file.delete
   }
 }

@@ -3,6 +3,7 @@
     <output-path>$PROJECT_DIR$/out/artifacts/plugin_jar</output-path>
     <root id="archive" name="plugin.jar">
       <element id="module-output" name="plugin" />
+      <element id="module-output" name="maker" />
     </root>
   </artifact>
 </component>

@@ -3,7 +3,8 @@ package plugin
 import scala.tools.nsc.{Global, Phase}
 import scala.tools.nsc.plugins.PluginComponent
 import scala.tools.nsc.plugins.Plugin
-import java.io.{FileWriter, BufferedWriter}
+import java.io.{File, FileWriter, BufferedWriter}
+import maker.project.Dependencies
 
 object WriteDependencies{
   def dependencyFile(sourceFile : String) = {
@@ -37,17 +38,17 @@ class WriteDependencies(val global: Global) extends Plugin {
     def newPhase(prev: Phase): Phase = new TraverserPhase(prev)
     class TraverserPhase(prev: Phase) extends StdPhase(prev) {
 
+      private var deps = Dependencies()
+      override def run(){
+        super.run
+        deps.persist()
+      }
       def outputFile(unit : CompilationUnit) = unit.source.path.replace(".scala", ".maker-dependencies")
 
       def apply(unit: CompilationUnit) {
         val collector = scala.collection.mutable.Set[String]()
         newTraverser(collector).traverse(unit.body)
-        println("Writing to " + dependencyFile(unit.source.path))
-        val out = new BufferedWriter(new FileWriter(dependencyFile(unit.source.path)));
-        collector.foreach{
-          dep => out.write(dep + "\n")
-        }
-        out.close
+        deps += (unit.source.file.file, Set() ++ collector.map{s => new java.io.File(s)})
       }
     }
 

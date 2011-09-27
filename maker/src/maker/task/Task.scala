@@ -1,6 +1,5 @@
 package maker.task
 
-import maker.utils.Log
 import maker.utils.FileUtils._
 import java.io.File
 import java.io.FileWriter
@@ -9,6 +8,7 @@ import maker.project.Project
 import maker.project.SignatureFile
 import maker.os.Environment
 import maker.os.Command
+import maker.utils.{FileUtils, Log}
 
 trait Task{
   def lock : Object
@@ -28,51 +28,6 @@ trait Task{
   def dependsOn(tasks : Task*) : Task
 }
 
-object Compile{
-  def writeCompileInstructionsFile(compileInstructionFile: File, classpath : String, outputDir : File, srcFiles : List[File]){
-    val out = outputStream(compileInstructionFile)
-
-    val pluginJar = "out/artifacts/plugin_jar/plugin.jar"
-    out.write("-unchecked\n")
-    out.write("-Xplugin:" + pluginJar + "\n")
-    out.write("-cp " + classpath + "\n")
-    out.write("-d " + outputDir.getAbsolutePath + "\n")
-    srcFiles.foreach{f : File => out.write(f.getAbsolutePath + "\n")}
-    out.flush
-    out.close()
-  }
-}
-
-case class Compile(project : Project, dependencies : List[Task] = Nil) extends Task{
-  import Environment._
-  import project._
-  import Compile._
-  val lock = new Object
-
-  def dependsOn(tasks : Task*) = copy(dependencies = (dependencies ::: tasks.toList).distinct)
-
-
-
-  protected def execSelf: (Int, String) = {
-    if (!outputDir.exists)
-      outputDir.mkdirs
-    if (compileRequired){
-      Log.info("Compiling " + project)
-      val compileInstructionFile = new File(root, "compile")
-      writeCompileInstructionsFile(compileInstructionFile, classpath, outputDir, srcFiles)
-      compileFromInstructionFile(compileInstructionFile)
-    } else {
-      Log.info("Already Compiling")
-      (0, "Already compiled")
-    }
-  }
-
-
-
-  def compileFromInstructionFile(compileInstructionFile : File) : (Int, String) = {
-    Command(fsc, "@" + compileInstructionFile.getAbsolutePath).exec
-  }
-}
 
 case class WriteSignatures(project : Project, dependencies : List[Task] = Nil) extends Task{
   import Environment._
@@ -118,9 +73,7 @@ case class WriteSignatures(project : Project, dependencies : List[Task] = Nil) e
           sigBySourceFile.foreach{
             case (srcFileName, sig) =>
               val sigFile = SignatureFile.forSourceFile(new File(dir, srcFileName + ".scala"))
-              val out = outputStream(sigFile.file)
-              out.write(sig.reverse.mkString("\n"))
-              out.close
+//              writeToFile(sigFile, sig.reverse.mkString("\n"))
           }
         }
       )

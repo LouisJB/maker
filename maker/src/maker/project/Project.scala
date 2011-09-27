@@ -34,12 +34,12 @@ case class Project(
 
   def dependsOn(projects : Project *) = copy(dependencies = dependencies ::: projects.toList)
 
-  def srcFiles = findSourceFiles(srcDirs : _*)
+  def srcFiles() = findSourceFiles(srcDirs : _*)
   def classFiles = findClasses(outputDir)
-  def compilationTime = classFiles.map(_.lastModified).sortWith(_>_).headOption
-  def changedFiles = compilationTime match {
-    case Some(time) => srcFiles.filter(_.lastModified >= time)
-    case None => srcFiles
+  def compilationTime() : Option[Long] = classFiles.map(_.lastModified).sortWith(_>_).headOption
+  def changedSrcFiles = compilationTime match {
+    case Some(time) => srcFiles().filter(_.lastModified > time)
+    case None => srcFiles()
   }
 
   def jars = findJars(jarDirs : _*)
@@ -59,17 +59,7 @@ case class Project(
   override def toString = "Project " + name
 
   def compileRequired = {
-    if (srcFiles.isEmpty){
-      Log.warn("No source files found")
-      false
-    }
-    else if (classFiles.isEmpty)
-      true
-    else {
-      println(srcFiles.map(_.lastModified).max)
-    println(classFiles.map(_.lastModified).min)
-      srcFiles.map(_.lastModified).max > classFiles.map(_.lastModified).min
-    }
+    changedSrcFiles.size > 0
   }
 }
 

@@ -20,7 +20,7 @@
   </component>
   <component name="DebuggerManager">
     <line_breakpoints>
-      <breakpoint url="file://$PROJECT_DIR$/plugin/src/plugin/WriteDependencies.scala" line="42" class="plugin.WriteDependencies.Component.TraverserPhase" package="">
+      <breakpoint url="file://$PROJECT_DIR$/plugin/src/plugin/WriteDependencies.scala" line="48" class="plugin.WriteDependencies.Component.TraverserPhase" package="">
         <option name="ENABLED" value="true" />
         <option name="LOG_ENABLED" value="false" />
         <option name="LOG_EXPRESSION_ENABLED" value="false" />
@@ -74,19 +74,10 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="MultiProject.scala" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/maker/src/maker/project/MultiProject.scala">
+      <file leaf-file-name="Task.scala" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/maker/src/maker/task/Task.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="8" column="12" selection-start="206" selection-end="206" vertical-scroll-proportion="0.0">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="Invoke.scala" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/caller/src/invoke/Invoke.scala">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="11" column="50" selection-start="353" selection-end="353" vertical-scroll-proportion="0.0">
+            <state line="61" column="14" selection-start="2021" selection-end="2021" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
@@ -95,16 +86,79 @@
       <file leaf-file-name="WriteDependencies.scala" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/plugin/src/plugin/WriteDependencies.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="47" column="41" selection-start="1856" selection-end="1856" vertical-scroll-proportion="0.0">
+            <state line="50" column="49" selection-start="1841" selection-end="1841" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="ProjectTests.scala" pinned="false" current="true" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/maker/tests/maker/project/ProjectTests.scala">
+      <file leaf-file-name="Invoke.scala" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/caller/src/invoke/Invoke.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="19" column="98" selection-start="538" selection-end="538" vertical-scroll-proportion="0.67058825">
+            <state line="4" column="18" selection-start="88" selection-end="88" vertical-scroll-proportion="0.0">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="CompilationUnits.class" pinned="false" current="false" current-in-tab="false">
+        <entry file="jar:///usr/local/scala/lib/scala-compiler.jar!/scala/tools/nsc/CompilationUnits.class">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="4" column="64" selection-start="249" selection-end="249" vertical-scroll-proportion="0.0">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="SourceFile.scala" pinned="false" current="false" current-in-tab="false">
+        <entry file="jar:///usr/local/scala/src/scala-compiler-src.jar!/scala/tools/nsc/util/SourceFile.scala">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="19" column="21" selection-start="497" selection-end="497" vertical-scroll-proportion="0.0">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="AbstractFile.scala" pinned="false" current="false" current-in-tab="false">
+        <entry file="jar:///usr/local/scala/src/scala-compiler-src.jar!/scala/tools/nsc/io/AbstractFile.scala">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="102" column="14" selection-start="3496" selection-end="3496" vertical-scroll-proportion="0.0">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="package.scala" pinned="false" current="false" current-in-tab="false">
+        <entry file="jar:///usr/local/scala/src/scala-compiler-src.jar!/scala/tools/nsc/io/package.scala">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="13" column="7" selection-start="311" selection-end="311" vertical-scroll-proportion="0.0">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="Dependencies.scala" pinned="false" current="true" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/maker/src/maker/project/Dependencies.scala">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="24" column="53" selection-start="758" selection-end="758" vertical-scroll-proportion="0.70197046">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="SignatureFile.scala" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/maker/src/maker/project/SignatureFile.scala">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="5" column="7" selection-start="74" selection-end="74" vertical-scroll-proportion="0.0">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="Compile.scala" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/maker/src/maker/task/Compile.scala">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="56" column="0" selection-start="1635" selection-end="1635" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
@@ -124,13 +178,16 @@
   <component name="IdeDocumentHistory">
     <option name="changedFiles">
       <list>
-        <option value="$PROJECT_DIR$/plugin/src/plugin/WriteDependencies.scala" />
         <option value="$PROJECT_DIR$/maker/src/maker/os/Command.scala" />
         <option value="$PROJECT_DIR$/maker/src/maker/LoadStarling.scala" />
         <option value="$PROJECT_DIR$/maker/starling_script/Starling.scala" />
         <option value="$PROJECT_DIR$/caller/src/invoke/Invoke.scala" />
         <option value="$PROJECT_DIR$/maker/src/maker/project/MultiProject.scala" />
         <option value="$PROJECT_DIR$/maker/tests/maker/project/ProjectTests.scala" />
+        <option value="$PROJECT_DIR$/maker/src/maker/task/Compile.scala" />
+        <option value="$PROJECT_DIR$/maker/src/maker/task/Task.scala" />
+        <option value="$PROJECT_DIR$/plugin/src/plugin/WriteDependencies.scala" />
+        <option value="$PROJECT_DIR$/maker/src/maker/project/Dependencies.scala" />
       </list>
     </option>
   </component>
@@ -140,6 +197,22 @@
   <component name="ModuleEditorState">
     <option name="LAST_EDITED_MODULE_NAME" />
     <option name="LAST_EDITED_TAB_NAME" />
+  </component>
+  <component name="ProjectInspectionProfilesVisibleTreeState">
+    <entry key="Project Default">
+      <profile-state>
+        <expanded-state>
+          <State>
+            <id />
+          </State>
+        </expanded-state>
+        <selected-state>
+          <State>
+            <id>Abstraction issues</id>
+          </State>
+        </selected-state>
+      </profile-state>
+    </entry>
   </component>
   <component name="ProjectLevelVcsManager" settingsEditedManually="false">
     <OptionsSetting value="true" id="Add" />
@@ -326,11 +399,11 @@
   </component>
   <component name="PropertiesComponent">
     <property name="GoToFile.includeJavaFiles" value="false" />
-    <property name="project.structure.last.edited" value="Modules" />
+    <property name="project.structure.last.edited" value="Artifacts" />
     <property name="project.structure.proportion" value="0.15" />
     <property name="options.splitter.main.proportions" value="0.3" />
     <property name="recentsLimit" value="5" />
-    <property name="options.lastSelected" value="org.jetbrains.plugins.scala.compiler.ScalacConfigurable" />
+    <property name="options.lastSelected" value="preferences.keymap" />
     <property name="MemberChooser.sorted" value="false" />
     <property name="project.structure.side.proportion" value="0.2" />
     <property name="MemberChooser.copyJavadoc" value="false" />
@@ -341,7 +414,7 @@
     <property name="options.searchVisible" value="true" />
     <property name="dynamic.classpath" value="false" />
   </component>
-  <component name="RunManager" selected="ScalaTest.ProjectTests">
+  <component name="RunManager" selected="Application.Invoke">
     <configuration default="false" name="Invoke" type="Application" factoryName="Application" temporary="true">
       <option name="MAIN_CLASS_NAME" value="invoke.Invoke" />
       <option name="VM_PARAMETERS" value="-Dscala.usejavacp=true" />
@@ -561,7 +634,7 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="1" width="1280" height="798" extended-state="0" />
-    <editor active="false" />
+    <editor active="true" />
     <layout>
       <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
@@ -573,9 +646,9 @@
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="true" content_ui="tabs" />
       <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.2489829" sideWeight="0.6711111" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.2489829" sideWeight="0.6711111" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Dependency Viewer" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.3288889" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.3288889" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.3288889" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
@@ -630,85 +703,114 @@
     <option name="FILTER_TARGETS" value="false" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/maker/tests/maker/project/AgentTests.scala">
+    <entry file="file://$PROJECT_DIR$/maker/tests/maker/project/ProjectTests.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="11" column="11" selection-start="194" selection-end="194" vertical-scroll-proportion="0.0" />
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/maker/src/maker/os/Command.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="18" column="22" selection-start="553" selection-end="553" vertical-scroll-proportion="0.0" />
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/maker/src/maker/project/Project.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="24" column="11" selection-start="708" selection-end="708" vertical-scroll-proportion="0.0" />
-      </provider>
-    </entry>
-    <entry file="jar:///usr/local/scala/src/scala-compiler-src.jar!/scala/tools/nsc/ScriptRunner.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="182" column="6" selection-start="6155" selection-end="6155" vertical-scroll-proportion="0.0" />
-      </provider>
-    </entry>
-    <entry file="jar:///usr/local/scala/src/scala-compiler-src.jar!/scala/tools/nsc/settings/MutableSettings.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="20" column="91" selection-start="574" selection-end="574" vertical-scroll-proportion="0.0" />
-      </provider>
-    </entry>
-    <entry file="jar:///usr/local/scala/src/scala-compiler-src.jar!/scala/tools/nsc/GenericRunnerSettings.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="20" column="6" selection-start="461" selection-end="461" vertical-scroll-proportion="0.0" />
-      </provider>
-    </entry>
-    <entry file="jar:///usr/local/scala/src/scala-compiler-src.jar!/scala/tools/nsc/GenericRunnerCommand.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="55" column="42" selection-start="1938" selection-end="1938" vertical-scroll-proportion="0.0" />
-      </provider>
-    </entry>
-    <entry file="jar:///usr/local/scala/src/scala-compiler-src.jar!/scala/tools/nsc/MainGenericRunner.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="64" column="15" selection-start="2252" selection-end="2252" vertical-scroll-proportion="0.0" />
-      </provider>
-    </entry>
-    <entry file="jar:///usr/local/scala/src/scala-compiler-src.jar!/scala/tools/nsc/settings/ScalaSettings.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="143" column="6" selection-start="10905" selection-end="10905" vertical-scroll-proportion="0.0" />
-      </provider>
-    </entry>
-    <entry file="jar:///usr/local/scala/src/scala-compiler-src.jar!/scala/tools/nsc/interpreter/ILoop.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="537" column="19" selection-start="19740" selection-end="19740" vertical-scroll-proportion="0.0" />
-      </provider>
-    </entry>
-    <entry file="jar:///usr/local/scala/src/scala-compiler-src.jar!/scala/tools/nsc/interpreter/ILoopInit.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="62" column="60" selection-start="1904" selection-end="1904" vertical-scroll-proportion="0.0" />
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/maker/src/maker/project/MultiProject.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="8" column="12" selection-start="206" selection-end="206" vertical-scroll-proportion="0.0">
+        <state line="21" column="6" selection-start="612" selection-end="612" vertical-scroll-proportion="0.0">
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/caller/src/invoke/Invoke.scala">
+    <entry file="jar:///usr/local/scala/src/scala-compiler-src.jar!/scala/tools/nsc/SubComponent.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="11" column="50" selection-start="353" selection-end="353" vertical-scroll-proportion="0.0">
+        <state line="66" column="58" selection-start="2078" selection-end="2078" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar:///usr/local/scala/src/scala-compiler-src.jar!/scala/tools/nsc/backend/opt/DeadCodeElimination.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="271" column="0" selection-start="9678" selection-end="9678" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar:///usr/local/scala/src/scala-compiler-src.jar!/scala/tools/nsc/Global.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="486" column="15" selection-start="16935" selection-end="16935" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/maker/src/maker/utils/FileUtils.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="8" column="43" selection-start="171" selection-end="171" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar:///usr/local/jdk/jre/lib/rt.jar!/java/io/File.class">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="63" column="16" selection-start="2320" selection-end="2320" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/maker/src/maker/task/Compile.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="56" column="0" selection-start="1635" selection-end="1635" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/maker/src/maker/project/SignatureFile.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="5" column="7" selection-start="74" selection-end="74" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/maker/src/maker/task/Task.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="61" column="14" selection-start="2021" selection-end="2021" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar:///usr/local/scala/src/scala-compiler-src.jar!/scala/tools/nsc/io/package.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="13" column="7" selection-start="311" selection-end="311" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar:///usr/local/scala/src/scala-compiler-src.jar!/scala/tools/nsc/io/AbstractFile.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="102" column="14" selection-start="3496" selection-end="3496" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar:///usr/local/scala/src/scala-compiler-src.jar!/scala/tools/nsc/util/SourceFile.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="19" column="21" selection-start="497" selection-end="497" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar:///usr/local/scala/lib/scala-compiler.jar!/scala/tools/nsc/CompilationUnits.class">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="4" column="64" selection-start="249" selection-end="249" vertical-scroll-proportion="0.0">
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/plugin/src/plugin/WriteDependencies.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="47" column="41" selection-start="1856" selection-end="1856" vertical-scroll-proportion="0.0">
+        <state line="50" column="49" selection-start="1841" selection-end="1841" vertical-scroll-proportion="0.0">
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/maker/tests/maker/project/ProjectTests.scala">
+    <entry file="file://$PROJECT_DIR$/caller/src/invoke/Invoke.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="19" column="98" selection-start="538" selection-end="538" vertical-scroll-proportion="0.67058825">
+        <state line="4" column="18" selection-start="88" selection-end="88" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/maker/src/maker/project/Dependencies.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="24" column="53" selection-start="758" selection-end="758" vertical-scroll-proportion="0.70197046">
           <folding />
         </state>
       </provider>
@@ -768,7 +870,7 @@
       </state>
       <state key="ModuleStructureConfigurable.UI">
         <settings>
-          <last-edited>maker</last-edited>
+          <last-edited>plugin</last-edited>
           <splitter-proportions>
             <option name="proportions">
               <list>
