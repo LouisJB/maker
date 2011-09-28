@@ -10,28 +10,35 @@ class ProjectTests extends FunSuite with BeforeAndAfterEach{
   var proj : Project = _
   val fooSrc = new File(root, "src/foo/Foo.scala")
   val barSrc = new File(root, "src/foo/bar/Bar.scala")
+  val bazSrc = new File(root, "src/foo/Baz.scala")
+  def fooClass = new File(proj.outputDir, "foo/Foo.class")
+  def fooObject = new File(proj.outputDir, "foo/Foo$.class")
+  def barClass = new File(proj.outputDir, "foo/bar/Bar.class")
+  def barObject = new File(proj.outputDir, "foo/bar/Bar$.class")
 
+  val originalFooContent = 
+    """
+    package foo
+    case class Foo(x : Double)
+    """
+  val originalBarContent = 
+    """
+    package foo.bar
+    import foo.Foo
+
+    case class Bar(x : Foo)
+    """
+  val originalBazContent = 
+    """
+    package foo
+    case class Baz(y : Int)
+    """
   def writeStandardProject{
     proj = Project("foox", root, List(new File(root, "src")), Nil, new File(root, "out"), new File(root, "out-jar"))
 
-    writeToFile(
-      fooSrc,
-      """
-      package foo
-      case class Foo(x : Double){
-      }
-      """
-    )
-    writeToFile(
-      barSrc,
-      """
-      package foo.bar
-      import foo.Foo
-
-      case class Bar(x : Foo){
-      }
-      """
-    )
+    writeToFile(fooSrc, originalFooContent)
+    writeToFile(barSrc, originalBarContent)
+    writeToFile(bazSrc, originalBazContent)
   }
 
   override def beforeEach(){
@@ -63,25 +70,32 @@ class ProjectTests extends FunSuite with BeforeAndAfterEach{
 
   test("Compilation not done if signature unchanged"){
     proj.compile
-    val fooClass = new File(proj.outputDir, "foo/Foo.class")
-      val barClass = new File(proj.outputDir, "foo/bar/Bar.class")
-      assert(barClass.exists)
-    assert(fooClass.exists)
-    val fooClassTimestamp = fooClass.lastModified
-    val barClassTimestamp = barClass.lastModified
+    val compilationTime = proj.compilationTime.get
+
     Thread.sleep(1100)
 
-    fooSrc.delete
+    writeToFile(fooSrc, originalFooContent)
+    proj.compile
+    val changedClassFiles = proj.classFiles.filter(_.lastModified > compilationTime)
+    assert(changedClassFiles == Set(fooClass, fooObject))
+  }
+
+  test("Compilation is done if signature changed, but only on dependent classes"){
+    proj.compile
+    val compilationTime = proj.compilationTime.get
+    Thread.sleep(1100)
+
     writeToFile(
-      fooSrc,
+      fooSrc, 
       """
-      package foo
-      case class Foo(x : Double){
-      }
+        package foo
+        case class Foo(x : Double){
+          def newPublicMethod(z : Int) = z + z
+        }
       """
     )
-  proj.compile
-  assert(fooClass.lastModified > fooClassTimestamp)
-  assert(barClass.lastModified == barClassTimestamp, "Bar is now " + barClass.lastModified + ", was " + barClassTimestamp)
-}
+    proj.compile
+    val changedClassFiles = proj.classFiles.filter(_.lastModified > compilationTime)
+    assert(changedClassFiles == Set(fooClass, fooObject, barClass, barObject))
+  }
 }

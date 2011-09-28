@@ -27,22 +27,22 @@ case class Project(
   jarDirs : List[File],
   outputDir : File,
   packageDir : File,
-  dependencies : List[Project] = Nil
+  dependentProjects : List[Project] = Nil
 ){
   import Project._
   import maker.utils.FileUtils._
 
-  def dependsOn(projects : Project *) = copy(dependencies = dependencies ::: projects.toList)
+  def dependsOn(projects : Project *) = copy(dependentProjects = dependentProjects ::: projects.toList)
 
   def srcFiles() = findSourceFiles(srcDirs : _*)
   def classFiles = findClasses(outputDir)
-  def compilationTime() : Option[Long] = classFiles.map(_.lastModified).sortWith(_>_).headOption
+  def compilationTime() : Option[Long] = classFiles.toList.map(_.lastModified).sortWith(_>_).headOption
   def changedSrcFiles = compilationTime match {
     case Some(time) => srcFiles().filter(_.lastModified > time)
     case None => srcFiles()
   }
 
-  def jars = findJars(jarDirs : _*)
+  def jars = findJars(jarDirs : _*).toList.sortWith(_.getPath < _.getPath)
   def classpath = (outputDir :: jars).map(_.getAbsolutePath).mkString(":")
   def outputJar = new File(packageDir.getAbsolutePath, name + ".jar")
 

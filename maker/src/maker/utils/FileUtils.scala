@@ -8,7 +8,7 @@ import java.io.FileReader
 
 object FileUtils{
 
-  def findFiles(pred : File => Boolean, dirs : File*) : List[File] = {
+  def findFiles(pred : File => Boolean, dirs : File*) : Set[File] = {
     def rec(file : File) : List[File] = {
       if (file.isDirectory)
         file.listFiles.toList.flatMap(rec)
@@ -17,7 +17,7 @@ object FileUtils{
       else
         Nil
     }
-    dirs.toList.flatMap(rec)
+    dirs.toList.flatMap(rec).toSet
   }
 
   def findFilesWithExtension(ext : String, dirs : File*) = {

@@ -9,7 +9,7 @@ import maker.utils.FileUtils._
 import java.io.{BufferedWriter, File}
 
 object Compile {
-  def writeCompileInstructionsFile(compileInstructionFile: File, classpath: String, outputDir: File, srcFiles: List[File]) {
+  def writeCompileInstructionsFile(compileInstructionFile: File, classpath: String, outputDir: File, srcFiles: Set[File]) {
     withFileWriter(compileInstructionFile) {
       out: BufferedWriter =>
 
