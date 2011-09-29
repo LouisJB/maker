@@ -9,16 +9,18 @@ import maker.utils.FileUtils._
 import java.io.{BufferedWriter, File}
 
 object Compile {
-  def writeCompileInstructionsFile(compileInstructionFile: File, classpath: String, outputDir: File, srcFiles: Set[File]) {
+  def writeCompileInstructionsFile(compileInstructionFile: File, project : Project, srcFilesToCompile: Set[File]) {
+    import project._
     withFileWriter(compileInstructionFile) {
       out: BufferedWriter =>
 
         val pluginJar = "out/artifacts/plugin_jar/plugin.jar"
         out.write("-unchecked\n")
         out.write("-Xplugin:" + pluginJar + "\n")
+        out.write("-Dmaker-project-root=" + root + "\n")
         out.write("-cp " + classpath + "\n")
         out.write("-d " + outputDir.getAbsolutePath + "\n")
-        srcFiles.foreach {
+        srcFilesToCompile.foreach {
           f: File => out.write(f.getAbsolutePath + "\n")
         }
     }
@@ -45,9 +47,10 @@ case class Compile(project: Project, dependencies: List[Task] = Nil) extends Tas
       val compileInstructionFile = new File(root, "compile")
       val lastCompilationTime = compilationTime()
 
-      writeCompileInstructionsFile(compileInstructionFile, classpath, outputDir, changedSrcFiles)
+      writeCompileInstructionsFile(compileInstructionFile, project, changedSrcFiles)
 
-      compileFromInstructionFile(compileInstructionFile)
+      val (res, msg) = compileFromInstructionFile(compileInstructionFile)
+      println(msg)
 //      val changedClassFiles = classFiles.filter(_.lastModified > lastCompilationTime)
 
       (0, "Compiled")

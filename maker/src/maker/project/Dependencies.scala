@@ -24,15 +24,15 @@ object Dependencies {
           }
       }
     }
-    Dependencies(deps)
+    new Dependencies(deps, file)
   }
 }
 
-case class Dependencies(private var deps: Map[File, Set[File]]) {
+class Dependencies(private var deps: Map[File, Set[File]], file : File = Dependencies.defaultFile) {
 
   import Dependencies._
 
-  def persist(file: File = defaultFile) {
+  def persist() {
     withFileWriter(file) {
       out: BufferedWriter =>
         deps.foreach {

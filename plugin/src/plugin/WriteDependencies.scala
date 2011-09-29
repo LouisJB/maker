@@ -13,15 +13,11 @@ object WriteDependencies{
 }
 /** This class implements a plugin component using a tree
  *  traverser */
- //class TemplateTraverse(val global: Global) extends PluginComponent {
 class WriteDependencies(val global: Global) extends Plugin {
   import WriteDependencies._
-//  import global.{CompilationUnit, Traverser, Tree, Apply, ForeachTreeTraverser, TypeTree, ForEachTypeTraverser, Type, Typed}
-//  import global.TypeTraverser
   import global._
   var symbolMap = Map[String, Set[String]]()
 
-  //import global.definitions._
   val name = "traverser"
   val description = "code walker"
   
@@ -30,20 +26,19 @@ class WriteDependencies(val global: Global) extends Plugin {
   private object Component extends PluginComponent{
     val global: WriteDependencies.this.global.type = WriteDependencies.this.global
     val runsAfter = List[String]("refchecks")
-    /** The phase name of the compiler plugin
-    *  @todo Adapt to specific plugin.
-    */
     val phaseName = "generatefiledependencies"
 
     def newPhase(prev: Phase): Phase = new TraverserPhase(prev)
     class TraverserPhase(prev: Phase) extends StdPhase(prev) {
 
-      private var deps = Dependencies()
+      private var depsFile = new File(System.getProperty("maker-project-root", "."), "/.maker/dependencies")
+      if (! depsFile.exists)
+        depsFile.getParentFile.mkdirs
+      private var deps = Dependencies(depsFile)
       override def run(){
         super.run
         deps.persist()
       }
-      def outputFile(unit : CompilationUnit) = unit.source.path.replace(".scala", ".maker-dependencies")
 
       def apply(unit: CompilationUnit) {
         val collector = scala.collection.mutable.Set[String]()
