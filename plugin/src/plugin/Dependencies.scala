@@ -1,4 +1,4 @@
-package maker.project
+package plugin
 
 import maker.utils.FileUtils._
 import java.io.File
@@ -47,5 +47,9 @@ class Dependencies(private var deps: Map[File, Set[File]], file : File = Depende
   def +=(classFile: File, sourceFiles: Set[File]) {
     deps = deps.updated(classFile, sourceFiles)
   }
+
+  def dependentFiles(files : Set[File]) = deps.filter {
+    case (source, dependencies) => files.exists(dependencies.contains)
+  }.keys
 }
 

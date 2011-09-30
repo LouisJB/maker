@@ -21,6 +21,7 @@
     <orderEntry type="library" name="scala-lib" level="project" />
     <orderEntry type="module" module-name="plugin" />
     <orderEntry type="module" module-name="maker" />
+    <orderEntry type="library" name="scalatest" level="project" />
   </component>
 </module>
 

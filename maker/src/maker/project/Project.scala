@@ -69,6 +69,8 @@ case class Project(
     changedSrcFiles.size > 0
   }
 
+  val dependencies = plugin.Dependencies(dependenciesFile)
+
   val compiler: Global = {
     val settings = new Settings
     settings.usejavacp.value = true
@@ -78,9 +80,12 @@ case class Project(
       self =>
         override protected def computeInternalPhases() {
           super.computeInternalPhases
-          phasesSet += new WriteDependencies(self, dependenciesFile).Component
+          phasesSet += new WriteDependencies(self, dependencies).Component
         }
     }
   }
+
+
+
 }
 

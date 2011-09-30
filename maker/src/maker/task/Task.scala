@@ -13,7 +13,7 @@ import maker.utils.{FileUtils, Log}
 trait Task{
   def lock : Object
   def exec : (Int, String) = {
-    dependencies.foreach{
+    dependentTasks.foreach{
       dep =>
         val (depResult, depOutput) = dep.exec
         if (depResult != 0)
@@ -24,17 +24,17 @@ trait Task{
     }
   }
   protected def execSelf : (Int, String)
-  def dependencies : Seq[Task]
+  def dependentTasks : Seq[Task]
   def dependsOn(tasks : Task*) : Task
 }
 
 
-case class WriteSignatures(project : Project, dependencies : List[Task] = Nil) extends Task{
+case class WriteSignatures(project : Project, dependentTasks : List[Task] = Nil) extends Task{
   import Environment._
   import project._
 
   val lock = new Object
-  def dependsOn(tasks : Task*) = copy(dependencies = (dependencies ::: tasks.toList).distinct)
+  def dependsOn(tasks : Task*) = copy(dependentTasks = (dependentTasks ::: tasks.toList).distinct)
   def execSelf : (Int, String) = {
     traverseDirectories(outputDir, {
         dir => 
@@ -81,11 +81,11 @@ case class WriteSignatures(project : Project, dependencies : List[Task] = Nil) e
   }
 }
 
-case class Package(project : Project, dependencies : List[Task] = Nil) extends Task{
+case class Package(project : Project, dependentTasks : List[Task] = Nil) extends Task{
   import Environment._
   import project._
   val lock = new Object
-  def dependsOn(tasks : Task*) = copy(dependencies = (dependencies ::: tasks.toList).distinct)
+  def dependsOn(tasks : Task*) = copy(dependentTasks = (dependentTasks ::: tasks.toList).distinct)
 
   def execSelf : (Int, String) = {
     if (!packageDir.exists)
@@ -96,10 +96,10 @@ case class Package(project : Project, dependencies : List[Task] = Nil) extends T
   }
 }
 
-case class Clean(project : Project, dependencies : List[Task] = Nil) extends Task{
+case class Clean(project : Project, dependentTasks : List[Task] = Nil) extends Task{
   import project._
   val lock = new Object
-  def dependsOn(tasks : Task*) = copy(dependencies = (dependencies ::: tasks.toList).distinct)
+  def dependsOn(tasks : Task*) = copy(dependentTasks = (dependentTasks ::: tasks.toList).distinct)
   def execSelf =  {
     Log.info("cleaning " + project)
     classFiles.foreach(_.delete)

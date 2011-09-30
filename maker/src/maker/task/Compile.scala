@@ -10,14 +10,14 @@ import java.io.{BufferedWriter, File}
 
 
 
-case class Compile(project: Project, dependencies: List[Task] = Nil) extends Task {
+case class Compile(project: Project, dependentTasks: List[Task] = Nil) extends Task {
 
   import Environment._
   import project._
 
   val lock = new Object
 
-  def dependsOn(tasks: Task*) = copy(dependencies = (dependencies ::: tasks.toList).distinct)
+  def dependsOn(tasks: Task*) = copy(dependentTasks = (dependentTasks ::: tasks.toList).distinct)
 
 
   protected def execSelf: (Int, String) = {
@@ -25,8 +25,9 @@ case class Compile(project: Project, dependencies: List[Task] = Nil) extends Tas
       outputDir.mkdirs
     if (compileRequired) {
       Log.info("Compiling " + project)
-      new project.compiler.Run() compile changedSrcFiles.toList.map(_.getPath)
-
+      val filesToCompile = changedSrcFiles ++ dependencies.dependentFiles(changedSrcFiles)
+      new compiler.Run() compile filesToCompile.toList.map(_.getPath)
+      dependencies.persist
       (0, "Compiled")
     } else {
       Log.info("Already Compiling")
