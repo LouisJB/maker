@@ -1,5 +1,6 @@
 package maker.project
 
+import plugin.WriteDependencies
 import maker.utils.Log
 import java.io.File
 import java.io.FileWriter
@@ -11,6 +12,9 @@ import java.io.InputStream
 import java.lang.System
 import scala.collection.JavaConversions._
 import maker.task._
+import tools.nsc.{Settings, Global}
+import tools.nsc.io.{Directory, PlainDirectory}
+import tools.nsc.reporters.ConsoleReporter
 
 object Project{
 
@@ -50,7 +54,10 @@ case class Project(
   private val compileTask = Compile(this)
   private val writeSignaturesTask = WriteSignatures(this) dependsOn (compileTask)
   private val packageTask = Package(this) dependsOn(compileTask)
-  
+  private val dependenciesFile = new File(root, ".maker/dependencies")
+  if (! dependenciesFile.exists)
+    dependenciesFile.getParentFile.mkdirs
+
   def clean: (Int, String) = cleanTask.exec
   def compile: (Int, String) = compileTask.exec
   def pack : (Int, String) = packageTask.exec
@@ -60,6 +67,20 @@ case class Project(
 
   def compileRequired = {
     changedSrcFiles.size > 0
+  }
+
+  val compiler: Global = {
+    val settings = new Settings
+    settings.usejavacp.value = true
+    settings.outputDirs.setSingleOutput(new PlainDirectory(new Directory(outputDir)))
+
+    new Global(settings, new ConsoleReporter(settings)) {
+      self =>
+        override protected def computeInternalPhases() {
+          super.computeInternalPhases
+          phasesSet += new WriteDependencies(self, dependenciesFile).Component
+        }
+    }
   }
 }
 

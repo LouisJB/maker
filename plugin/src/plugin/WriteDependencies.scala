@@ -13,7 +13,7 @@ object WriteDependencies{
 }
 /** This class implements a plugin component using a tree
  *  traverser */
-class WriteDependencies(val global: Global) extends Plugin {
+class WriteDependencies(val global: Global, depsFile : File) extends Plugin {
   import WriteDependencies._
   import global._
   var symbolMap = Map[String, Set[String]]()
@@ -23,7 +23,7 @@ class WriteDependencies(val global: Global) extends Plugin {
   
   val components = List[PluginComponent](Component)
 
-  private object Component extends PluginComponent{
+  object Component extends PluginComponent{
     val global: WriteDependencies.this.global.type = WriteDependencies.this.global
     val runsAfter = List[String]("refchecks")
     val phaseName = "generatefiledependencies"
@@ -31,7 +31,6 @@ class WriteDependencies(val global: Global) extends Plugin {
     def newPhase(prev: Phase): Phase = new TraverserPhase(prev)
     class TraverserPhase(prev: Phase) extends StdPhase(prev) {
 
-      private var depsFile = new File(System.getProperty("maker-project-root", "."), "/.maker/dependencies")
       if (! depsFile.exists)
         depsFile.getParentFile.mkdirs
       private var deps = Dependencies(depsFile)

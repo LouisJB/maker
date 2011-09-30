@@ -54,25 +54,25 @@ class ProjectTests extends FunSuite with BeforeAndAfterEach{
     assert(proj.classFiles.size === 0)
     proj.compile
     assert(proj.classFiles.size > 0)
-//    assert(!proj.outputJar.exists)
-//    proj.pack
-//    assert(proj.outputJar.exists)
-//    proj.clean
-//    assert(proj.classFiles.size === 0)
-//    assert(!proj.outputJar.exists)
+    assert(!proj.outputJar.exists)
+    proj.pack
+    assert(proj.outputJar.exists)
+    proj.clean
+    assert(proj.classFiles.size === 0)
+    assert(!proj.outputJar.exists)
   }
 
 
   test("Compilation not done if signature unchanged"){
-//    proj.compile
-//    val compilationTime = proj.compilationTime.get
-//
-//    Thread.sleep(1100)
-//
-//    writeToFile(fooSrc, originalFooContent)
-//    proj.compile
-//    val changedClassFiles = proj.classFiles.filter(_.lastModified > compilationTime)
-//    assert(changedClassFiles == Set(fooClass, fooObject))
+    proj.compile
+    val compilationTime = proj.compilationTime.get
+
+    Thread.sleep(1100)
+
+    writeToFile(fooSrc, originalFooContent)
+    proj.compile
+    val changedClassFiles = proj.classFiles.filter(_.lastModified > compilationTime)
+    assert(changedClassFiles == Set(fooClass, fooObject))
   }
 
 //  test("Compilation is done if signature changed, but only on dependent classes"){
