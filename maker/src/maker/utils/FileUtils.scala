@@ -80,4 +80,31 @@ object FileUtils{
     if (deleteOnExit)
       file.delete
   }
+
+  def extractMapFromFile[K, V](file : File, extractor : String => (K, V)) : Map[K, V] = {
+    var map = Map[K, V]()
+    if (file.exists) {
+      withFileReader(file) {
+        in: BufferedReader =>
+          var line = in.readLine
+          while (line != null) {
+            map += extractor(line)
+            line = in.readLine
+          }
+      }
+    }
+    map
+  }
+
+  def writeMapToFile[K, V](file : File, map : Map[K, V], fn : (K, V) => String){
+    withFileWriter(file) {
+      out: BufferedWriter =>
+        map.foreach {
+          case (key, value) =>
+            out.write(fn(key, value))
+            out.write("\n")
+        }
+    }
+  }
+
 }

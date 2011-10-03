@@ -5,7 +5,6 @@ import java.io.File
 import java.io.FileWriter
 import java.io.BufferedWriter
 import maker.project.Project
-import maker.project.SignatureFile
 import maker.os.Environment
 import maker.os.Command
 import maker.utils.{FileUtils, Log}
@@ -45,21 +44,22 @@ case class WriteSignatures(project : Project, dependentTasks : List[Task] = Nil)
                 cf.getPath.substring(outputDir.getPath.length + 1).replace("/", ".").replace(".class", "")
             }.toList
           val CompiledFromRegex = """Compiled from \"(\w+).*""".r
-          var sigBySourceFile = Map[String, List[String]]()
-          var currentSourceFile : Option[String] = None
+          var sigs = Map[File, Long]()
+          var currentSourceFile : Option[File] = None
           shortClassNames.grouped(40).foreach{
             group => 
             val args = List(javap, "-classpath", outputDir.getPath) ::: group
             val cmd = Command(args : _*)
             cmd.exec match {
-              case (0, sigs) => {
-                sigs.split("\n").foreach {
-                      case CompiledFromRegex(scalaFile) => 
-                        currentSourceFile = Some(scalaFile)
+              case (0, signatures) => {
+                signatures.split("\n").foreach {
+                      case CompiledFromRegex(scalaFile) =>
+                        currentSourceFile = Some(new File(scalaFile))
                       case line =>
                         currentSourceFile match {
                           case Some(file) => 
-                            sigBySourceFile = sigBySourceFile.updated(file, line :: sigBySourceFile.getOrElse(file, Nil))
+                            val currentHash : Long = (sigs.getOrElse(file, 0))
+                            sigs = sigs.updated(file, line.hashCode ^ currentHash)
                           case None =>
                             throw new Exception("No source file in line " + line)
                       }
@@ -70,11 +70,11 @@ case class WriteSignatures(project : Project, dependentTasks : List[Task] = Nil)
                 throw new Exception("Error " + err + " when executing " + cmd)
             }
           }
-          sigBySourceFile.foreach{
-            case (srcFileName, sig) =>
-              val sigFile = SignatureFile.forSourceFile(new File(dir, srcFileName + ".scala"))
-//              writeToFile(sigFile, sig.reverse.mkString("\n"))
-          }
+          writeMapToFile(
+            project.signatureFile,
+            sigs,
+            (srcFile : File, hash : Long) => srcFile.getPath + ":" + hash.toString
+          )
         }
       )
     (0, "")

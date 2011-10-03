@@ -6,42 +6,29 @@ import java.io.BufferedWriter
 import java.io.BufferedReader
 
 object Dependencies {
-  val defaultFile = new File(".maker/dependencies")
 
-  def apply(file: File = defaultFile): Dependencies = {
-    var deps = Map[File, Set[File]]()
-    if (file.exists) {
-      withFileReader(file) {
-        in: BufferedReader =>
-          var line = in.readLine
-          while (line != null) {
-            val classFile :: sourceFileString :: Nil = line.split(":").toList
-            val sourceFiles = sourceFileString.split(",").toSet.map {
-              s: String => new File(s)
-            }
-            deps += new File(classFile) -> sourceFiles
-            line = in.readLine
-          }
+  def apply(file: File): Dependencies = {
+    val deps : Map[File, Set[File]] = extractMapFromFile(
+      file,
+      (line : String) => {
+        val sourceFile :: itsDependenciesAsString :: Nil = line.split(":").toList
+        val itsDependencies : Set[File] = itsDependenciesAsString.split(",").toSet.map {s : String => new File(s)}
+        (new File(sourceFile), itsDependencies)
       }
-    }
+    )
     new Dependencies(deps, file)
   }
 }
 
-class Dependencies(private var deps: Map[File, Set[File]], file : File = Dependencies.defaultFile) {
+class Dependencies(private var deps: Map[File, Set[File]], file : File) {
 
   import Dependencies._
 
   def persist() {
-    withFileWriter(file) {
-      out: BufferedWriter =>
-        deps.foreach {
-          case (classFile, sourceFiles) =>
-            out.write(classFile.getPath)
-            out.write(":")
-            out.write(sourceFiles.map(_.getPath).mkString("", ",", "\n"))
-        }
-    }
+    writeMapToFile(
+      file, deps,
+      (f : File, s : Set[File]) => f.getPath + ":" + s.map(_.getPath).mkString("", ",", "\n")
+    )
   }
 
   def +=(classFile: File, sourceFiles: Set[File]) {

@@ -55,8 +55,12 @@ case class Project(
   private val writeSignaturesTask = WriteSignatures(this) dependsOn (compileTask)
   private val packageTask = Package(this) dependsOn(compileTask)
   private val dependenciesFile = new File(root, ".maker/dependencies")
-  if (! dependenciesFile.exists)
-    dependenciesFile.getParentFile.mkdirs
+  val signatureFile = new File(root, ".maker/signatures")
+  List(dependenciesFile, signatureFile).foreach{
+    file =>
+    if (! file.exists)
+      file.getParentFile.mkdirs
+  }
 
   def clean: (Int, String) = cleanTask.exec
   def compile: (Int, String) = compileTask.exec
