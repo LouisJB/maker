@@ -60,7 +60,6 @@ case class Project(
 
   private val cleanTask = Clean(this)
   private val compileTask = Compile(this)
-  private val writeSignaturesTask = UpdateSignatures(this) dependsOn (compileTask)
   private val packageTask = Package(this) dependsOn (compileTask)
   private val makerDirectory = mkdirs(new File(root, ".maker"))
 
@@ -69,8 +68,6 @@ case class Project(
   def compile = compileTask.exec
 
   def pack = packageTask.exec
-
-  def writeSignatures = writeSignaturesTask.exec
 
   def delete = recursiveDelete(root)
 
