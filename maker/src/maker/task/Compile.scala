@@ -10,14 +10,14 @@ import java.io.{BufferedWriter, File}
 
 
 
-case class Compile(project: Project, dependentTasks: List[Task] = Nil) extends Task {
+case class Compile(project: Project, dependentTasks: List[Task[_]] = Nil) extends Task[String] {
 
   import Environment._
   import project._
 
   val lock = new Object
 
-  def dependsOn(tasks: Task*) = copy(dependentTasks = (dependentTasks ::: tasks.toList).distinct)
+  def dependsOn(tasks: Task[_]*) = copy(dependentTasks = (dependentTasks ::: tasks.toList).distinct)
 
 
   protected def execSelf: (Int, String) = {

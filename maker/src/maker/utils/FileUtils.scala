@@ -107,4 +107,8 @@ object FileUtils{
     }
   }
 
+  def mkdirs(dir : File) = {
+    dir.mkdirs
+    dir
+  }
 }

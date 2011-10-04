@@ -19,6 +19,15 @@ object SourceFileSignatures{
 
 case class SourceFileSignatures(private var sigs : Map[File, Long], file : File){
 
+  def += (file : File, hash : Long) = {
+    val updated = sigs.get(file) match {
+      case Some(currentHash) if hash == currentHash => false
+      case _ => true
+    }
+    sigs = sigs + (file -> hash)
+    updated
+  }
+
   def persist(){
     withFileWriter(file) {
       out: BufferedWriter =>
@@ -30,4 +39,9 @@ case class SourceFileSignatures(private var sigs : Map[File, Long], file : File)
         }
     }
   }
+
+  def timestamp: Long = if (file.exists)
+    file.lastModified()
+  else
+    0
 }
