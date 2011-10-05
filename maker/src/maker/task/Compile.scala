@@ -21,14 +21,15 @@ case class Compile(project: Project, dependentTasks: List[Task[_]] = Nil) extend
       outputDir.mkdirs
     if (compileRequired) {
       Log.info("Compiling changed source files for " + project)
+      val modifiedSrcFiles = project.changedSrcFiles
       // First compile those files who have changed
-      new compiler.Run() compile changedSrcFiles.toList.map(_.getPath)
+      new compiler.Run() compile modifiedSrcFiles.toList.map(_.getPath)
       // Determine which source files have changed signatures
       val sourceFilesWithChangedSigs = UpdateSignatures(project)
 
-      val dependentFiles = dependencies.dependentFiles(sourceFilesWithChangedSigs)
+      val dependentFiles: Set[File] = dependencies.dependentFiles(sourceFilesWithChangedSigs)
       new compiler.Run() compile dependentFiles.toList.map(_.getPath)
-      Right(sourceFilesWithChangedSigs)
+      Right(modifiedSrcFiles ++ dependentFiles)
     } else {
       Log.info("Already Compiled")
       Right(Set[File]())

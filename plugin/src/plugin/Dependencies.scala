@@ -4,6 +4,7 @@ import maker.utils.FileUtils._
 import java.io.File
 import java.io.BufferedWriter
 import java.io.BufferedReader
+import collection.Iterable
 
 object Dependencies {
 
@@ -35,8 +36,8 @@ class Dependencies(private var deps: Map[File, Set[File]], file : File) {
     deps = deps.updated(classFile, sourceFiles)
   }
 
-  def dependentFiles(files : Set[File]) = deps.filter {
+  def dependentFiles(files : Set[File]): Set[File] = deps.filter {
     case (source, dependencies) => files.exists(dependencies.contains)
-  }.keys
+  }.keySet
 }
 

@@ -29,15 +29,7 @@ case class SourceFileSignatures(private var sigs : Map[File, Long], file : File)
   }
 
   def persist(){
-    withFileWriter(file) {
-      out: BufferedWriter =>
-        sigs.foreach {
-          case (sourceFile, hash) =>
-            out.write(sourceFile.getPath)
-            out.write(":")
-            out.write(hash.toString)
-        }
-    }
+    writeMapToFile(file, sigs, {(f : File, hash : Long) => f.getPath + ":" + hash})
   }
 
   def timestamp: Long = if (file.exists)
