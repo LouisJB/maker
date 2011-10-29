@@ -2,6 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/browse/browse.iml" filepath="$PROJECT_DIR$/browse/browse.iml" />
       <module fileurl="file://$PROJECT_DIR$/caller/caller.iml" filepath="$PROJECT_DIR$/caller/caller.iml" />
       <module fileurl="file://$PROJECT_DIR$/maker/maker.iml" filepath="$PROJECT_DIR$/maker/maker.iml" />
       <module fileurl="file://$PROJECT_DIR$/plugin/plugin.iml" filepath="$PROJECT_DIR$/plugin/plugin.iml" />

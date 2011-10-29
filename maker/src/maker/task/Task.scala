@@ -17,6 +17,8 @@ trait Task[T]{
       } catch {
         case ex =>
           Left(TaskFailed(this, ex.getMessage))
+          ex.printStackTrace()
+          throw ex
       }
     }
   }

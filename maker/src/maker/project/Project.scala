@@ -1,6 +1,5 @@
 package maker.project
 
-import plugin.WriteDependencies
 import maker.utils.Log
 import java.io.File
 import java.io.FileWriter
@@ -15,6 +14,9 @@ import maker.task._
 import tools.nsc.{Settings, Global}
 import tools.nsc.io.{Directory, PlainDirectory}
 import tools.nsc.reporters.ConsoleReporter
+import sxr.BrowsePlugin
+import plugin._
+import collection.Set
 
 object Project {
 
@@ -77,21 +79,37 @@ case class Project(
     changedSrcFiles.size > 0
   }
 
-  val dependencies = plugin.Dependencies(new File(makerDirectory, "dependencies"))
+  val dependencies= plugin.Dependencies(new File(makerDirectory, "dependencies"))
+  private var signatures = plugin.ProjectSignatures()
+  private val signatureFile = new File(makerDirectory, "signatures")
+  def updateSignatures : Set[File] = {
+    val olderSigs = ProjectSignatures(signatureFile)
+    val changedFiles = signatures.changedFiles(olderSigs)
+    signatures.persist(signatureFile)
+    changedFiles
+  }
 
-  val signatures = plugin.SourceFileSignatures(new File(makerDirectory, "signatures"))
   val compiler: Global = {
     val settings = new Settings
     settings.usejavacp.value = true
     settings.outputDirs.setSingleOutput(new PlainDirectory(new Directory(outputDir)))
+//    settings.pluginOptions.appendToValue("sxr:base-directory:" + srcDirs.head + "/")
 
-    new Global(settings, new ConsoleReporter(settings)) {
+    val comp = new Global(settings, new ConsoleReporter(settings)) {
       self =>
+//      phasesSet ++= new BrowsePlugin(self).components
       override protected def computeInternalPhases() {
         super.computeInternalPhases
-        phasesSet += new WriteDependencies(self, dependencies).Component
+//        phasesSet += new WriteDependencies(self, dependencies).Component
+        phasesSet += new GenerateSigs(self, signatures).Component
+//        phasesSet ++= new BrowsePlugin(self).components
       }
+
+//      override protected lazy val roughPluginsList = List(new GenerateSigs(self))
+//      lazy val pubRoughPlugins = roughPluginsList
     }
+//    comp.pubRoughPlugins.foreach(println)
+    comp
   }
 
 

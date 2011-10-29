@@ -36,7 +36,7 @@ class Dependencies(private var deps: Map[File, Set[File]], file : File) {
     deps = deps.updated(classFile, sourceFiles)
   }
 
-  def dependentFiles(files : Set[File]): Set[File] = deps.filter {
+  def dependentFiles(files : scala.collection.Set[File]): Set[File] = deps.filter {
     case (source, dependencies) => files.exists(dependencies.contains)
   }.keySet
 }

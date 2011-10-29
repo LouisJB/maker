@@ -4,6 +4,7 @@ import maker.project.Project
 import maker.os.Environment
 import maker.utils.Log
 import java.io.File
+import collection.Set
 
 
 case class Compile(project: Project, dependentTasks: List[Task[_]] = Nil) extends Task[Set[File]] {
@@ -25,9 +26,9 @@ case class Compile(project: Project, dependentTasks: List[Task[_]] = Nil) extend
       // First compile those files who have changed
       new compiler.Run() compile modifiedSrcFiles.toList.map(_.getPath)
       // Determine which source files have changed signatures
-      val sourceFilesWithChangedSigs = UpdateSignatures(project)
 
-      val dependentFiles: Set[File] = dependencies.dependentFiles(sourceFilesWithChangedSigs)
+      val sourceFilesWithChangedSigs: Set[File] = Set() ++ project.updateSignatures
+      val dependentFiles = dependencies.dependentFiles(sourceFilesWithChangedSigs)
       new compiler.Run() compile dependentFiles.toList.map(_.getPath)
       Right(modifiedSrcFiles ++ dependentFiles)
     } else {

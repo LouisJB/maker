@@ -22,6 +22,7 @@
     <orderEntry type="library" name="lib" level="project" />
     <orderEntry type="module" module-name="plugin" />
     <orderEntry type="library" name="scalatest" level="project" />
+    <orderEntry type="module" module-name="browse" exported="" />
   </component>
 </module>
 
