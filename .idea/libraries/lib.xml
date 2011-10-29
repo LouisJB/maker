@@ -4,7 +4,6 @@
       <root url="jar://$PROJECT_DIR$/maker/lib/akka-actor-1.2-RC6.jar!/" />
       <root url="jar://$PROJECT_DIR$/maker/lib/slf4j-api-1.6.1.jar!/" />
       <root url="jar://$PROJECT_DIR$/maker/lib/log4j-1.2.16.jar!/" />
-      <root url="jar://$PROJECT_DIR$/maker/lib/scalatest_2.9.0-1.4.1.jar!/" />
       <root url="jar://$PROJECT_DIR$/maker/lib/scalaz-core_2.9.0-1-6.0.1.jar!/" />
       <root url="jar://$PROJECT_DIR$/maker/lib/akka-stm-1.2-RC6.jar!/" />
       <root url="jar://$PROJECT_DIR$/maker/lib/slf4j-log4j12-1.6.1.jar!/" />

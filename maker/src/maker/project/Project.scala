@@ -14,9 +14,9 @@ import maker.task._
 import tools.nsc.{Settings, Global}
 import tools.nsc.io.{Directory, PlainDirectory}
 import tools.nsc.reporters.ConsoleReporter
-import sxr.BrowsePlugin
 import plugin._
 import collection.Set
+
 
 object Project {
 
