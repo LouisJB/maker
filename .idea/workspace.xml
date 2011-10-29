@@ -261,10 +261,10 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="Project.scala" pinned="false" current="false" current-in-tab="false">
+      <file leaf-file-name="Project.scala" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/maker/src/maker/project/Project.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="12" column="7" selection-start="326" selection-end="326" vertical-scroll-proportion="0.0">
+            <state line="58" column="46" selection-start="1762" selection-end="1762" vertical-scroll-proportion="0.25641027">
               <folding />
             </state>
           </provider>
@@ -279,10 +279,10 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="Log.scala" pinned="false" current="true" current-in-tab="true">
+      <file leaf-file-name="Log.scala" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/utils/src/maker/utils/Log.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="10" column="64" selection-start="302" selection-end="302" vertical-scroll-proportion="0.42735043">
+            <state line="10" column="64" selection-start="302" selection-end="302" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
@@ -452,7 +452,7 @@
   </component>
   <component name="PropertiesComponent">
     <property name="GoToFile.includeJavaFiles" value="false" />
-    <property name="project.structure.last.edited" value="Modules" />
+    <property name="project.structure.last.edited" value="Libraries" />
     <property name="project.structure.proportion" value="0.15" />
     <property name="options.splitter.main.proportions" value="0.3" />
     <property name="recentsLimit" value="5" />
@@ -892,13 +892,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/maker/src/maker/project/Project.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="12" column="7" selection-start="326" selection-end="326" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/plugin/src/plugin/Dependencies.scala">
       <provider selected="true" editor-type-id="text-editor">
         <state line="4" column="28" selection-start="95" selection-end="95" vertical-scroll-proportion="0.0">
@@ -908,7 +901,14 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/utils/src/maker/utils/Log.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="10" column="64" selection-start="302" selection-end="302" vertical-scroll-proportion="0.42735043">
+        <state line="10" column="64" selection-start="302" selection-end="302" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/maker/src/maker/project/Project.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="58" column="46" selection-start="1762" selection-end="1762" vertical-scroll-proportion="0.25641027">
           <folding />
         </state>
       </provider>
@@ -973,6 +973,7 @@
             <option name="proportions">
               <list>
                 <option value="0.2" />
+                <option value="0.5" />
               </list>
             </option>
           </splitter-proportions>
@@ -992,7 +993,7 @@
       </state>
       <state key="ProjectLibrariesConfigurable.UI">
         <settings>
-          <last-edited>scala-lib</last-edited>
+          <last-edited>lib</last-edited>
           <splitter-proportions>
             <option name="proportions">
               <list>
