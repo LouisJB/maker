@@ -101,7 +101,7 @@ case class Project(
       override protected def computeInternalPhases() {
         super.computeInternalPhases
 //        phasesSet += new WriteDependencies(self, dependencies).Component
-        phasesSet += new GenerateSigs(self, signatures).Component
+//        phasesSet += new GenerateSigs(self, signatures).Component
 //        phasesSet ++= new BrowsePlugin(self).components
       }
 

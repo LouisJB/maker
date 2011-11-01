@@ -16,7 +16,8 @@ case class Package(project : Project, dependentTasks : List[Task[_]] = Nil) exte
     if (!packageDir.exists)
       packageDir.mkdirs
 
-    val cmd = Command(jar, "cf", outputJar.getAbsolutePath, "-C", new File(outputDir.getAbsolutePath).getParentFile.toString, outputDir.getName)
+    val cmd = Command(jar, "cf", outputJar.getAbsolutePath, "-C", new File(outputDir.getAbsolutePath).toString, ".")
+   println(cmd)
     cmd.exec match {
       case (0, _) => Right(Unit)
       case (errNo, errMessage) => Left(TaskFailed(this, errMessage))
