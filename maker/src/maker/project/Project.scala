@@ -91,12 +91,16 @@ case class Project(
 
   val compiler: Global = {
     val settings = new Settings
-    settings.usejavacp.value = true
+    val scalaAndJavaLibs = System.getProperty("sun.boot.class.path")
+
+    settings.usejavacp.value = false
     settings.outputDirs.setSingleOutput(new PlainDirectory(new Directory(outputDir)))
-//    settings.pluginOptions.appendToValue("sxr:base-directory:" + srcDirs.head + "/")
+    settings.javabootclasspath.value = scalaAndJavaLibs
+    settings.classpath.value = classpath
 
     val comp = new Global(settings, new ConsoleReporter(settings)) {
       self =>
+  //    println(settings.classpath.value)
 //      phasesSet ++= new BrowsePlugin(self).components
       override protected def computeInternalPhases() {
         super.computeInternalPhases
@@ -109,6 +113,7 @@ case class Project(
 //      lazy val pubRoughPlugins = roughPluginsList
     }
 //    comp.pubRoughPlugins.foreach(println)
+//    println("platform Classpath = " + comp.platform.classPath)
     comp
   }
 

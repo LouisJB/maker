@@ -46,10 +46,12 @@ object FileUtils{
   }
 
   def withFileReader(file : File)(f : BufferedReader => _){
-    val fstream = new FileReader(file)
-    val in = new BufferedReader(fstream)
-    f(in)
-    in.close
+    if (file.exists()) {
+      val fstream = new FileReader(file)
+      val in = new BufferedReader(fstream)
+      f(in)
+      in.close
+    }
   }
   
   def tempDir(name : String = "") = {

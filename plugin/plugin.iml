@@ -23,6 +23,7 @@
     <orderEntry type="library" name="scalatest" level="project" />
     <orderEntry type="library" name="lib" level="project" />
     <orderEntry type="module" module-name="utils" />
+    <orderEntry type="module" module-name="scc" exported="" />
   </component>
 </module>
 

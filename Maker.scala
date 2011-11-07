@@ -15,3 +15,5 @@ val maker = standardProject("maker")
 val plugin = standardProject("plugin")
 
 import utils._
+import scala.tools.nsc.{Settings, Global}
+import scala.tools.util._
