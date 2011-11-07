@@ -29,14 +29,14 @@ object Project {
 }
 
 case class Project(
-                    name: String,
-                    root: File,
-                    srcDirs: List[File],
-                    jarDirs: List[File],
-                    outputDir: File,
-                    packageDir: File,
-                    dependentProjects: List[Project] = Nil
-                    ) {
+  name: String,
+  root: File,
+  srcDirs: List[File],
+  jarDirs: List[File],
+  outputDir: File,
+  packageDir: File,
+  dependentProjects: List[Project] = Nil
+) {
 
   import Project._
   import maker.utils.FileUtils._
@@ -56,7 +56,9 @@ case class Project(
 
   def jars = findJars(jarDirs: _*).toList.sortWith(_.getPath < _.getPath)
 
-  def classpath = (outputDir :: jars).map(_.getAbsolutePath).mkString(":")
+  private def classpathFiles : List[File] = ((outputDir :: jars) ::: dependentProjects.flatMap(_.classpathFiles)).distinct
+
+  def classpath = classpathFiles.map(_.getAbsolutePath).mkString(":")
 
   def outputJar = new File(packageDir.getAbsolutePath, name + ".jar")
 
@@ -98,9 +100,10 @@ case class Project(
     settings.javabootclasspath.value = scalaAndJavaLibs
     settings.classpath.value = classpath
 
+    println(this)
+    new scala.tools.util.PathResolver(settings).result
     val comp = new Global(settings, new ConsoleReporter(settings)) {
       self =>
-  //    println(settings.classpath.value)
 //      phasesSet ++= new BrowsePlugin(self).components
       override protected def computeInternalPhases() {
         super.computeInternalPhases

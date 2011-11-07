@@ -1,6 +1,7 @@
 import maker.project.Project
 import java.io.File
 
+System.setProperty("scala.usejavacp", "false")
 def standardProject(name : String) = Project(
   name, 
   new File("./" + name), 
