@@ -23,6 +23,7 @@ case class Compile(project: Project, dependentTasks: List[Task[_]] = Nil) extend
     if (compileRequired) {
       Log.info("Compiling changed source files for " + project)
       val modifiedSrcFiles = project.changedSrcFiles
+      reporter.reset
       // First compile those files who have changed
       new compiler.Run() compile modifiedSrcFiles.toList.map(_.getPath)
       // Determine which source files have changed signatures
@@ -30,7 +31,10 @@ case class Compile(project: Project, dependentTasks: List[Task[_]] = Nil) extend
       val sourceFilesWithChangedSigs: Set[File] = Set() ++ project.updateSignatures
       val dependentFiles = dependencies.dependentFiles(sourceFilesWithChangedSigs)
       new compiler.Run() compile dependentFiles.toList.map(_.getPath)
-      Right(modifiedSrcFiles ++ dependentFiles)
+      if (reporter.hasErrors)
+        Left(TaskFailed(this, "Failed to compile"))
+      else
+        Right(modifiedSrcFiles ++ dependentFiles)
     } else {
       Log.info("Already Compiled")
       Right(Set[File]())

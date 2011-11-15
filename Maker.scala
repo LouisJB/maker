@@ -6,14 +6,12 @@ def standardProject(name : String) = Project(
   name, 
   new File("./" + name), 
   List(new File(name + "/src")), 
-  List(new File("./lib")),
-  new File(name + "/out"),
-  new File(name + "/package")
+  List(new File("./lib"))
 )
 
 val utils = standardProject("utils")
-val maker = standardProject("maker")
-val plugin = standardProject("plugin")
+val plugin = standardProject("plugin") dependsOn utils
+val maker = standardProject("maker") dependsOn plugin
 
 import utils._
 import scala.tools.nsc.{Settings, Global}

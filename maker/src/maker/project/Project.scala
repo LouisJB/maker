@@ -33,11 +33,11 @@ case class Project(
   root: File,
   srcDirs: List[File],
   jarDirs: List[File],
-  outputDir: File,
-  packageDir: File,
   dependentProjects: List[Project] = Nil
 ) {
 
+  def outputDir = new File(root, "out")
+  def packageDir = new File(root, "package")
   import Project._
   import maker.utils.FileUtils._
 
@@ -91,8 +91,9 @@ case class Project(
     changedFiles
   }
 
+  val settings = new Settings
+  val reporter = new ConsoleReporter(settings)
   val compiler: Global = {
-    val settings = new Settings
     val scalaAndJavaLibs = System.getProperty("sun.boot.class.path")
 
     settings.usejavacp.value = false
@@ -101,8 +102,9 @@ case class Project(
     settings.classpath.value = classpath
 
     println(this)
+    println("classpath = " + classpath)
     new scala.tools.util.PathResolver(settings).result
-    val comp = new Global(settings, new ConsoleReporter(settings)) {
+    val comp = new Global(settings, reporter) {
       self =>
 //      phasesSet ++= new BrowsePlugin(self).components
       override protected def computeInternalPhases() {
@@ -120,6 +122,9 @@ case class Project(
     comp
   }
 
+  def allDependencies(projectsSoFar : Set[Project] = Set()) : List[Project] = {
+    (this :: dependentProjects.filterNot(projectsSoFar).flatMap(_.allDependencies(projectsSoFar + this))).distinct
+  }
 
 }
 

@@ -76,11 +76,27 @@ object FileUtils{
     }
   }
 
-  def withTempFile(f : File => _, deleteOnExit : Boolean = true){
-    val file = File.createTempFile("maker-temp", java.lang.Long.toString(System.nanoTime))
-    f(file)
+  def withTempFile[A](f : File => A, deleteOnExit : Boolean = true) = {
+    val file = File.createTempFile("maker-temp-file", java.lang.Long.toString(System.nanoTime))
+    val result = f(file)
     if (deleteOnExit)
       file.delete
+    result
+  }
+
+  def withTempDir[A](f : File => A, deleteOnExit : Boolean = true) = {
+    val result = withTempFile({
+        file : File => 
+          file.delete
+          file.mkdir
+          val result = f(file)
+          if (deleteOnExit)
+            recursiveDelete(file)
+          result
+        },
+        deleteOnExit = false
+    )
+    result
   }
 
   def extractMapFromFile[K, V](file : File, extractor : String => (K, V)) : Map[K, V] = {
