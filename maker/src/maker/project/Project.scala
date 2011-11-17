@@ -33,7 +33,8 @@ case class Project(
   root: File,
   srcDirs: List[File],
   jarDirs: List[File],
-  dependentProjects: List[Project] = Nil
+  dependentProjects: List[Project] = Nil,
+  classpathOverride : Option[String] = None
 ) {
 
   def outputDir = new File(root, "out")
@@ -58,7 +59,7 @@ case class Project(
 
   private def classpathFiles : List[File] = ((outputDir :: jars) ::: dependentProjects.flatMap(_.classpathFiles)).distinct
 
-  def classpath = classpathFiles.map(_.getAbsolutePath).mkString(":")
+  def classpath = (classpathOverride.toList ::: classpathFiles.map(_.getAbsolutePath)).mkString(":")
 
   def outputJar = new File(packageDir.getAbsolutePath, name + ".jar")
 
@@ -67,9 +68,10 @@ case class Project(
   private val packageTask = Package(this) dependsOn (compileTask)
   private val makerDirectory = mkdirs(new File(root, ".maker"))
 
+
   def clean = cleanTask.exec
 
-  def compile = compileTask.exec
+  def compile = {println("Compiling"); compileTask.exec}
 
   def pack = packageTask.exec
 
