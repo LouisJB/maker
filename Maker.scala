@@ -1,23 +1,37 @@
 import maker.project.Project
 import java.io.File
-import org.apache.commons.io.FileUtils
+import org.apache.commons.io.{FileUtils => ApacheFileUtils}
 
 System.setProperty("scala.usejavacp", "false")
 
 def standardProject(name : String) = Project(
   name, 
-  new File("./" + name), 
+  new File(name), 
   List(new File(name + "/src")), 
-  List(new File("./lib"), new File("./package")),
+  List(new File("./lib")),
   Nil,
-  Some("maker.jar")
+  Some("out/")
 )
 
 val utils = standardProject("utils")
 val plugin = standardProject("plugin") dependsOn utils
-val maker = standardProject("maker") dependsOn plugin
+val maker = new Project(
+  "maker",
+  new File("maker"),
+  List(new File("maker/src")),
+  List(new File("./lib")),
+  Nil,
+  Some("out/")
+){
+  def copyClasses{
+    allDependencies().foreach{
+      proj =>
+        ApacheFileUtils.copyDirectory(proj.outputDir, new File("out"))
+    }
+  }
+}
 
 def copyPackage {
-  FileUtils.copyFile(maker.outputJar, new File("maker.jar"))
+  ApacheFileUtils.copyFile(maker.outputJar, new File("maker.jar"))
 }
 
