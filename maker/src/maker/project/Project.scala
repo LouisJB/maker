@@ -32,12 +32,14 @@ case class Project(
   name: String,
   root: File,
   srcDirs: List[File],
+  testDirs: List[File],
   jarDirs: List[File],
   dependentProjects: List[Project] = Nil,
-  classpathOverride : Option[String] = None
+  compilationClasspathOverride : Option[String] = None
 ) {
 
-  def outputDir = new File(root, "out")
+  def outputDir = new File(root, "classes")
+  def testOutputDir = new File(root, "test-classes")
   def packageDir = new File(root, "package")
   import Project._
   import maker.utils.FileUtils._
@@ -45,43 +47,54 @@ case class Project(
   def dependsOn(projects: Project*) = copy(dependentProjects = dependentProjects ::: projects.toList)
 
   def srcFiles() = findSourceFiles(srcDirs: _*)
+  def testSrcFiles() = findSourceFiles(testDirs: _*)
 
-  def classFiles = findClasses(outputDir)
+  def classFiles = findClasses(outputDir) 
+  def testClassFiles = findClasses(testOutputDir)
 
-  def compilationTime(): Option[Long] = classFiles.toList.map(_.lastModified).sortWith(_ > _).headOption
+  private def lastModificationTime(files : Set[File]) = files.toList.map(_.lastModified).sortWith(_ > _).headOption
+  def compilationTime: Option[Long] = lastModificationTime(classFiles)
+  def testCompilationTime: Option[Long] = lastModificationTime(testClassFiles)
 
-  def changedSrcFiles = compilationTime match {
-    case Some(time) => srcFiles().filter(_.lastModified > time)
-    case None => srcFiles()
+  private def filterChangedSrcFiles(files : Set[File], modTime : Option[Long]) = {
+    modTime match {
+      case Some(time) => files.filter(_.lastModified > time)
+      case None => files
+    }
   }
+  def changedSrcFiles = filterChangedSrcFiles(srcFiles(), compilationTime)
+  def changedTestFiles = filterChangedSrcFiles(testSrcFiles(), testCompilationTime)
 
   def jars = findJars(jarDirs: _*).toList.sortWith(_.getPath < _.getPath)
 
   private def classpathFiles : List[File] = ((outputDir :: jars) ::: dependentProjects.flatMap(_.classpathFiles)).distinct
 
-  def classpath = (classpathOverride.toList ::: classpathFiles.map(_.getAbsolutePath)).mkString(":")
+  def compilationClasspath = (compilationClasspathOverride.toList ::: classpathFiles.map(_.getAbsolutePath)).mkString(":")
+  def runClasspath = classpathFiles.map(_.getAbsolutePath).mkString(":")
 
   def outputJar = new File(packageDir.getAbsolutePath, name + ".jar")
 
-  private val cleanTask = Clean(this)
-  private val compileTask = Compile(this)
+  private val cleanTask : Clean = Clean(this, dependentProjects.map(_.cleanTask))
+  private val compileTask : Compile = Compile(this, changedSrcFiles _, dependentProjects.map(_.compileTask))
+  private val testCompileTask : Compile = Compile(this, changedTestFiles _, compileTask::dependentProjects.map(_.testCompileTask))
   private val packageTask = Package(this) dependsOn (compileTask)
   private val makerDirectory = mkdirs(new File(root, ".maker"))
 
+  private val testTask : Test = Test(this, testCompileTask :: dependentProjects.map(_.testTask))
+  private val testOnlyTask : Test = Test(this, List(testCompileTask))
 
   def clean = cleanTask.exec
 
-  def compile = {println("Compiling"); compileTask.exec}
+  def compile = compileTask.exec
+  def testCompile = testCompileTask.exec
+  def test = testTask.exec
+  def testOnly = testOnlyTask.exec
 
   def pack = packageTask.exec
 
   def delete = recursiveDelete(root)
 
   override def toString = "Project " + name
-
-  def compileRequired = {
-    changedSrcFiles.size > 0
-  }
 
   val dependencies= plugin.Dependencies(new File(makerDirectory, "dependencies"))
   private var signatures = plugin.ProjectSignatures()
@@ -101,10 +114,8 @@ case class Project(
     settings.usejavacp.value = false
     settings.outputDirs.setSingleOutput(new PlainDirectory(new Directory(outputDir)))
     settings.javabootclasspath.value = scalaAndJavaLibs
-    settings.classpath.value = classpath
+    settings.classpath.value = compilationClasspath
 
-    println(this)
-    println("classpath = " + classpath)
     new scala.tools.util.PathResolver(settings).result
     val comp = new Global(settings, reporter) {
       self =>

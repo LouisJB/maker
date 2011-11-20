@@ -23,7 +23,7 @@ case class Package(project : Project, dependentTasks : List[Task[_]] = Nil) exte
           depProj =>
             ApacheFileUtils.copyDirectory(depProj.outputDir, dir)
         }
-      val cmd = Command(jar, "cf", project.packageDir + "/maker.jar", "-C", dir.getAbsolutePath, ".")
+      val cmd = Command(jar, "cf", project.outputJar.getAbsolutePath, "-C", dir.getAbsolutePath, ".")
       cmd.exec match {
         case (0, _) => Right(Unit)
         case (errNo, errMessage) => Left(TaskFailed(this, errMessage))

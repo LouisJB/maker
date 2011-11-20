@@ -34,7 +34,13 @@ class ProjectTests extends FunSuite with BeforeAndAfterEach{
     case class Baz(y : Int)
     """
   def writeStandardProject{
-    proj = Project("foox", root, List(new File(root, "src")), Nil, new File(root, "out"), new File(root, "out-jar"))
+    proj = Project(
+      "foox", 
+      root, 
+      List(new File(root, "src")), 
+      Nil,
+      Nil
+    )
 
     writeToFile(fooSrc, originalFooContent)
     writeToFile(barSrc, originalBarContent)
@@ -51,6 +57,7 @@ class ProjectTests extends FunSuite with BeforeAndAfterEach{
 
   test("Compilation makes class files, writes dependencies, and package makes jar"){
     proj.clean
+    
     assert(proj.classFiles.size === 0)
     proj.compile
     assert(proj.classFiles.size > 0)
@@ -63,34 +70,34 @@ class ProjectTests extends FunSuite with BeforeAndAfterEach{
   }
 
 
-  test("Compilation not done if signature unchanged"){
-    proj.compile
-    val compilationTime = proj.compilationTime.get
-
-    Thread.sleep(1100)
-
-    writeToFile(fooSrc, originalFooContent)
-    proj.compile
-    val changedClassFiles = proj.classFiles.filter(_.lastModified > compilationTime)
-    assert(changedClassFiles == Set(fooClass, fooObject))
-  }
-
-  test("Compilation is done if signature changed, but only on dependent classes"){
-    proj.compile
-    val compilationTime = proj.compilationTime.get
-    Thread.sleep(1100)
-
-    writeToFile(
-      fooSrc,
-      """
-        package foo
-        case class Foo(x : Double){
-          def newPublicMethod(z : Int) = z + z
-        }
-      """
-    )
-    proj.compile
-    val changedClassFiles = proj.classFiles.filter(_.lastModified > compilationTime)
-    assert(changedClassFiles == Set(fooClass, fooObject, barClass, barObject))
-  }
+  //test("Compilation not done if signature unchanged"){
+    //proj.compile
+    //val compilationTime = proj.compilationTime.get
+    //
+    //Thread.sleep(1100)
+    //
+    //writeToFile(fooSrc, originalFooContent)
+    //proj.compile
+    //val changedClassFiles = proj.classFiles.filter(_.lastModified > compilationTime)
+    //assert(changedClassFiles == Set(fooClass, fooObject))
+    //}
+    //
+    //test("Compilation is done if signature changed, but only on dependent classes"){
+      //proj.compile
+      //val compilationTime = proj.compilationTime.get
+      //Thread.sleep(1100)
+      //
+      //writeToFile(
+        //fooSrc,
+        //"""
+        //package foo
+        //case class Foo(x : Double){
+          //def newPublicMethod(z : Int) = z + z
+          //}
+          //"""
+          //)
+        //proj.compile
+        //val changedClassFiles = proj.classFiles.filter(_.lastModified > compilationTime)
+        //assert(changedClassFiles == Set(fooClass, fooObject, barClass, barObject))
+        //}
 }

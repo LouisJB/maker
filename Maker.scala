@@ -8,6 +8,7 @@ def standardProject(name : String) = Project(
   name, 
   new File(name), 
   List(new File(name + "/src")), 
+  List(new File(name + "/tests")), 
   List(new File("./lib")),
   Nil,
   Some("out/")
@@ -15,19 +16,16 @@ def standardProject(name : String) = Project(
 
 val utils = standardProject("utils")
 val plugin = standardProject("plugin") dependsOn utils
-val maker = new Project(
-  "maker",
-  new File("maker"),
-  List(new File("maker/src")),
-  List(new File("./lib")),
-  Nil,
-  Some("out/")
-){
-  def copyClasses{
-    allDependencies().foreach{
-      proj =>
-        ApacheFileUtils.copyDirectory(proj.outputDir, new File("out"))
-    }
+val maker = standardProject("maker") dependsOn plugin
+
+def copyClasses{
+  maker.compile match {
+    case Left(_) => 
+    case Right(_) => 
+      maker.allDependencies().foreach{
+        proj =>
+          ApacheFileUtils.copyDirectory(proj.outputDir, new File("out"))
+      }
   }
 }
 
