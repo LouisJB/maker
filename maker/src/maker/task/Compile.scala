@@ -5,19 +5,16 @@ import maker.os.Environment
 import maker.utils.Log
 import java.io.File
 import collection.Set
+import scala.tools.nsc.reporters.AbstractReporter
+import scala.tools.nsc.Global
 
-
-case class Compile(project: Project, changedSrcFiles : () => Set[File], dependentTasks: List[Task[_]] = Nil) extends Task[Set[File]] {
-
-  import Environment._
-  import project._
-
+abstract class AbstractCompile(project : Project) extends Task[Set[File]]{
   val lock = new Object
+  def outputDir : File
+  def changedSrcFiles() : Set[File]
 
-  def dependsOn(tasks: Task[_]*) = new Compile(project, changedSrcFiles, dependentTasks = (dependentTasks ::: tasks.toList).distinct)
-
-
-  protected def execSelf: Either[TaskFailed, Set[File]] = {
+  protected def doCompilation(compiler : Global): Either[TaskFailed, Set[File]] = {
+    val reporter = compiler.reporter
     if (!outputDir.exists)
       outputDir.mkdirs
     val modifiedSrcFiles = changedSrcFiles()
@@ -29,7 +26,7 @@ case class Compile(project: Project, changedSrcFiles : () => Set[File], dependen
       // Determine which source files have changed signatures
 
       val sourceFilesWithChangedSigs: Set[File] = Set() ++ project.updateSignatures
-      val dependentFiles = dependencies.dependentFiles(sourceFilesWithChangedSigs)
+      val dependentFiles = project.dependencies.dependentFiles(sourceFilesWithChangedSigs)
       new compiler.Run() compile dependentFiles.toList.map(_.getPath)
       if (reporter.hasErrors)
         Left(TaskFailed(this, "Failed to compile"))
@@ -42,3 +39,26 @@ case class Compile(project: Project, changedSrcFiles : () => Set[File], dependen
   }
 }
 
+case class Compile(project: Project, dependentTasks: List[Task[_]] = Nil) extends AbstractCompile(project) {
+
+  import Environment._
+
+  protected def execSelf = doCompilation(project.compiler)
+  def changedSrcFiles = project.changedSrcFiles
+  def outputDir = project.outputDir
+
+  def dependsOn(tasks: Task[_]*) = new Compile(project, dependentTasks = (dependentTasks ::: tasks.toList).distinct)
+
+}
+
+case class TestCompile(project: Project, dependentTasks: List[Task[_]] = Nil) extends AbstractCompile(project) {
+
+  import Environment._
+
+  protected def execSelf = doCompilation(project.testCompiler)
+  def changedSrcFiles = project.changedTestFiles
+  def outputDir = project.testOutputDir
+
+  def dependsOn(tasks: Task[_]*) = new TestCompile(project, dependentTasks = (dependentTasks ::: tasks.toList).distinct)
+
+}

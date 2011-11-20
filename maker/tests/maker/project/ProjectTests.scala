@@ -3,6 +3,7 @@ import org.scalatest.FunSuite
 import java.io.File
 import maker.utils.FileUtils._
 import org.scalatest.BeforeAndAfterEach
+import maker.utils.Log
 
 class ProjectTests extends FunSuite with BeforeAndAfterEach{
 
@@ -70,18 +71,20 @@ class ProjectTests extends FunSuite with BeforeAndAfterEach{
   }
 
 
-  //test("Compilation not done if signature unchanged"){
-    //proj.compile
-    //val compilationTime = proj.compilationTime.get
-    //
-    //Thread.sleep(1100)
-    //
-    //writeToFile(fooSrc, originalFooContent)
-    //proj.compile
-    //val changedClassFiles = proj.classFiles.filter(_.lastModified > compilationTime)
-    //assert(changedClassFiles == Set(fooClass, fooObject))
-    //}
-    //
+  test("Compilation not done if signature unchanged"){
+    Log.warn("Got here")
+    proj.compile
+    val compilationTime = proj.compilationTime.get
+
+    Thread.sleep(1100)
+
+    writeToFile(fooSrc, originalFooContent)
+    proj.compile
+    val changedClassFiles = proj.classFiles.filter(_.lastModified > compilationTime)
+    assert(changedClassFiles == Set(fooClass, fooObject))
+  //assert(1 === 0)
+  }
+
     //test("Compilation is done if signature changed, but only on dependent classes"){
       //proj.compile
       //val compilationTime = proj.compilationTime.get

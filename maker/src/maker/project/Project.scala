@@ -16,6 +16,7 @@ import tools.nsc.io.{Directory, PlainDirectory}
 import tools.nsc.reporters.ConsoleReporter
 import plugin._
 import collection.Set
+import maker.utils.FileUtils
 
 
 object Project {
@@ -75,8 +76,8 @@ case class Project(
   def outputJar = new File(packageDir.getAbsolutePath, name + ".jar")
 
   private val cleanTask : Clean = Clean(this, dependentProjects.map(_.cleanTask))
-  private val compileTask : Compile = Compile(this, changedSrcFiles _, dependentProjects.map(_.compileTask))
-  private val testCompileTask : Compile = Compile(this, changedTestFiles _, compileTask::dependentProjects.map(_.testCompileTask))
+  private val compileTask : Compile = Compile(this, dependentProjects.map(_.compileTask))
+  private val testCompileTask : TestCompile = TestCompile(this, compileTask::dependentProjects.map(_.testCompileTask))
   private val packageTask = Package(this) dependsOn (compileTask)
   private val makerDirectory = mkdirs(new File(root, ".maker"))
 
@@ -92,7 +93,7 @@ case class Project(
 
   def pack = packageTask.exec
 
-  def delete = recursiveDelete(root)
+  def delete = FileUtils.recursiveDelete(root)
 
   override def toString = "Project " + name
 
@@ -106,13 +107,16 @@ case class Project(
     changedFiles
   }
 
-  val settings = new Settings
-  val reporter = new ConsoleReporter(settings)
-  val compiler: Global = {
+  private def makeCompiler(isTestCompiler : Boolean) = {
+    val settings = new Settings
+    val reporter = new ConsoleReporter(settings)
     val scalaAndJavaLibs = System.getProperty("sun.boot.class.path")
 
     settings.usejavacp.value = false
-    settings.outputDirs.setSingleOutput(new PlainDirectory(new Directory(outputDir)))
+    settings.outputDirs.setSingleOutput(
+      new PlainDirectory(new Directory(
+        if (isTestCompiler) testOutputDir else outputDir
+    )))
     settings.javabootclasspath.value = scalaAndJavaLibs
     settings.classpath.value = compilationClasspath
 
@@ -135,6 +139,8 @@ case class Project(
     comp
   }
 
+  val compiler: Global = makeCompiler(isTestCompiler = false)
+  val testCompiler: Global = makeCompiler(isTestCompiler = true)
   def allDependencies(projectsSoFar : Set[Project] = Set()) : List[Project] = {
     (this :: dependentProjects.filterNot(projectsSoFar).flatMap(_.allDependencies(projectsSoFar + this))).distinct
   }

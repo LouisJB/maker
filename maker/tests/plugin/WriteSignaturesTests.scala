@@ -31,13 +31,17 @@ class WriteSignaturesTests extends FunSuite with BeforeAndAfterEach{
   }
 
   test("what can we get"){
-    val proj = Project("foox", root, List(new File(root, "src")), Nil, new File(root, "out"), new File(root, "out-jar"))
+    proj = Project(
+      "foox", 
+      root, 
+      List(new File(root, "src")), 
+      Nil, 
+      Nil
+    )
 
     writeToFile(fooSrc, fooContent)
-    proj.srcFiles.foreach(println)
     println("There are " + proj.srcFiles.size + " src filed")
     proj.compile
-    proj.classFiles.foreach(println)
     println("There are " + proj.classFiles.size + " classes")
     println("Finished")
 

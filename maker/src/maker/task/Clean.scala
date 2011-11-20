@@ -11,6 +11,7 @@ case class Clean(project : Project, dependentTasks : List[Task[_]] = Nil) extend
   def execSelf = {
     Log.info("cleaning " + project)
     classFiles.foreach(_.delete)
+    testClassFiles.foreach(_.delete)
     outputJar.delete
     Right(Unit)
   }
