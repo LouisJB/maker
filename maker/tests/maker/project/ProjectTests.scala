@@ -4,6 +4,7 @@ import java.io.File
 import maker.utils.FileUtils._
 import org.scalatest.BeforeAndAfterEach
 import maker.utils.Log
+import org.apache.log4j.Level
 
 class ProjectTests extends FunSuite with BeforeAndAfterEach{
 
@@ -22,6 +23,7 @@ class ProjectTests extends FunSuite with BeforeAndAfterEach{
     package foo
     case class Foo(x : Double){
       val fred = 10
+      def double() = x + x
     }
     """
   val originalBarContent = 
@@ -83,7 +85,7 @@ class ProjectTests extends FunSuite with BeforeAndAfterEach{
     writeToFile(fooSrc, originalFooContent)
     proj.compile
     val changedClassFiles = proj.classFiles.filter(_.lastModified > compilationTime)
-    assert(changedClassFiles == Set(fooClass, fooObject))
+      assert(changedClassFiles === Set(fooClass, fooObject))
   }
 
   test("Compilation is done if signature changed, but only on dependent classes"){
@@ -96,12 +98,36 @@ class ProjectTests extends FunSuite with BeforeAndAfterEach{
       """
       package foo
       case class Foo(x : Double){
+        val fred = 10
+        def double() = x + x
         def newPublicMethod(z : Int) = z + z
       }
       """
     )
+  proj.compile
+  val changedClassFiles = proj.classFiles.filter(_.lastModified > compilationTime)
+    assert(changedClassFiles === Set(fooClass, fooObject, barClass, barObject))
+}
+
+  test("Compilation of dependent classes is not done if signature is unchanged"){
+    proj.compile
+    val compilationTime = proj.compilationTime.get
+    Thread.sleep(1100)
+
+    writeToFile(
+      fooSrc,
+      """
+      package foo
+      case class Foo(x : Double){
+        val fred = 10
+        def double() = x + x + x // implementation changed
+      }
+      """
+    )
+    Log.debug("Pre compilation sig")
+    Log.debug("\n" + proj.signatures)
     proj.compile
     val changedClassFiles = proj.classFiles.filter(_.lastModified > compilationTime)
-      assert(changedClassFiles == Set(fooClass, fooObject, barClass, barObject))
+    assert(changedClassFiles === Set(fooClass, fooObject))
   }
 }

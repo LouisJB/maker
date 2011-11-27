@@ -20,7 +20,7 @@
   </component>
   <component name="DebuggerManager">
     <line_breakpoints>
-      <breakpoint url="file://$PROJECT_DIR$/plugin/src/plugin/GenerateSigs.scala" line="40" class="plugin.GenerateSigs.Component" package="">
+      <breakpoint url="file://$PROJECT_DIR$/plugin/src/plugin/ProjectSignatures.scala" line="74" class="plugin.ProjectSignatures" package="">
         <option name="ENABLED" value="true" />
         <option name="LOG_ENABLED" value="false" />
         <option name="LOG_EXPRESSION_ENABLED" value="false" />
@@ -94,10 +94,8 @@
       <file leaf-file-name="GenerateSigs.scala" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/plugin/src/plugin/GenerateSigs.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="42" column="21" selection-start="1550" selection-end="1550" vertical-scroll-proportion="0.0">
-              <folding>
-                <marker date="1322352196000" expanded="true" signature="819:1029" placeholder="..." />
-              </folding>
+            <state line="39" column="0" selection-start="1462" selection-end="1462" vertical-scroll-proportion="0.0">
+              <folding />
             </state>
           </provider>
         </entry>
@@ -111,10 +109,10 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="Trees.scala" pinned="false" current="false" current-in-tab="false">
+      <file leaf-file-name="Trees.scala" pinned="false" current="true" current-in-tab="true">
         <entry file="jar:///usr/local/scala/src/scala-library-src.jar!/scala/reflect/generic/Trees.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="206" column="13" selection-start="6760" selection-end="6760" vertical-scroll-proportion="0.0">
+            <state line="28" column="47" selection-start="1031" selection-end="1031" vertical-scroll-proportion="0.536036">
               <folding />
             </state>
           </provider>
@@ -138,10 +136,28 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="AbstractFile.scala" pinned="false" current="true" current-in-tab="true">
+      <file leaf-file-name="AbstractFile.scala" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/scc/scala/tools/nsc/io/AbstractFile.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="73" column="15" selection-start="2440" selection-end="2440" vertical-scroll-proportion="0.08443709">
+            <state line="73" column="15" selection-start="2440" selection-end="2440" vertical-scroll-proportion="0.0">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="ProjectSignatures.scala" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/plugin/src/plugin/ProjectSignatures.scala">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="76" column="31" selection-start="3357" selection-end="3357" vertical-scroll-proportion="0.0">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="Project.scala" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/maker/src/maker/project/Project.scala">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="109" column="0" selection-start="4095" selection-end="4095" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
@@ -160,24 +176,6 @@
         <entry file="jar:///usr/local/scala/src/scala-library-src.jar!/scala/reflect/generic/Names.scala">
           <provider selected="true" editor-type-id="text-editor">
             <state line="6" column="7" selection-start="177" selection-end="177" vertical-scroll-proportion="0.0">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="Symbols.scala" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/scc/scala/tools/nsc/symtab/Symbols.scala">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="49" column="0" selection-start="1415" selection-end="1415" vertical-scroll-proportion="0.0">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="Symbols.scala" pinned="false" current="false" current-in-tab="false">
-        <entry file="jar:///usr/local/scala/src/scala-compiler-src.jar!/scala/tools/nsc/symtab/Symbols.scala">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="2042" column="0" selection-start="76869" selection-end="76869" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
@@ -204,7 +202,6 @@
         <option value="$PROJECT_DIR$/browse/src/scala/HtmlWriter.scala" />
         <option value="$PROJECT_DIR$/plugin/tests/plugin/WriteSignaturesTests.scala" />
         <option value="$PROJECT_DIR$/maker/src/maker/utils/FileUtils.scala" />
-        <option value="$PROJECT_DIR$/plugin/src/plugin/ProjectSignatures.scala" />
         <option value="$PROJECT_DIR$/plugin/tests/plugin/ProjectSignaturesTests.scala" />
         <option value="$PROJECT_DIR$/plugin/src/plugin/Dependencies.scala" />
         <option value="$PROJECT_DIR$/maker/src/maker/task/Package.scala" />
@@ -213,6 +210,7 @@
         <option value="$PROJECT_DIR$/maker/src/maker/task/Compile.scala" />
         <option value="$PROJECT_DIR$/scc/scala/tools/nsc/symtab/Symbols.scala" />
         <option value="$PROJECT_DIR$/plugin/src/plugin/GenerateSigs.scala" />
+        <option value="$PROJECT_DIR$/plugin/src/plugin/ProjectSignatures.scala" />
       </list>
     </option>
   </component>
@@ -726,7 +724,7 @@
       <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.58678955" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.58678955" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="12" side_tool="false" content_ui="tabs" />
       <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32411674" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
@@ -801,23 +799,9 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/plugin/src/plugin/WriteSignatures.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="13" column="0" selection-start="393" selection-end="393" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/plugin/src/plugin/WriteDependencies.scala">
       <provider selected="true" editor-type-id="text-editor">
         <state line="47" column="0" selection-start="1590" selection-end="1590" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/maker/src/maker/project/Project.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="128" column="0" selection-start="4713" selection-end="4713" vertical-scroll-proportion="0.0">
           <folding />
         </state>
       </provider>
@@ -857,15 +841,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/plugin/src/plugin/GenerateSigs.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="42" column="21" selection-start="1550" selection-end="1550" vertical-scroll-proportion="0.0">
-          <folding>
-            <marker date="1322352196000" expanded="true" signature="819:1029" placeholder="..." />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="jar:///usr/local/scala/src/scala-library-src.jar!/scala/reflect/generic/Names.scala">
       <provider selected="true" editor-type-id="text-editor">
         <state line="6" column="7" selection-start="177" selection-end="177" vertical-scroll-proportion="0.0">
@@ -876,13 +851,6 @@
     <entry file="jar:///usr/local/scala/src/scala-library-src.jar!/scala/reflect/generic/Symbols.scala">
       <provider selected="true" editor-type-id="text-editor">
         <state line="30" column="75" selection-start="719" selection-end="719" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="jar:///usr/local/scala/src/scala-library-src.jar!/scala/reflect/generic/Trees.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="206" column="13" selection-start="6760" selection-end="6760" vertical-scroll-proportion="0.0">
           <folding />
         </state>
       </provider>
@@ -903,7 +871,35 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/scc/scala/tools/nsc/io/AbstractFile.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="73" column="15" selection-start="2440" selection-end="2440" vertical-scroll-proportion="0.08443709">
+        <state line="73" column="15" selection-start="2440" selection-end="2440" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/plugin/src/plugin/GenerateSigs.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="39" column="0" selection-start="1462" selection-end="1462" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/maker/src/maker/project/Project.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="109" column="0" selection-start="4095" selection-end="4095" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/plugin/src/plugin/ProjectSignatures.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="76" column="31" selection-start="3357" selection-end="3357" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar:///usr/local/scala/src/scala-library-src.jar!/scala/reflect/generic/Trees.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="28" column="47" selection-start="1031" selection-end="1031" vertical-scroll-proportion="0.536036">
           <folding />
         </state>
       </provider>

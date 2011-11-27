@@ -36,11 +36,11 @@ class GenerateSigs(val global: Global, signatures : ProjectSignatures) extends P
     def check(collector : scala.collection.mutable.Set[String])(tree: Tree): Unit = {
       tree match {
         case dd : DefDef if ! dd.mods.isPrivate => {
-          val sig = dd.symbol.fullName + " : def, modifiers " + dd.mods + ", type params " + dd.tparams + ", return type " + dd.tpt + ", params " + dd.vparamss.map(_.map(_.tpt)) 
+          val sig = dd.symbol.fullName + " : def, modifiers " + dd.mods.flags + ", type params " + dd.tparams + ", return type " + dd.tpt + ", params " + dd.vparamss.map(_.map(_.tpt)) 
           collector += sig
         }
         case vd : ValDef if ! vd.mods.isPrivate => {
-          val sig = vd.symbol.fullName + " : val, modifiers " + vd.mods + ", type " + vd.tpt
+          val sig = vd.symbol.fullName + " : val, modifiers " + vd.mods.flags + ", type " + vd.tpt
           collector += sig
         }
         case _ =>

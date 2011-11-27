@@ -9,7 +9,7 @@ case class RichLevel(level : Level) extends Ordered[Level] {
   // Log4J levels have smaller numbers for higher levels. Reverse this here
   def compare(rhs : Level) = if (level.toInt < rhs.toInt) 
     1 
-  else if (level.toInt < rhs.toInt) 
+  else if (level.toInt > rhs.toInt) 
     -1
   else
     0
@@ -174,7 +174,7 @@ class Log4JLogger(val logger: Logger, levelTransformer: DynamicVariable[Level]) 
 
   override def level_=(level: Level) = logger.setLevel(level)
 
-  override def level[T](newLevel: Level)(thunk: => T) = levelTransformer.withValue(newLevel) { thunk }
+  override def level[T](newLevel: Level)(thunk: => T) = levelTransformer.withValue(newLevel) {val savedLevel = logger.getEffectiveLevel(); logger.setLevel(Level.ALL); val thunkVal = {thunk}; logger.setLevel(savedLevel); thunkVal }
 
   override def name = logger.getName
 

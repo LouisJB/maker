@@ -14,19 +14,23 @@ abstract class AbstractCompile(project : Project) extends Task[Set[File]]{
   def changedSrcFiles() : Set[File]
 
   protected def doCompilation(compiler : Global): Either[TaskFailed, Set[File]] = {
+    def listOfFiles(files : Iterable[File]) = files.mkString("\n\t", "\n\t", "")
     val reporter = compiler.reporter
     if (!outputDir.exists)
       outputDir.mkdirs
     val modifiedSrcFiles = changedSrcFiles()
     if (! modifiedSrcFiles.isEmpty) {
-      Log.debug("Compiling changed source files for " + project)
+      Log.info("Compiling " + project)
+      Log.debug("Changed files are " + listOfFiles(modifiedSrcFiles))
       reporter.reset
       // First compile those files who have changed
       new compiler.Run() compile modifiedSrcFiles.toList.map(_.getPath)
       // Determine which source files have changed signatures
 
       val sourceFilesWithChangedSigs: Set[File] = Set() ++ project.updateSignatures
+      Log.debug("Files with changed sigs " + listOfFiles(sourceFilesWithChangedSigs))
       val dependentFiles = project.dependencies.dependentFiles(sourceFilesWithChangedSigs)
+      Log.debug("Files dependent on those with shanged sigs" + listOfFiles(dependentFiles))
       new compiler.Run() compile dependentFiles.toList.map(_.getPath)
       if (reporter.hasErrors)
         Left(TaskFailed(this, "Failed to compile"))

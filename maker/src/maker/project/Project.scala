@@ -98,12 +98,16 @@ case class Project(
   override def toString = "Project " + name
 
   val dependencies= plugin.Dependencies(new File(makerDirectory, "dependencies"))
-  private var signatures = plugin.ProjectSignatures()
+  var signatures = plugin.ProjectSignatures()
   private val signatureFile = new File(makerDirectory, "signatures")
   def updateSignatures : Set[File] = {
     val olderSigs = ProjectSignatures(signatureFile)
     val changedFiles = signatures.changedFiles(olderSigs)
     signatures.persist(signatureFile)
+  //Log.debug("old sigs were\n" + olderSigs)
+  //Log.debug("new sigs are\n" + signatures)
+    Log.debug("Files with changed sigs " + changedFiles.mkString("\n\t", "\n\t", ""))
+    Log.debug("Sig changes\n" + signatures.changeAsString(olderSigs))
     changedFiles
   }
 

@@ -57,6 +57,36 @@ case class ProjectSignatures(private val sigs : MMap[File, Set[String]] = MMap()
         }
     }
   }
+
+  private def files = sigs.keys.toList.sortWith(_.toString < _.toString)
+
+  private def sigString(sig : Set[String], prefix : String = "\n\t\t", infix : String = "\n\t\t", postfix : String = "") = sig.toList.sortWith(_<_).mkString(prefix, infix, postfix)
+
+  def changeAsString(olderSigs : ProjectSignatures) = {
+    val buff = new StringBuffer()
+    files.foreach{
+      file =>
+        val oldSig = olderSigs.sigs.getOrElse(file, Set())
+        val newSig = sigs.getOrElse(file, Set())
+        val deletedSigs = oldSig.filterNot(newSig)
+        val newSigs = newSig.filterNot(oldSig)
+        buff.append("\n\t" + file + "\n")
+        buff.append(sigString(deletedSigs, "\n\t\t-", "\n\t\t-"))
+        buff.append(sigString(newSigs, "\n\t\t+", "\n\t\t+"))
+    }
+    buff.toString
+  }
+
+  override def toString = {
+    val buff = new StringBuffer()
+    files.foreach{
+      file =>
+        val signature = sigs(file)
+        buff.append("\n\t" + file)
+        buff.append(sigString(sigs(file)))
+    }
+    buff.toString
+  }
 }
 
 object ProjectSignatures{
