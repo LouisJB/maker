@@ -60,9 +60,21 @@ class ProjectTests extends FunSuite with BeforeAndAfterEach{
     proj.delete
   }
 
-  test("Compilation makes class files, writes dependencies, and package makes jar"){
-    proj.clean
+  private def sleepToNextSecond{
+    Thread.sleep(1100)
+    //val currentTimeInSeconds = System.currentTimeMillis / 1000
+    //println(currentTimeInSeconds)
+    //while (System.currentTimeMillis / 1000 == currentTimeInSeconds)
+    //Thread.sleep(10)
+    //println(System.currentTimeMillis / 1000 )
+  }
+  /**
+   * Done as a single test for speed
+   */
+  test("Incremental compilation"){
 
+    // test("Compilation makes class files, writes dependencies, and package makes jar"){
+    proj.clean
     assert(proj.classFiles.size === 0)
     proj.compile
     assert(proj.classFiles.size > 0)
@@ -72,26 +84,28 @@ class ProjectTests extends FunSuite with BeforeAndAfterEach{
     proj.clean
     assert(proj.classFiles.size === 0)
     assert(!proj.outputJar.exists)
-  }
+    //}
 
-
-  test("Compilation not done if signature unchanged"){
+    // test("Compilation not done if signature unchanged"){
     proj.clean
     proj.compile
-    val compilationTime = proj.compilationTime.get
+    var compilationTime = proj.compilationTime.get
 
-    Thread.sleep(1100)
+    sleepToNextSecond
+    //Thread.sleep(1100)
 
     writeToFile(fooSrc, originalFooContent)
     proj.compile
-    val changedClassFiles = proj.classFiles.filter(_.lastModified > compilationTime)
-      assert(changedClassFiles === Set(fooClass, fooObject))
-  }
+    var changedClassFiles = proj.classFiles.filter(_.lastModified > compilationTime)
+    assert(changedClassFiles === Set(fooClass, fooObject))
+    //}
 
-  test("Compilation is done if signature changed, but only on dependent classes"){
+    //test("Compilation is done if signature changed, but only on dependent classes"){
+    proj.clean
     proj.compile
-    val compilationTime = proj.compilationTime.get
-    Thread.sleep(1100)
+    compilationTime = proj.compilationTime.get
+    sleepToNextSecond
+    //Thread.sleep(1100)
 
     writeToFile(
       fooSrc,
@@ -104,15 +118,18 @@ class ProjectTests extends FunSuite with BeforeAndAfterEach{
       }
       """
     )
-  proj.compile
-  val changedClassFiles = proj.classFiles.filter(_.lastModified > compilationTime)
-    assert(changedClassFiles === Set(fooClass, fooObject, barClass, barObject))
-}
-
-  test("Compilation of dependent classes is not done if signature is unchanged"){
     proj.compile
-    val compilationTime = proj.compilationTime.get
-    Thread.sleep(1100)
+    changedClassFiles = proj.classFiles.filter(_.lastModified > compilationTime)
+    assert(changedClassFiles === Set(fooClass, fooObject, barClass, barObject))
+    //}
+
+    //test("Compilation of dependent classes is not done if signature of public method is unchanged"){
+    writeToFile(fooSrc, originalFooContent)
+    proj.clean
+    proj.compile
+    compilationTime = proj.compilationTime.get
+    sleepToNextSecond
+    //Thread.sleep(1100)
 
     writeToFile(
       fooSrc,
@@ -124,10 +141,31 @@ class ProjectTests extends FunSuite with BeforeAndAfterEach{
       }
       """
     )
-    Log.debug("Pre compilation sig")
-    Log.debug("\n" + proj.signatures)
     proj.compile
-    val changedClassFiles = proj.classFiles.filter(_.lastModified > compilationTime)
+    changedClassFiles = proj.classFiles.filter(_.lastModified > compilationTime)
     assert(changedClassFiles === Set(fooClass, fooObject))
+    //}
+
+    // test("Compilation of dependent classes is not done if new private method is added"){
+    compilationTime = proj.compilationTime.get
+    sleepToNextSecond
+    //Thread.sleep(1100)
+
+    writeToFile(
+      fooSrc,
+      """
+      package foo
+      case class Foo(x : Double){
+        val fred = 10
+        def double() = x + x 
+        private def treble() = x + x + x
+      }
+      """
+    )
+    proj.compile
+    changedClassFiles = proj.classFiles.filter(_.lastModified > compilationTime)
+    assert(changedClassFiles === Set(fooClass, fooObject))
+    //}
   }
+
 }
