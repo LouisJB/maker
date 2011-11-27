@@ -14,6 +14,7 @@ modules.each do |m|
 end
 
 jars = Dir.glob("lib/*.jar")
+puts jars
 
 cmd = "/usr/local/scala/bin/fsc -classpath #{jars.join(":")} -d out/ #{source_files.join(" ")}"
 puts cmd

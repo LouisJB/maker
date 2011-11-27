@@ -123,19 +123,13 @@ case class Project(
     new scala.tools.util.PathResolver(settings).result
     val comp = new Global(settings, reporter) {
       self =>
-//      phasesSet ++= new BrowsePlugin(self).components
       override protected def computeInternalPhases() {
         super.computeInternalPhases
-//        phasesSet += new WriteDependencies(self, dependencies).Component
-//        phasesSet += new GenerateSigs(self, signatures).Component
-//        phasesSet ++= new BrowsePlugin(self).components
+        phasesSet += new WriteDependencies(self, dependencies).Component
+        phasesSet += new GenerateSigs(self, signatures).Component
       }
 
-//      override protected lazy val roughPluginsList = List(new GenerateSigs(self))
-//      lazy val pubRoughPlugins = roughPluginsList
     }
-//    comp.pubRoughPlugins.foreach(println)
-//    println("platform Classpath = " + comp.platform.classPath)
     comp
   }
 

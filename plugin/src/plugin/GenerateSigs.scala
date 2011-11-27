@@ -26,8 +26,8 @@ class GenerateSigs(val global: Global, signatures : ProjectSignatures) extends P
 
       def apply(unit: CompilationUnit) {
         val collector = scala.collection.mutable.Set[String]()
-        println("Compilation unit " + unit)
         newTraverser(collector).traverse(unit.body)
+        signatures += (unit.source.file.file, Set[String]() ++ collector)
       }
     }
 
@@ -35,21 +35,13 @@ class GenerateSigs(val global: Global, signatures : ProjectSignatures) extends P
 
     def check(collector : scala.collection.mutable.Set[String])(tree: Tree): Unit = {
       tree match {
-        case pd : PackageDef => {
-          println("Got package def " + pd.name)
-          val owner =  pd.pid.symbol.owner
-          println("Owner = " + owner + ", " + owner.getClass)
-
-        }
-        case cd : ClassDef => {
-          println("Got class def " + cd.name + ", mods " + cd.mods + ", type params " + cd.tparams)
-        }
         case dd : DefDef if ! dd.mods.isPrivate => {
-          println("got def def, name " + dd.name + ", modifiers " + dd.mods + ", type params " + dd.tparams + ", return type " + dd.tpt + ", params " + dd.vparamss)
-          val owner =  dd.symbol.owner
-          println("Owner = " + owner + ", " + owner.getClass)
-          val classOwner = owner.owner
-          println("Class owner = " + classOwner + ", " + classOwner.getClass)
+          val sig = dd.symbol.fullName + " : def, modifiers " + dd.mods + ", type params " + dd.tparams + ", return type " + dd.tpt + ", params " + dd.vparamss.map(_.map(_.tpt)) 
+          collector += sig
+        }
+        case vd : ValDef if ! vd.mods.isPrivate => {
+          val sig = vd.symbol.fullName + " : val, modifiers " + vd.mods + ", type " + vd.tpt
+          collector += sig
         }
         case _ =>
       }

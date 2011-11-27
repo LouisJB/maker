@@ -19,7 +19,7 @@ abstract class AbstractCompile(project : Project) extends Task[Set[File]]{
       outputDir.mkdirs
     val modifiedSrcFiles = changedSrcFiles()
     if (! modifiedSrcFiles.isEmpty) {
-      Log.info("Compiling changed source files for " + project)
+      Log.debug("Compiling changed source files for " + project)
       reporter.reset
       // First compile those files who have changed
       new compiler.Run() compile modifiedSrcFiles.toList.map(_.getPath)

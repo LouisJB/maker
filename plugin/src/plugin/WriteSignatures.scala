@@ -41,13 +41,25 @@ class WriteSignatures(val global: Global, collector : scala.collection.mutable.M
       val over = if(sym.isMethod) name + "(" + sym.tpe.toString + ")" else name
       tpe + " " + over
     }
+    import scala.tools.nsc.symtab.Symbols
 
+    private def symbolPath(s : Symbol, path : List[Symbol] = Nil) : List[Symbol] = Option(s.rawowner) match {
+      case Some(t) => symbolPath(s.rawowner, s :: path)
+      case _ => path
+    }
+    private def classSig(s : Symbol) : ClassSignature = {
+      val sp = symbolPath(s)
+      val packages = sp.filter(_.toString.startsWith("package")).map(_.rawname.toString)
+      val classes = sp.filter(_.toString.startsWith("class")).map(_.rawname.toString)
+      ClassSignature(packages, classes)
+    }
+
+    var klass : ClassSignature = null
 
     def check(collector : scala.collection.mutable.Set[String])(tree: Tree): Unit = {
       tree match {
         case cd : ClassDef => {
-           println("Got a class def")
-            println(stableID(cd.symbol))
+          klass = classSig(cd.symbol)
         }
         case vd : ValDef =>{
           println("Got a val def")

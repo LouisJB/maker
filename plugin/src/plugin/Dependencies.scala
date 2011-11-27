@@ -21,7 +21,7 @@ object Dependencies {
   }
 }
 
-class Dependencies(private var deps: Map[File, Set[File]], file : File) {
+case class Dependencies(private var deps: Map[File, Set[File]], file : File) {
 
   import Dependencies._
 
