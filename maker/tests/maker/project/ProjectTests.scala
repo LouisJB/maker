@@ -62,11 +62,6 @@ class ProjectTests extends FunSuite with BeforeAndAfterEach{
 
   private def sleepToNextSecond{
     Thread.sleep(1100)
-    //val currentTimeInSeconds = System.currentTimeMillis / 1000
-    //println(currentTimeInSeconds)
-    //while (System.currentTimeMillis / 1000 == currentTimeInSeconds)
-    //Thread.sleep(10)
-    //println(System.currentTimeMillis / 1000 )
   }
   /**
    * Done as a single test for speed
@@ -87,7 +82,6 @@ class ProjectTests extends FunSuite with BeforeAndAfterEach{
     //}
 
     // test("Compilation not done if signature unchanged"){
-    proj.clean
     proj.compile
     var compilationTime = proj.compilationTime.get
 
@@ -101,7 +95,7 @@ class ProjectTests extends FunSuite with BeforeAndAfterEach{
     //}
 
     //test("Compilation is done if signature changed, but only on dependent classes"){
-    proj.clean
+    //proj.clean
     proj.compile
     compilationTime = proj.compilationTime.get
     sleepToNextSecond
@@ -125,7 +119,7 @@ class ProjectTests extends FunSuite with BeforeAndAfterEach{
 
     //test("Compilation of dependent classes is not done if signature of public method is unchanged"){
     writeToFile(fooSrc, originalFooContent)
-    proj.clean
+    //proj.clean
     proj.compile
     compilationTime = proj.compilationTime.get
     sleepToNextSecond

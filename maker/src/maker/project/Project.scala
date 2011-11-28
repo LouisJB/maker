@@ -15,7 +15,6 @@ import tools.nsc.{Settings, Global}
 import tools.nsc.io.{Directory, PlainDirectory}
 import tools.nsc.reporters.ConsoleReporter
 import plugin._
-import collection.Set
 import maker.utils.FileUtils
 
 

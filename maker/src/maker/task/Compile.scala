@@ -4,7 +4,6 @@ import maker.project.Project
 import maker.os.Environment
 import maker.utils.Log
 import java.io.File
-import collection.Set
 import scala.tools.nsc.reporters.AbstractReporter
 import scala.tools.nsc.Global
 
