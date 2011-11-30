@@ -60,9 +60,9 @@ class QueueManager(projects : Set[Project], nWorkers : Int) extends Actor{
 }
 
 object Build{
-  def apply(projects : Set[Project]){
+  def apply(projects : Set[Project]) = {
     implicit val timeout = Timeout(10000)
     val future = actorOf(new QueueManager(projects, 2)).start ? StartBuild
-    println("Result was " + future.get)
+    future.get
   }
 }
