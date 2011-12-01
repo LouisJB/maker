@@ -28,7 +28,7 @@ case class Dependencies(private var deps: Map[File, Set[File]], file : File) {
   def persist() {
     writeMapToFile(
       file, deps,
-      (f : File, s : Set[File]) => f.getPath + ":" + s.map(_.getPath).mkString("", ",", "\n")
+      (f : File, s : Set[File]) => f.getPath + ":" + s.map(_.getPath).mkString("", ",", "")
     )
   }
 
@@ -39,5 +39,6 @@ case class Dependencies(private var deps: Map[File, Set[File]], file : File) {
   def dependentFiles(files : scala.collection.Set[File]): Set[File] = deps.filter {
     case (source, dependencies) => files.exists(dependencies.contains)
   }.keySet
+  def asMap = Map[File, Set[File]]() ++ deps
 }
 

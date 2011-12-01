@@ -6,6 +6,7 @@ import maker.utils.Log
 import java.io.File
 import scala.tools.nsc.reporters.AbstractReporter
 import scala.tools.nsc.Global
+import maker.utils.Stopwatch
 
 abstract class AbstractCompile(project : Project) extends Task[Set[File]]{
   val lock = new Object
@@ -19,7 +20,8 @@ abstract class AbstractCompile(project : Project) extends Task[Set[File]]{
       outputDir.mkdirs
     val modifiedSrcFiles = changedSrcFiles()
     if (! modifiedSrcFiles.isEmpty) {
-      Log.info("Compiling " + project)
+      Log.info("Compiling " + project + ", " + modifiedSrcFiles.size + " modified or uncompiled files")
+      val sw = new Stopwatch
       Log.debug("Changed files are " + listOfFiles(modifiedSrcFiles))
       reporter.reset
       // First compile those files who have changed
@@ -27,14 +29,18 @@ abstract class AbstractCompile(project : Project) extends Task[Set[File]]{
       // Determine which source files have changed signatures
 
       val sourceFilesWithChangedSigs: Set[File] = Set() ++ project.updateSignatures
-      Log.debug("Files with changed sigs " + listOfFiles(sourceFilesWithChangedSigs))
-      val dependentFiles = project.dependencies.dependentFiles(sourceFilesWithChangedSigs)
+      Log.info("Files with changed sigs " + listOfFiles(sourceFilesWithChangedSigs))
+      val dependentFiles = project.dependencies.dependentFiles(sourceFilesWithChangedSigs).filterNot(sourceFilesWithChangedSigs)
       Log.debug("Files dependent on those with shanged sigs" + listOfFiles(dependentFiles))
+      Log.info("Compiling " + dependentFiles.size + " files dependent n those with changed sigs")
       new compiler.Run() compile dependentFiles.toList.map(_.getPath)
+      Log.info("time taken " + sw.toStringSeconds)
       if (reporter.hasErrors)
         Left(TaskFailed(this, "Failed to compile"))
-      else
+      else {
+        project.dependencies.persist
         Right(modifiedSrcFiles ++ dependentFiles)
+      }
     } else {
       Log.info("Already Compiled " + project.name)
       Right(Set[File]())

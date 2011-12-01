@@ -108,7 +108,7 @@ trait VarLogger {
 
   def fatal(msg: AnyRef, t: Throwable): Unit = ()
 
-  def level: Level = Level.OFF
+  def level: Level = Level.INFO
 
   def level_=(level: Level): Unit = ()
 
@@ -136,7 +136,7 @@ object Log4JLogger {
   def forName(name: String) = new Log4JLogger(Logger.getLogger(name), levelTransformer)
   def forClass(clazz: Class[_]) = new Log4JLogger(Logger.getLogger(clazz), levelTransformer)
 
-  private val levelTransformer = new DynamicVariable[Level](Level.OFF)
+  private val levelTransformer = new DynamicVariable[Level](Level.INFO)
 }
 
 

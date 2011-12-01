@@ -5,15 +5,9 @@ import scala.tools.nsc.plugins.PluginComponent
 import scala.tools.nsc.plugins.Plugin
 import java.io.{File, FileWriter, BufferedWriter}
 
-object WriteDependencies{
-  def dependencyFile(sourceFile : String) = {
-    sourceFile.replace(".scala", ".maker-dependencies")
-  }
-}
 /** This class implements a plugin component using a tree
  *  traverser */
 class WriteDependencies(val global: Global, deps : Dependencies) extends Plugin {
-  import WriteDependencies._
   import global._
   var symbolMap = Map[String, Set[String]]()
 
@@ -29,11 +23,6 @@ class WriteDependencies(val global: Global, deps : Dependencies) extends Plugin 
 
     def newPhase(prev: Phase): Phase = new TraverserPhase(prev)
     class TraverserPhase(prev: Phase) extends StdPhase(prev) {
-
-      override def run(){
-        super.run
-        deps.persist()
-      }
 
       def apply(unit: CompilationUnit) {
         val collector = scala.collection.mutable.Set[String]()
