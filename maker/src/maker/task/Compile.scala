@@ -7,6 +7,7 @@ import java.io.File
 import scala.tools.nsc.reporters.AbstractReporter
 import scala.tools.nsc.Global
 import maker.utils.Stopwatch
+import maker.os.Command
 
 abstract class AbstractCompile(project : Project) extends Task[Set[File]]{
   val lock = new Object
@@ -69,5 +70,24 @@ case class TestCompile(project: Project, dependentTasks: List[Task[_]] = Nil) ex
   def outputDir = project.testOutputDir
 
   def dependsOn(tasks: Task[_]*) = new TestCompile(project, dependentTasks = (dependentTasks ::: tasks.toList).distinct)
+}
 
+case class JavaCompile(project : Project, dependentTasks : List[Task[_]] = Nil) extends Task[Set[File]]{
+  val lock = new Object
+  def dependsOn(tasks: Task[_]*) = new JavaCompile(project, dependentTasks = (dependentTasks ::: tasks.toList).distinct)
+  protected def execSelf = {
+
+    import project._
+    javaOutputDir.mkdirs
+    val javaFilesToCompile = changedJavaFiles
+    if (javaFilesToCompile.isEmpty)
+      Right(Set())
+    else {
+      val parameters = "javac"::"-cp"::compilationClasspath::"-d"::javaOutputDir.getAbsolutePath::javaSrcFiles.toList.map(_.getAbsolutePath)
+      Command(parameters : _*).exec match {
+        case (0, _) => Right(javaFilesToCompile)
+        case (_, error) => Left(TaskFailed(this, error))
+      }
+    }
+  }
 }

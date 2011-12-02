@@ -1,6 +1,7 @@
 package maker.task
 
 case class TaskFailed(task : Task[_], reason : String)
+
 trait Task[T]{
   def lock : Object
   def exec : Either[TaskFailed, T] = {

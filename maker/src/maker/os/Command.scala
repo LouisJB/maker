@@ -11,7 +11,7 @@ case class Command(args : String*){
 
   def exec : (Int, String) = {
     val procBuilder = new ProcessBuilder(args : _*)
-    procBuilder.redirectErrorStream
+    procBuilder.redirectErrorStream(true)
     val proc = procBuilder.start
     val procResult = proc.waitFor
     val output = getStringFromInputStream(proc.getInputStream)

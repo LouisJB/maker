@@ -11,10 +11,10 @@ lib_dirs.each do |lib_dir|
     end
   end
 end
-project_resource_dir="resources/"
+project_resource_dir="lib/resources/"
 module_class_dirs = modules.collect do |m| "#{m}/classes/:#{m}/test-classes:#{m}/resources/" end
 all_files = jars + [project_resource_dir] + module_class_dirs
-classpath="#{jars.join(":")}:#{project_resource_dir}:#{module_class_dirs.join(":")}"
+#classpath="#{jars.join(":")}:#{project_resource_dir}:#{module_class_dirs.join(":")}"
 classpath = (all_files.collect do |f| File.expand_path(f) end).join(":")
 
 File.open("set-classpath.sh", "w") do |s|

@@ -39,6 +39,7 @@ case class Project(
 ) {
 
   def outputDir = new File(root, "classes")
+  def javaOutputDir = new File(root, "java-classes")
   def testOutputDir = new File(root, "test-classes")
   def packageDir = new File(root, "package")
   import Project._
@@ -48,12 +49,15 @@ case class Project(
 
   def srcFiles() = findSourceFiles(srcDirs: _*)
   def testSrcFiles() = findSourceFiles(testDirs: _*)
+  def javaSrcFiles() = findJavaSourceFiles(srcDirs: _*)
 
   def classFiles = findClasses(outputDir) 
+  def javaClassFiles = findClasses(javaOutputDir) 
   def testClassFiles = findClasses(testOutputDir)
 
   private def lastModificationTime(files : Set[File]) = files.toList.map(_.lastModified).sortWith(_ > _).headOption
   def compilationTime: Option[Long] = lastModificationTime(classFiles)
+  def javaCompilationTime: Option[Long] = lastModificationTime(javaClassFiles)
   def testCompilationTime: Option[Long] = lastModificationTime(testClassFiles)
 
   private def filterChangedSrcFiles(files : Set[File], modTime : Option[Long]) = {
@@ -63,19 +67,21 @@ case class Project(
     }
   }
   def changedSrcFiles = filterChangedSrcFiles(srcFiles(), compilationTime)
+  def changedJavaFiles = filterChangedSrcFiles(javaSrcFiles(), javaCompilationTime)
   def changedTestFiles = filterChangedSrcFiles(testSrcFiles(), testCompilationTime)
 
   def jars = findJars(jarDirs: _*).toList.sortWith(_.getPath < _.getPath)
 
-  private def classpathFiles : List[File] = ((outputDir :: jars) ::: dependentProjects.flatMap(_.classpathFiles)).distinct
+  private def classpathDirectoriesAndJars : List[File] = ((outputDir :: javaOutputDir :: jars) ::: dependentProjects.flatMap(_.classpathDirectoriesAndJars)).distinct
 
-  def compilationClasspath = (compilationClasspathOverride.toList ::: classpathFiles.map(_.getAbsolutePath)).mkString(":")
-  def runClasspath = classpathFiles.map(_.getAbsolutePath).mkString(":")
+  def compilationClasspath = (compilationClasspathOverride.toList ::: classpathDirectoriesAndJars.map(_.getAbsolutePath)).mkString(":")
+  def runClasspath = classpathDirectoriesAndJars.map(_.getAbsolutePath).mkString(":")
 
   def outputJar = new File(packageDir.getAbsolutePath, name + ".jar")
 
   private val cleanTask : Clean = Clean(this, dependentProjects.map(_.cleanTask))
-  private val compileTask : Compile = Compile(this, dependentProjects.map(_.compileTask))
+  private val javaCompileTask : JavaCompile = JavaCompile(this, dependentProjects.map(_.compileTask))
+  private val compileTask : Compile = Compile(this, dependentProjects.map(_.compileTask)) dependsOn javaCompileTask
   private val testCompileTask : TestCompile = TestCompile(this, compileTask::dependentProjects.map(_.testCompileTask))
   private val packageTask = Package(this) dependsOn (compileTask)
   private val makerDirectory = mkdirs(new File(root, ".maker"))
@@ -86,6 +92,7 @@ case class Project(
   def clean = cleanTask.exec
 
   def compile = compileTask.exec
+  def javaCompile = javaCompileTask.exec
   def testCompile = testCompileTask.exec
   def test = testTask.exec
   def testOnly = testOnlyTask.exec

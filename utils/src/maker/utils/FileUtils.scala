@@ -35,6 +35,7 @@ object FileUtils{
   def findJars(dirs : File*) = findFilesWithExtension("jar", dirs : _*)
   def findClasses(dirs : File*) = findFilesWithExtension("class", dirs : _*)
   def findSourceFiles(dirs : File*) = findFilesWithExtension("scala", dirs : _*)
+  def findJavaSourceFiles(dirs : File*) = findFilesWithExtension("java", dirs : _*)
 
   def withFileWriter(file : File)(f : BufferedWriter => _){
     if (! file.getParentFile.exists)
