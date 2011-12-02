@@ -1,1 +1,22 @@
 How hard is it to replace SBT?
+
+
+To bootstrap
+$ ./bin/build-from-scratch.sh
+
+This outputs classes to the out directory 
+
+$./bin/write-classpath.rb
+$ . set-maker-classpath.sh
+$ export JAVA_OPTS="-Xmx2000m -javaagent:"<path to jrebel.jar>"
+$ scala -Yrepl-sync -i Maker.scala
+scala>maker.compile
+
+That should return Right(Set(... some files ...))
+Now remove the out/ directory from the classpath
+$ . set-classpath.sh
+
+You should now be good to go. cd to the starling directory, launch the repl again and build
+
+Developing in vim is easiest. It should 'just work'. It's my 'init-scripts' repo. Pull that and run init.sh.
+
