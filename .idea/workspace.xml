@@ -91,91 +91,19 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="Trees.class" pinned="false" current="false" current-in-tab="false">
-        <entry file="jar:///usr/local/scala/lib/scala-library.jar!/scala/reflect/generic/Trees.class">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="133" column="2" selection-start="9711" selection-end="9711" vertical-scroll-proportion="0.0">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="Trees.scala" pinned="false" current="false" current-in-tab="false">
-        <entry file="jar:///usr/local/scala/src/scala-library-src.jar!/scala/reflect/generic/Trees.scala">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="43" column="41" selection-start="1604" selection-end="1604" vertical-scroll-proportion="0.0">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
       <file leaf-file-name="Task.scala" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/maker/src/maker/task/Task.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="156" column="2" selection-start="6020" selection-end="6020" vertical-scroll-proportion="0.07614213">
+            <state line="185" column="44" selection-start="7030" selection-end="7030" vertical-scroll-proportion="0.78688526">
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="CompilationUnits.scala" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/scc/scala/tools/nsc/CompilationUnits.scala">
+      <file leaf-file-name="Build.scala" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/maker/src/maker/task/Build.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="15" column="43" selection-start="530" selection-end="530" vertical-scroll-proportion="0.0">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="SourceFile.scala" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/scc/scala/tools/nsc/util/SourceFile.scala">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="19" column="22" selection-start="498" selection-end="498" vertical-scroll-proportion="0.0">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="AbstractFile.scala" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/scc/scala/tools/nsc/io/AbstractFile.scala">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="73" column="15" selection-start="2440" selection-end="2440" vertical-scroll-proportion="0.0">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="ProjectSignatures.scala" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/plugin/src/plugin/ProjectSignatures.scala">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="76" column="31" selection-start="3357" selection-end="3357" vertical-scroll-proportion="0.0">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="Project.scala" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/maker/src/maker/project/Project.scala">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="109" column="0" selection-start="4309" selection-end="4309" vertical-scroll-proportion="0.0">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="Symbols.scala" pinned="false" current="false" current-in-tab="false">
-        <entry file="jar:///usr/local/scala/src/scala-library-src.jar!/scala/reflect/generic/Symbols.scala">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="30" column="75" selection-start="719" selection-end="719" vertical-scroll-proportion="0.0">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="Names.scala" pinned="false" current="false" current-in-tab="false">
-        <entry file="jar:///usr/local/scala/src/scala-library-src.jar!/scala/reflect/generic/Names.scala">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="6" column="7" selection-start="177" selection-end="177" vertical-scroll-proportion="0.0">
+            <state line="16" column="22" selection-start="447" selection-end="447" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
@@ -195,9 +123,7 @@
   <component name="IdeDocumentHistory">
     <option name="changedFiles">
       <list>
-        <option value="$PROJECT_DIR$/maker/src/maker/task/UpdateSignatures.scala" />
         <option value="$PROJECT_DIR$/maker/tests/maker/project/ProjectTests.scala" />
-        <option value="$PROJECT_DIR$/maker/src/maker/task/Task.scala" />
         <option value="$PROJECT_DIR$/plugin/src/plugin/WriteSignatures.scala" />
         <option value="$PROJECT_DIR$/browse/src/scala/HtmlWriter.scala" />
         <option value="$PROJECT_DIR$/plugin/tests/plugin/WriteSignaturesTests.scala" />
@@ -211,6 +137,8 @@
         <option value="$PROJECT_DIR$/scc/scala/tools/nsc/symtab/Symbols.scala" />
         <option value="$PROJECT_DIR$/plugin/src/plugin/GenerateSigs.scala" />
         <option value="$PROJECT_DIR$/plugin/src/plugin/ProjectSignatures.scala" />
+        <option value="$PROJECT_DIR$/maker/src/maker/task/Build.scala" />
+        <option value="$PROJECT_DIR$/maker/src/maker/task/Task.scala" />
       </list>
     </option>
   </component>
@@ -335,46 +263,6 @@
             </PATH_ELEMENT>
             <PATH_ELEMENT>
               <option name="myItemId" value="project" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="maker" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="maker" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="src" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="maker" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="task" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="maker" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="maker" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="src" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="maker" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
@@ -774,11 +662,6 @@
     <option name="FILTER_TARGETS" value="false" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/plugin/src/plugin/WriteDependencies.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="47" column="0" selection-start="1590" selection-end="1590" vertical-scroll-proportion="0.0" />
-      </provider>
-    </entry>
     <entry file="jar:///usr/local/scala/src/scala-compiler-src.jar!/scala/tools/util/PathResolver.scala">
       <provider selected="true" editor-type-id="text-editor">
         <state line="207" column="0" selection-start="7891" selection-end="7891" vertical-scroll-proportion="0.0" />
@@ -853,9 +736,16 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/maker/src/maker/task/Build.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="16" column="22" selection-start="447" selection-end="447" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/maker/src/maker/task/Task.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="156" column="2" selection-start="6020" selection-end="6020" vertical-scroll-proportion="0.07614213">
+        <state line="185" column="44" selection-start="7030" selection-end="7030" vertical-scroll-proportion="0.78688526">
           <folding />
         </state>
       </provider>

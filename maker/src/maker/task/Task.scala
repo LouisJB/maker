@@ -130,17 +130,18 @@ trait SingleProjectTask{
   }
   def execSelf(project : Project, acc : List[AnyRef]) : Either[TaskFailed2, AnyRef]
 }
-
-case class ExecTaskMessage(proj : Project, acc : List[AnyRef])
-case class TaskResultMessage(proj : Project, result : Either[TaskFailed2, AnyRef])
+sealed trait BuildMessage
+case class ExecTaskMessage(proj : Project, acc : List[AnyRef]) extends BuildMessage
+case class TaskResultMessage(proj : Project, result : Either[TaskFailed2, AnyRef]) extends BuildMessage
+case object StartBuild extends BuildMessage
 class Worker(task : SingleProjectTask) extends Actor{
   def receive = {
     case ExecTaskMessage(proj : Project, acc : List[AnyRef]) => self reply TaskResultMessage(proj, task.exec(proj, acc))
   }
 }
-case class BuildResult2(res : Either[TaskFailed2, AnyRef])
+case class BuildResult(res : Either[TaskFailed2, AnyRef]) extends BuildMessage
 
-class QueueManager2(projects : Set[Project], nWorkers : Int, val task : SingleProjectTask) extends Actor{
+class QueueManager(projects : Set[Project], nWorkers : Int, val task : SingleProjectTask) extends Actor{
 
   var accumuland : List[AnyRef] = Nil
   val workers = Vector.fill(nWorkers)(actorOf(new Worker(task)).start)
@@ -158,13 +159,13 @@ class QueueManager2(projects : Set[Project], nWorkers : Int, val task : SinglePr
   def receive = {
     case TaskResultMessage(_, Left(taskFailure)) => {
       router ! PoisonPill
-      originalCaller ! BuildResult2(Left(taskFailure))
+      originalCaller ! BuildResult(Left(taskFailure))
     }
     case TaskResultMessage(proj, Right(result)) => {
       accumuland = result :: accumuland
       completedProjects += proj
       if (completedProjects  == projects)
-        originalCaller ! BuildResult2(Right("OK"))
+        originalCaller ! BuildResult(Right("OK"))
       else {
         remainingProjects = remainingProjects.filterNot(_ == proj)
         execNextLevel
@@ -177,11 +178,11 @@ class QueueManager2(projects : Set[Project], nWorkers : Int, val task : SinglePr
   }
 }
 
-object Build2{
+object Build{
   def apply(project : Project, task : SingleProjectTask) = {
     implicit val timeout = Timeout(10000)
     val projects = project.allDependencies().toSet
-    val future = actorOf(new QueueManager2(projects, 2, task)).start ? StartBuild
-    future.get
+    val future = actorOf(new QueueManager(projects, 2, task)).start ? StartBuild
+    future.get.asInstanceOf[BuildResult].res
   }
 }
