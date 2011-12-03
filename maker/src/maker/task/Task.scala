@@ -106,7 +106,10 @@ case class TestTask(dependentTasks : List[SingleProjectTask] = List(CompileTests
   
   def execSelf(project : Project, acc : List[AnyRef]) = {
     Log.info("Testing " + project)
-    if (Runner.run(Array("-o", "-p", project.testOutputDir.getAbsolutePath)))
+    //if (Runner.run(Array("-o", "-p", "\"" + project.testOutputDir.getAbsolutePath + "\"")))
+    val path = project.testOutputDir.getAbsolutePath + " " + project.outputDir.getAbsolutePath 
+    println(path)
+    if (Runner.run(Array("-o", "-p", path)))
       Right(Unit)
     else
       Left(TaskFailed2(this, "Bad test"))
