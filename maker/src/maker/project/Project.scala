@@ -110,8 +110,6 @@ case class Project(
     val olderSigs = ProjectSignatures(signatureFile)
     val changedFiles = signatures.changedFiles(olderSigs)
     signatures.persist(signatureFile)
-  //Log.debug("old sigs were\n" + olderSigs)
-  //Log.debug("new sigs are\n" + signatures)
     Log.debug("Files with changed sigs " + changedFiles.mkString("\n\t", "\n\t", ""))
     Log.debug("Sig changes\n" + signatures.changeAsString(olderSigs))
     changedFiles

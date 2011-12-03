@@ -50,7 +50,8 @@ class BuildTests extends FunSuite {
     val proj = makeProject("foox", root)
 
     writeToFile(new File(root, "src/foo/Foo.scala"), fooContent)
-    assert(Build(Set(proj)) === BuildResult(true))
+    //assert(Build(Set(proj)) === BuildResult(true))
+    assert(Build2(proj, CompileSourceTask()) === BuildResult2(Right("OK")))
     proj.delete
   }
 
@@ -62,20 +63,23 @@ class BuildTests extends FunSuite {
 
     writeToFile(new File(root1, "src/foo/Foo.scala"), fooContent)
     writeToFile(new File(root2, "src/bar/Bar.scala"), barContent)
-    assert(Build(Set(proj1, proj2)) === BuildResult(true))
+    assert(Build2(proj1, CompileSourceTask()) === BuildResult2(Right("OK")))
     proj1.delete
     proj2.delete
   }
 
   test("Build of dependent projects with compilation error fails"){
     val root1 = tempDir("fred")
-    val root2 = tempDir("fred")
-    val proj1 = makeProject("1", root1)
-    val proj2 = makeProject("2", root2) dependsOn proj1
+      val root2 = tempDir("fred")
+      val proj1 = makeProject("1", root1)
+      val proj2 = makeProject("2", root2) dependsOn proj1
 
     writeToFile(new File(root1, "src/foo/Foo.scala"), fooContent)
     writeToFile(new File(root2, "src/bar/Bar.scala"), barContentWithError)
-    assert(Build(Set(proj1, proj2)) === BuildResult(false))
+    Build2(proj2, CompileSourceTask()) match {
+      case BuildResult2(Left(taskFailure)) =>
+      case r => fail("Expected build to fail, got " + r)
+    }
     proj1.delete
     proj2.delete
   }
