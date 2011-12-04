@@ -4,6 +4,8 @@ import org.scalatest.FunSuite
 import maker.utils.FileUtils._
 import maker.project.Project
 import java.io.File
+import maker.utils.Log
+import org.apache.log4j.Level
 
 class BuildTests extends FunSuite {
 
@@ -98,7 +100,7 @@ class BuildTests extends FunSuite {
 
     writeToFile(new File(root1, "src/foo/Foo.scala"), fooContent)
     writeToFile(new File(root2, "src/bar/Bar.scala"), barContentWithError)
-     proj2.compile match {
+    proj2.compile match {
       case Left(taskFailure) =>
       case r => fail("Expected build to fail, got " + r)
     }
@@ -112,13 +114,14 @@ class BuildTests extends FunSuite {
     writeToFile(new File(root, "src/foo/Foo.scala"), fooContent)
     writeToFile(new File(root, "tests/foo/FooTest.scala"), fooTestContent)
     assert(proj.test === Right("OK"))
+
     proj.delete
   }
 
   test("Failing test fails"){
     val root = tempDir("fred")
-    val proj = makeProject("with_failing_test", root)
-    writeToFile(new File(root, "tests/foo/FooTest.scala"), failingTestContent)
+      val proj = makeProject("with_failing_test", root)
+      writeToFile(new File(root, "tests/foo/FooTest.scala"), failingTestContent)
     proj.test match {
       case Left(_) =>
       case r => fail("Expected test to fail, got " + r)

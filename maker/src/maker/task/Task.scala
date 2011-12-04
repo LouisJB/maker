@@ -4,53 +4,21 @@ import java.io.File
 import scala.tools.nsc.Global
 import maker.utils.Log
 import maker.utils.Stopwatch
-import akka.actor._
-import akka.routing.Routing
-import akka.routing.CyclicIterator
-import Actor._
-import Routing._
 import org.scalatest.tools.Runner
 import maker.os.Command
 import maker.utils.FileUtils
 import org.apache.commons.io.{FileUtils => ApacheFileUtils}
 
-//case class TaskFailed(task : Task[_], reason : String)
 
-//trait Task[T]{
-//  def lock : Object
-//  def exec : Either[TaskFailed, T] = {
-//    dependentTasks.foreach(
-//      _.exec match {
-//        case Left(TaskFailed(task, reason)) => return Left(TaskFailed(task, reason))
-//        case _ =>
-//      }
-//    )
-//
-//    lock.synchronized{
-//      try {
-//        execSelf
-//      } catch {
-//        case ex =>
-//          Left(TaskFailed(this, ex.getMessage))
-//          ex.printStackTrace()
-//          throw ex
-//      }
-//    }
-//  }
-//  protected def execSelf : Either[TaskFailed, T]
-//  def dependentTasks : Seq[Task[_]]
-//  def dependsOn(tasks : Task[_]*) : Task[T]
-//}
-
-case class TaskFailed2(task : SingleProjectTask, reason : String)
+case class TaskFailed(task : Task, reason : String)
 
 
-abstract class CompileTask extends SingleProjectTask{
+abstract class CompileTask extends Task{
   // Returns 
   def compiler(proj : Project) : Global
   def outputDir(proj : Project) : File
   def changedSrcFiles(proj : Project) : Set[File]
-  def exec(proj : Project, acc : List[AnyRef]) : Either[TaskFailed2, AnyRef] = {
+  def exec(proj : Project, acc : List[AnyRef]) : Either[TaskFailed, AnyRef] = {
     val comp = compiler(proj)
     def listOfFiles(files : Iterable[File]) = files.mkString("\n\t", "\n\t", "")
     val reporter = comp.reporter
@@ -79,7 +47,7 @@ abstract class CompileTask extends SingleProjectTask{
       new comp.Run() compile dependentFiles.toList.map(_.getPath)
       Log.info("time taken " + sw.toStringSeconds)
       if (reporter.hasErrors)
-        Left(TaskFailed2(this, "Failed to compile"))
+        Left(TaskFailed(this, "Failed to compile"))
       else {
         proj.dependencies.persist
         Right((sourceFilesFromThisProjectWithChangedSigs, modifiedSrcFiles ++ dependentFiles))
@@ -103,7 +71,7 @@ case object CompileTestsTask extends CompileTask{
   def compiler(proj : Project) = proj.testCompiler
 }
 
-case object CompileJavaSourceTask extends SingleProjectTask{
+case object CompileJavaSourceTask extends Task{
 
   def exec(project : Project, acc : List[AnyRef]) = {
     import project._
@@ -115,13 +83,13 @@ case object CompileJavaSourceTask extends SingleProjectTask{
       val parameters = "javac"::"-cp"::compilationClasspath::"-d"::javaOutputDir.getAbsolutePath::javaSrcFiles.toList.map(_.getAbsolutePath)
       Command(parameters : _*).exec match {
         case (0, _) => Right(javaFilesToCompile)
-        case (_, error) => Left(TaskFailed2(this, error))
+        case (_, error) => Left(TaskFailed(this, error))
       }
     }
   }
 }
 
-case object CleanTask extends SingleProjectTask{
+case object CleanTask extends Task{
   def exec(project : Project, acc : List[AnyRef]) = {
     Log.info("cleaning " + project)
     project.classFiles.foreach(_.delete)
@@ -131,7 +99,7 @@ case object CleanTask extends SingleProjectTask{
   }
 }
 
-case object PackageTask extends SingleProjectTask{
+case object PackageTask extends Task{
   import maker.os.Environment._
   def exec(project : Project, acc : List[AnyRef]) = {
     import project._
@@ -146,87 +114,25 @@ case object PackageTask extends SingleProjectTask{
       val cmd = Command(jar, "cf", project.outputJar.getAbsolutePath, "-C", dir.getAbsolutePath, ".")
       cmd.exec match {
         case (0, _) => Right(Unit)
-        case (errNo, errMessage) => Left(TaskFailed2(this, errMessage))
+        case (errNo, errMessage) => Left(TaskFailed(this, errMessage))
       }
     }, false)
 
   }
 }
-case object TestTask extends SingleProjectTask{
+case object RuntUnitTestsTask extends Task{
 
   def exec(project : Project, acc : List[AnyRef]) = {
     Log.info("Testing " + project)
-    //if (Runner.run(Array("-o", "-p", "\"" + project.testOutputDir.getAbsolutePath + "\"")))
-    val path = project.testOutputDir.getAbsolutePath + " " + project.outputDir.getAbsolutePath 
-    println(path)
+    val path = project.testOutputDir.getAbsolutePath + " " + project.outputDir.getAbsolutePath
     if (Runner.run(Array("-o", "-p", path)))
       Right(Unit)
     else
-      Left(TaskFailed2(this, "Bad test"))
+      Left(TaskFailed(this, "Bad test"))
   }
 }
 
-trait SingleProjectTask{
-  def exec(project : Project, acc : List[AnyRef] = Nil) : Either[TaskFailed2, AnyRef] 
+trait Task{
+  def exec(project : Project, acc : List[AnyRef] = Nil) : Either[TaskFailed, AnyRef]
 }
-sealed trait BuildMessage
-case class ExecTaskMessage(projectTask : ProjectAndTask, acc : Map[SingleProjectTask, List[AnyRef]]) extends BuildMessage
-case class TaskResultMessage(projectTask : ProjectAndTask, result : Either[TaskFailed2, AnyRef]) extends BuildMessage
-case object StartBuild extends BuildMessage
-class Worker() extends Actor{
-  def receive = {
-    case ExecTaskMessage(projectTask : ProjectAndTask, acc : Map[SingleProjectTask, List[AnyRef]]) => self reply TaskResultMessage(projectTask, projectTask.exec(acc))
-  }
-}
-case class BuildResult(res : Either[TaskFailed2, AnyRef]) extends BuildMessage
 
-class QueueManager(projectTasks : Set[ProjectAndTask], nWorkers : Int) extends Actor{
-
-  var accumuland : Map[SingleProjectTask, List[AnyRef]] = Map[SingleProjectTask, List[AnyRef]]()
-  val workers = Vector.fill(nWorkers)(actorOf(new Worker()).start)
-  val router = Routing.loadBalancerActor(CyclicIterator(workers)).start()
-  var remainingProjectTasks = projectTasks
-  var completedProjectTasks : Set[ProjectAndTask] = Set()
-  var originalCaller : UntypedChannel = _
-  private def execNextLevel{
-    val (canBeProcessed, mustWait) = remainingProjectTasks.partition(
-      _.properDependencies.filterNot(remainingProjectTasks).isEmpty
-    )
-    remainingProjectTasks = mustWait
-    canBeProcessed.foreach(router ! ExecTaskMessage(_, accumuland))
-  }
-  def receive = {
-    case TaskResultMessage(_, Left(taskFailure)) => {
-      router ! PoisonPill
-      originalCaller ! BuildResult(Left(taskFailure))
-    }
-    case TaskResultMessage(projectTask, Right(result)) => {
-      accumuland = accumuland + (projectTask.task -> (result :: accumuland.getOrElse(projectTask.task, Nil)))
-      completedProjectTasks += projectTask
-      if (completedProjectTasks  == projectTasks)
-        originalCaller ! BuildResult(Right("OK"))
-      else {
-        remainingProjectTasks = remainingProjectTasks.filterNot(_ == projectTask)
-        execNextLevel
-      }
-    }
-    case StartBuild => {
-      originalCaller = self.channel
-      execNextLevel
-    }
-  }
-}
-case class ProjectAndTask(project : Project, task : SingleProjectTask){
-  println(project.name + "/" + task)
-  val properDependencies : Set[ProjectAndTask] = project.taskDependencies(task).map(ProjectAndTask(project, _)) ++ project.dependentProjects.flatMap(ProjectAndTask(_, task).allDependencies)
-  def allDependencies = properDependencies + this
-  def exec(acc : Map[SingleProjectTask, List[AnyRef]]) = task.exec(project, acc.getOrElse(task, Nil))
-}
-object Build{
-  def apply(projects : Set[Project], task : SingleProjectTask) = {
-    val projectTasks = projects.flatMap(ProjectAndTask(_, task).allDependencies)
-    implicit val timeout = Timeout(100000)
-    val future = actorOf(new QueueManager(projectTasks, 2)).start ? StartBuild
-    future.get.asInstanceOf[BuildResult].res
-  }
-}

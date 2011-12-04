@@ -81,8 +81,8 @@
       <property name="field_breakpoints_groupByClasses" value="true" />
       <property name="method_breakpoints_groupByClasses" value="true" />
       <property name="exception_breakpoints_viewId" value="TABLE" />
-      <property name="field_breakpoints_viewId" value="TABLE" />
       <property name="exception_breakpoints_groupByClasses" value="true" />
+      <property name="field_breakpoints_viewId" value="TABLE" />
       <property name="method_breakpoints_groupByMethods" value="false" />
     </ui_properties>
   </component>
@@ -91,28 +91,37 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="Task.scala" pinned="false" current="true" current-in-tab="true">
+      <file leaf-file-name="Task.scala" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/maker/src/maker/task/Task.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="46" column="0" selection-start="1164" selection-end="1164" vertical-scroll-proportion="0.88664985">
+            <state line="16" column="0" selection-start="394" selection-end="394" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="Project.scala" pinned="false" current="false" current-in-tab="false">
+      <file leaf-file-name="Environment.scala" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/maker/src/maker/os/Environment.scala">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="13" column="27" selection-start="688" selection-end="688" vertical-scroll-proportion="0.0">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="Project.scala" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/maker/src/maker/project/Project.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="74" column="21" selection-start="2583" selection-end="2583" vertical-scroll-proportion="0.0">
+            <state line="39" column="0" selection-start="1100" selection-end="1100" vertical-scroll-proportion="0.8312343">
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="Build.scala" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/maker/src/maker/task/Build.scala">
+      <file leaf-file-name="QueueManager.scala" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/maker/src/maker/task/QueueManager.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="16" column="22" selection-start="447" selection-end="447" vertical-scroll-proportion="0.0">
+            <state line="23" column="0" selection-start="1140" selection-end="1140" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
@@ -132,8 +141,6 @@
   <component name="IdeDocumentHistory">
     <option name="changedFiles">
       <list>
-        <option value="$PROJECT_DIR$/plugin/src/plugin/WriteSignatures.scala" />
-        <option value="$PROJECT_DIR$/browse/src/scala/HtmlWriter.scala" />
         <option value="$PROJECT_DIR$/plugin/tests/plugin/WriteSignaturesTests.scala" />
         <option value="$PROJECT_DIR$/maker/src/maker/utils/FileUtils.scala" />
         <option value="$PROJECT_DIR$/plugin/tests/plugin/ProjectSignaturesTests.scala" />
@@ -142,12 +149,14 @@
         <option value="$PROJECT_DIR$/scc/scala/tools/nsc/symtab/Symbols.scala" />
         <option value="$PROJECT_DIR$/plugin/src/plugin/GenerateSigs.scala" />
         <option value="$PROJECT_DIR$/plugin/src/plugin/ProjectSignatures.scala" />
-        <option value="$PROJECT_DIR$/maker/src/maker/task/Build.scala" />
         <option value="$PROJECT_DIR$/maker/src/maker/task/Clean.scala" />
         <option value="$PROJECT_DIR$/maker/src/maker/task/Compile.scala" />
         <option value="$PROJECT_DIR$/maker/src/maker/task/Package.scala" />
-        <option value="$PROJECT_DIR$/maker/src/maker/project/Project.scala" />
+        <option value="$PROJECT_DIR$/maker/src/maker/task/Build.scala" />
+        <option value="$PROJECT_DIR$/maker/src/maker/task/RunTasks.scala" />
+        <option value="$PROJECT_DIR$/maker/src/maker/task/QueueManager.scala" />
         <option value="$PROJECT_DIR$/maker/src/maker/task/Task.scala" />
+        <option value="$PROJECT_DIR$/maker/src/maker/project/Project.scala" />
       </list>
     </option>
   </component>
@@ -202,7 +211,6 @@
     <panes>
       <pane id="PackagesPane" />
       <pane id="Scope" />
-      <pane id="Favorites" />
       <pane id="ProjectPane">
         <subPane>
           <PATH>
@@ -318,32 +326,6 @@
               <option name="myItemId" value="task" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="Task.scala" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.ClassesTreeStructureProvider$PsiClassOwnerTreeNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="maker" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="maker" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="src" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="maker" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="task" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
           </PATH>
           <PATH>
             <PATH_ELEMENT>
@@ -410,9 +392,14 @@
               <option name="myItemId" value="maker" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="os" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
           </PATH>
         </subPane>
       </pane>
+      <pane id="Favorites" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -428,9 +415,9 @@
     <property name="GoToClass.toSaveIncludeLibraries" value="false" />
     <property name="MemberChooser.showClasses" value="true" />
     <property name="GoToClass.includeLibraries" value="false" />
-    <property name="dynamic.classpath" value="false" />
-    <property name="options.searchVisible" value="true" />
     <property name="options.splitter.details.proportions" value="0.2" />
+    <property name="options.searchVisible" value="true" />
+    <property name="dynamic.classpath" value="false" />
   </component>
   <component name="RecentsManager">
     <key name="MoveClassesOrPackagesDialog.RECENTS_KEY">
@@ -542,6 +529,20 @@
         <option name="SBT.BeforeRunTask" enabled="false" runInCurrentModule="false" />
       </method>
     </configuration>
+    <configuration default="true" type="Remote" factoryName="Remote">
+      <option name="USE_SOCKET_TRANSPORT" value="true" />
+      <option name="SERVER_MODE" value="false" />
+      <option name="SHMEM_ADDRESS" value="javadebug" />
+      <option name="HOST" value="localhost" />
+      <option name="PORT" value="5005" />
+      <method>
+        <option name="AntTarget" enabled="false" />
+        <option name="BuildArtifacts" enabled="false" />
+        <option name="Maven.BeforeRunTask" enabled="false" />
+        <option name="PhingTarget" enabled="false" />
+        <option name="SBT.BeforeRunTask" enabled="false" runInCurrentModule="false" />
+      </method>
+    </configuration>
     <configuration default="true" type="Specs2RunConfiguration" factoryName="Specs2">
       <module name="" />
       <setting name="path" value="" />
@@ -553,20 +554,6 @@
         <option name="AntTarget" enabled="false" />
         <option name="BuildArtifacts" enabled="false" />
         <option name="Make" enabled="true" />
-        <option name="Maven.BeforeRunTask" enabled="false" />
-        <option name="PhingTarget" enabled="false" />
-        <option name="SBT.BeforeRunTask" enabled="false" runInCurrentModule="false" />
-      </method>
-    </configuration>
-    <configuration default="true" type="Remote" factoryName="Remote">
-      <option name="USE_SOCKET_TRANSPORT" value="true" />
-      <option name="SERVER_MODE" value="false" />
-      <option name="SHMEM_ADDRESS" value="javadebug" />
-      <option name="HOST" value="localhost" />
-      <option name="PORT" value="5005" />
-      <method>
-        <option name="AntTarget" enabled="false" />
-        <option name="BuildArtifacts" enabled="false" />
         <option name="Maven.BeforeRunTask" enabled="false" />
         <option name="PhingTarget" enabled="false" />
         <option name="SBT.BeforeRunTask" enabled="false" runInCurrentModule="false" />
@@ -854,28 +841,33 @@
     </entry>
     <entry file="jar:///usr/local/scala/src/scala-library-src.jar!/scala/reflect/generic/Trees.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="43" column="41" selection-start="1604" selection-end="1604" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
+        <state line="43" column="41" selection-start="1604" selection-end="1604" vertical-scroll-proportion="0.0" />
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/maker/src/maker/task/Build.scala">
+    <entry file="file://$PROJECT_DIR$/maker/src/maker/task/QueueManager.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="16" column="22" selection-start="447" selection-end="447" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/maker/src/maker/project/Project.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="74" column="21" selection-start="2583" selection-end="2583" vertical-scroll-proportion="0.0">
+        <state line="23" column="0" selection-start="1140" selection-end="1140" vertical-scroll-proportion="0.0">
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/maker/src/maker/task/Task.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="46" column="0" selection-start="1164" selection-end="1164" vertical-scroll-proportion="0.88664985">
+        <state line="16" column="0" selection-start="394" selection-end="394" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/maker/src/maker/os/Environment.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="13" column="27" selection-start="688" selection-end="688" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/maker/src/maker/project/Project.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="39" column="0" selection-start="1100" selection-end="1100" vertical-scroll-proportion="0.8312343">
           <folding />
         </state>
       </provider>

@@ -19,15 +19,15 @@ import maker.utils.FileUtils
 import scala.collection.immutable.MapProxy
 
 
-object Project {
-
-  private def java_home = ("/usr/local/jdk" :: List("JAVA_HOME", "MAKER_JAVA_HOME").flatMap {
-    e: String => Option(System.getenv(e))
-  }).filter(new File(_).exists).headOption.getOrElse(throw new Exception("Can't find scala home"))
-
-  private def jar: String = java_home + "/bin/jar"
-
-}
+//object Project {
+//
+//  private def java_home = ("/usr/local/jdk" :: List("JAVA_HOME", "MAKER_JAVA_HOME").flatMap {
+//    e: String => Option(System.getenv(e))
+//  }).filter(new File(_).exists).headOption.getOrElse(throw new Exception("Can't find scala home"))
+//
+//  private def jar: String = java_home + "/bin/jar"
+//
+//}
 
 case class Project(
   name: String,
@@ -82,36 +82,36 @@ case class Project(
 
   private val makerDirectory = mkdirs(new File(root, ".maker"))
 
-  def clean = Build(allDependencies(), CleanTask)
-  def compile = Build(allDependencies(), CompileSourceTask)
-  def javaCompile = Build(allDependencies(), CompileJavaSourceTask)
-  def testCompile = Build(allDependencies(), CompileTestsTask)
-  def test = Build(allDependencies(), TestTask)
-  def testOnly = Build(Set(this), TestTask)
-  def pack = Build(allDependencies(), PackageTask)
+  def clean = QueueManager(allDependencies(), CleanTask)
+  def compile = QueueManager(allDependencies(), CompileSourceTask)
+  def javaCompile = QueueManager(allDependencies(), CompileJavaSourceTask)
+  def testCompile = QueueManager(allDependencies(), CompileTestsTask)
+  def test = QueueManager(allDependencies(), RuntUnitTestsTask)
+  def testOnly = QueueManager(Set(this), RuntUnitTestsTask)
+  def pack = QueueManager(allDependencies(), PackageTask)
 
-  val projectTaskDependencies = new MapProxy[SingleProjectTask, Set[SingleProjectTask]]{
-    val self = Map[SingleProjectTask, Set[SingleProjectTask]](
+  val projectTaskDependencies = new MapProxy[Task, Set[Task]]{
+    val self = Map[Task, Set[Task]](
       CompileSourceTask -> Set(CompileJavaSourceTask),
       CompileTestsTask -> Set(CompileSourceTask),
-      TestTask -> Set(CompileTestsTask)
+      RuntUnitTestsTask -> Set(CompileTestsTask)
     )
-    override def default(task : SingleProjectTask) = Set[SingleProjectTask]()
+    override def default(task : Task) = Set[Task]()
   }
 
-  def allTaskDependencies(task : SingleProjectTask) : Set[SingleProjectTask] = {
-    def recurse(tasks : Set[SingleProjectTask], acc : Set[SingleProjectTask] = Set[SingleProjectTask]()) : Set[SingleProjectTask] = {
+  def allTaskDependencies(task : Task) : Set[Task] = {
+    def recurse(tasks : Set[Task], acc : Set[Task] = Set[Task]()) : Set[Task] = {
       if (tasks.forall(acc.contains))
         acc
       else
         recurse(
-          (Set[SingleProjectTask]() /: tasks.map(projectTaskDependencies.getOrElse(_, Set[SingleProjectTask]())))(_ ++ _),
+          (Set[Task]() /: tasks.map(projectTaskDependencies.getOrElse(_, Set[Task]())))(_ ++ _),
           acc ++ tasks
         )
     }
     recurse(Set(task))
   }
-  def taskDependencies(task : SingleProjectTask) = allTaskDependencies(task).filterNot(_ == task)
+  def taskDependencies(task : Task) = allTaskDependencies(task).filterNot(_ == task)
 
     //def allProjectTaskDependencies(task : SingleProjectTask) : Set[ProjectAndTask] = allTaskDependencies(task).map(ProjectAndTask(this, _)) ++ dependentProjects.flatMap(_.allProjectTaskDependencies(task))
   //def projectTaskDependencies(task : SingleProjectTask) = allProjectTaskDependencies(task).filterNot(_ == ProjectAndTask(this, task))

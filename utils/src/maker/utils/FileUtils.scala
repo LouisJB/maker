@@ -101,7 +101,7 @@ object FileUtils{
   }
 
   def extractMapFromFile[K, V](file : File, extractor : String => (K, V)) : Map[K, V] = {
-    println("Extracting from " + file)
+    Log.debug("Extracting from " + file)
     var map = Map[K, V]()
     if (file.exists) {
       withFileReader(file) {
