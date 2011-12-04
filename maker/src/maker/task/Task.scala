@@ -50,7 +50,7 @@ abstract class CompileTask extends SingleProjectTask{
   def compiler(proj : Project) : Global
   def outputDir(proj : Project) : File
   def changedSrcFiles(proj : Project) : Set[File]
-  def execSelf(proj : Project, acc : List[AnyRef]) : Either[TaskFailed2, AnyRef] = {
+  def exec(proj : Project, acc : List[AnyRef]) : Either[TaskFailed2, AnyRef] = {
     val comp = compiler(proj)
     def listOfFiles(files : Iterable[File]) = files.mkString("\n\t", "\n\t", "")
     val reporter = comp.reporter
@@ -91,21 +91,21 @@ abstract class CompileTask extends SingleProjectTask{
   }
 }
 
-case class CompileSourceTask(dependentTasks : List[SingleProjectTask] = Nil) extends CompileTask{
+case object CompileSourceTask extends CompileTask{
   def changedSrcFiles(proj : Project) = proj.changedSrcFiles
   def outputDir(proj : Project) = proj.outputDir
   def compiler(proj : Project) = proj.compiler
 }
 
-case class CompileTestsTask(dependentTasks : List[SingleProjectTask] = List(CompileSourceTask())) extends CompileTask{
+case object CompileTestsTask extends CompileTask{
   def changedSrcFiles(proj : Project) = proj.changedTestFiles
   def outputDir(proj : Project) = proj.testOutputDir
   def compiler(proj : Project) = proj.testCompiler
 }
 
-case class CompileJavaSourceTask(dependentTasks : List[SingleProjectTask] = Nil) extends SingleProjectTask{
+case object CompileJavaSourceTask extends SingleProjectTask{
 
-  def execSelf(project : Project, acc : List[AnyRef]) = {
+  def exec(project : Project, acc : List[AnyRef]) = {
     import project._
     javaOutputDir.mkdirs
     val javaFilesToCompile = changedJavaFiles
@@ -121,8 +121,8 @@ case class CompileJavaSourceTask(dependentTasks : List[SingleProjectTask] = Nil)
   }
 }
 
-case class CleanTask(dependentTasks : List[SingleProjectTask] = Nil) extends SingleProjectTask{
-  def execSelf(project : Project, acc : List[AnyRef]) = {
+case object CleanTask extends SingleProjectTask{
+  def exec(project : Project, acc : List[AnyRef]) = {
     Log.info("cleaning " + project)
     project.classFiles.foreach(_.delete)
     project.testClassFiles.foreach(_.delete)
@@ -131,9 +131,9 @@ case class CleanTask(dependentTasks : List[SingleProjectTask] = Nil) extends Sin
   }
 }
 
-case class PackageTask(dependentTasks : List[SingleProjectTask] = List(CompileSourceTask())) extends SingleProjectTask{
+case object PackageTask extends SingleProjectTask{
   import maker.os.Environment._
-  def execSelf(project : Project, acc : List[AnyRef]) = {
+  def exec(project : Project, acc : List[AnyRef]) = {
     import project._
     if (!packageDir.exists)
       packageDir.mkdirs
@@ -152,11 +152,9 @@ case class PackageTask(dependentTasks : List[SingleProjectTask] = List(CompileSo
 
   }
 }
-case class TestTask(dependentTasks : List[SingleProjectTask] = List(CompileTestsTask())) extends SingleProjectTask{
+case object TestTask extends SingleProjectTask{
 
-  def dependsOn(tasks : SingleProjectTask*) = copy(dependentTasks = (dependentTasks ::: tasks.toList).distinct)
-  
-  def execSelf(project : Project, acc : List[AnyRef]) = {
+  def exec(project : Project, acc : List[AnyRef]) = {
     Log.info("Testing " + project)
     //if (Runner.run(Array("-o", "-p", "\"" + project.testOutputDir.getAbsolutePath + "\"")))
     val path = project.testOutputDir.getAbsolutePath + " " + project.outputDir.getAbsolutePath 
@@ -169,43 +167,32 @@ case class TestTask(dependentTasks : List[SingleProjectTask] = List(CompileTests
 }
 
 trait SingleProjectTask{
-  def dependentTasks : Seq[SingleProjectTask]
-  def exec(project : Project, acc : List[AnyRef] = Nil) : Either[TaskFailed2, AnyRef] = {
-    dependentTasks.foreach{
-      task => 
-        task.exec(project) match {
-          case Left(TaskFailed2(task, reason)) => return Left(TaskFailed2(task, reason))
-          case _ =>
-        }
-    }
-    execSelf(project, acc)
-  }
-  def execSelf(project : Project, acc : List[AnyRef]) : Either[TaskFailed2, AnyRef]
+  def exec(project : Project, acc : List[AnyRef] = Nil) : Either[TaskFailed2, AnyRef] 
 }
 sealed trait BuildMessage
-case class ExecTaskMessage(proj : Project, acc : List[AnyRef]) extends BuildMessage
-case class TaskResultMessage(proj : Project, result : Either[TaskFailed2, AnyRef]) extends BuildMessage
+case class ExecTaskMessage(projectTask : ProjectAndTask, acc : Map[SingleProjectTask, List[AnyRef]]) extends BuildMessage
+case class TaskResultMessage(projectTask : ProjectAndTask, result : Either[TaskFailed2, AnyRef]) extends BuildMessage
 case object StartBuild extends BuildMessage
-class Worker(task : SingleProjectTask) extends Actor{
+class Worker() extends Actor{
   def receive = {
-    case ExecTaskMessage(proj : Project, acc : List[AnyRef]) => self reply TaskResultMessage(proj, task.exec(proj, acc))
+    case ExecTaskMessage(projectTask : ProjectAndTask, acc : Map[SingleProjectTask, List[AnyRef]]) => self reply TaskResultMessage(projectTask, projectTask.exec(acc))
   }
 }
 case class BuildResult(res : Either[TaskFailed2, AnyRef]) extends BuildMessage
 
-class QueueManager(projects : Set[Project], nWorkers : Int, val task : SingleProjectTask) extends Actor{
+class QueueManager(projectTasks : Set[ProjectAndTask], nWorkers : Int) extends Actor{
 
-  var accumuland : List[AnyRef] = Nil
-  val workers = Vector.fill(nWorkers)(actorOf(new Worker(task)).start)
+  var accumuland : Map[SingleProjectTask, List[AnyRef]] = Map[SingleProjectTask, List[AnyRef]]()
+  val workers = Vector.fill(nWorkers)(actorOf(new Worker()).start)
   val router = Routing.loadBalancerActor(CyclicIterator(workers)).start()
-  var remainingProjects = projects
-  var completedProjects : Set[Project] = Set()
+  var remainingProjectTasks = projectTasks
+  var completedProjectTasks : Set[ProjectAndTask] = Set()
   var originalCaller : UntypedChannel = _
   private def execNextLevel{
-    val (canBeProcessed, mustWait) = remainingProjects.partition(
-      _.dependentProjects.filterNot(remainingProjects).isEmpty
+    val (canBeProcessed, mustWait) = remainingProjectTasks.partition(
+      _.properDependencies.filterNot(remainingProjectTasks).isEmpty
     )
-    remainingProjects = mustWait
+    remainingProjectTasks = mustWait
     canBeProcessed.foreach(router ! ExecTaskMessage(_, accumuland))
   }
   def receive = {
@@ -213,13 +200,13 @@ class QueueManager(projects : Set[Project], nWorkers : Int, val task : SinglePro
       router ! PoisonPill
       originalCaller ! BuildResult(Left(taskFailure))
     }
-    case TaskResultMessage(proj, Right(result)) => {
-      accumuland = result :: accumuland
-      completedProjects += proj
-      if (completedProjects  == projects)
+    case TaskResultMessage(projectTask, Right(result)) => {
+      accumuland = accumuland + (projectTask.task -> (result :: accumuland.getOrElse(projectTask.task, Nil)))
+      completedProjectTasks += projectTask
+      if (completedProjectTasks  == projectTasks)
         originalCaller ! BuildResult(Right("OK"))
       else {
-        remainingProjects = remainingProjects.filterNot(_ == proj)
+        remainingProjectTasks = remainingProjectTasks.filterNot(_ == projectTask)
         execNextLevel
       }
     }
@@ -229,11 +216,17 @@ class QueueManager(projects : Set[Project], nWorkers : Int, val task : SinglePro
     }
   }
 }
-
+case class ProjectAndTask(project : Project, task : SingleProjectTask){
+  println(project.name + "/" + task)
+  val properDependencies : Set[ProjectAndTask] = project.taskDependencies(task).map(ProjectAndTask(project, _)) ++ project.dependentProjects.flatMap(ProjectAndTask(_, task).allDependencies)
+  def allDependencies = properDependencies + this
+  def exec(acc : Map[SingleProjectTask, List[AnyRef]]) = task.exec(project, acc.getOrElse(task, Nil))
+}
 object Build{
   def apply(projects : Set[Project], task : SingleProjectTask) = {
+    val projectTasks = projects.flatMap(ProjectAndTask(_, task).allDependencies)
     implicit val timeout = Timeout(100000)
-    val future = actorOf(new QueueManager(projects, 2, task)).start ? StartBuild
+    val future = actorOf(new QueueManager(projectTasks, 2)).start ? StartBuild
     future.get.asInstanceOf[BuildResult].res
   }
 }

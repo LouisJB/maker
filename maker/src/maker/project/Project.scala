@@ -16,6 +16,7 @@ import tools.nsc.io.{Directory, PlainDirectory}
 import tools.nsc.reporters.ConsoleReporter
 import plugin._
 import maker.utils.FileUtils
+import scala.collection.immutable.MapProxy
 
 
 object Project {
@@ -81,15 +82,39 @@ case class Project(
 
   private val makerDirectory = mkdirs(new File(root, ".maker"))
 
-  def clean = Build(allDependencies(), CleanTask())//cleanTask.exec
+  def clean = Build(allDependencies(), CleanTask)
+  def compile = Build(allDependencies(), CompileSourceTask)
+  def javaCompile = Build(allDependencies(), CompileJavaSourceTask)
+  def testCompile = Build(allDependencies(), CompileTestsTask)
+  def test = Build(allDependencies(), TestTask)
+  def testOnly = Build(Set(this), TestTask)
+  def pack = Build(allDependencies(), PackageTask)
 
-  def compile = Build(allDependencies(), CompileSourceTask())
-  def javaCompile = Build(allDependencies(), CompileJavaSourceTask())
-  def testCompile = Build(allDependencies(), CompileTestsTask())
-  def test = Build(allDependencies(), TestTask())
-  def testOnly = Build(Set(this), TestTask())
+  val projectTaskDependencies = new MapProxy[SingleProjectTask, Set[SingleProjectTask]]{
+    val self = Map[SingleProjectTask, Set[SingleProjectTask]](
+      CompileSourceTask -> Set(CompileJavaSourceTask),
+      CompileTestsTask -> Set(CompileSourceTask),
+      TestTask -> Set(CompileTestsTask)
+    )
+    override def default(task : SingleProjectTask) = Set[SingleProjectTask]()
+  }
 
-  def pack = Build(allDependencies(), PackageTask())
+  def allTaskDependencies(task : SingleProjectTask) : Set[SingleProjectTask] = {
+    def recurse(tasks : Set[SingleProjectTask], acc : Set[SingleProjectTask] = Set[SingleProjectTask]()) : Set[SingleProjectTask] = {
+      if (tasks.forall(acc.contains))
+        acc
+      else
+        recurse(
+          (Set[SingleProjectTask]() /: tasks.map(projectTaskDependencies.getOrElse(_, Set[SingleProjectTask]())))(_ ++ _),
+          acc ++ tasks
+        )
+    }
+    recurse(Set(task))
+  }
+  def taskDependencies(task : SingleProjectTask) = allTaskDependencies(task).filterNot(_ == task)
+
+    //def allProjectTaskDependencies(task : SingleProjectTask) : Set[ProjectAndTask] = allTaskDependencies(task).map(ProjectAndTask(this, _)) ++ dependentProjects.flatMap(_.allProjectTaskDependencies(task))
+  //def projectTaskDependencies(task : SingleProjectTask) = allProjectTaskDependencies(task).filterNot(_ == ProjectAndTask(this, task))
 
   def delete = FileUtils.recursiveDelete(root)
 
@@ -128,7 +153,6 @@ case class Project(
         phasesSet += new WriteDependencies(self, dependencies).Component
         phasesSet += new GenerateSigs(self, signatures).Component
       }
-
     }
     comp
   }
@@ -138,6 +162,5 @@ case class Project(
   def allDependencies(projectsSoFar : Set[Project] = Set()) : Set[Project] = {
     (Set(this) ++ dependentProjects.filterNot(projectsSoFar).flatMap(_.allDependencies(projectsSoFar + this)))
   }
-
 }
 
