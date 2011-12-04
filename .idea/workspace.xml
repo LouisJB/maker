@@ -91,37 +91,19 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="Task.scala" pinned="false" current="false" current-in-tab="false">
+      <file leaf-file-name="Task.scala" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/maker/src/maker/task/Task.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="176" column="27" selection-start="6521" selection-end="6521" vertical-scroll-proportion="0.0">
+            <state line="46" column="0" selection-start="1164" selection-end="1164" vertical-scroll-proportion="0.88664985">
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="Clean.scala" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/maker/src/maker/task/Clean.scala">
+      <file leaf-file-name="Project.scala" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/maker/src/maker/project/Project.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="5" column="13" selection-start="73" selection-end="73" vertical-scroll-proportion="0.0">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="Compile.scala" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/maker/src/maker/task/Compile.scala">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="15" column="0" selection-start="254" selection-end="2137" vertical-scroll-proportion="0.0">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="Package.scala" pinned="false" current="true" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/maker/src/maker/task/Package.scala">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="8" column="45" selection-start="198" selection-end="198" vertical-scroll-proportion="0.29268292">
+            <state line="74" column="21" selection-start="2583" selection-end="2583" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
@@ -157,15 +139,15 @@
         <option value="$PROJECT_DIR$/plugin/tests/plugin/ProjectSignaturesTests.scala" />
         <option value="$PROJECT_DIR$/plugin/src/plugin/Dependencies.scala" />
         <option value="$PROJECT_DIR$/utils/src/maker/utils/FileUtils.scala" />
-        <option value="$PROJECT_DIR$/maker/src/maker/project/Project.scala" />
         <option value="$PROJECT_DIR$/scc/scala/tools/nsc/symtab/Symbols.scala" />
         <option value="$PROJECT_DIR$/plugin/src/plugin/GenerateSigs.scala" />
         <option value="$PROJECT_DIR$/plugin/src/plugin/ProjectSignatures.scala" />
         <option value="$PROJECT_DIR$/maker/src/maker/task/Build.scala" />
-        <option value="$PROJECT_DIR$/maker/src/maker/task/Task.scala" />
         <option value="$PROJECT_DIR$/maker/src/maker/task/Clean.scala" />
         <option value="$PROJECT_DIR$/maker/src/maker/task/Compile.scala" />
         <option value="$PROJECT_DIR$/maker/src/maker/task/Package.scala" />
+        <option value="$PROJECT_DIR$/maker/src/maker/project/Project.scala" />
+        <option value="$PROJECT_DIR$/maker/src/maker/task/Task.scala" />
       </list>
     </option>
   </component>
@@ -289,7 +271,143 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
+              <option name="myItemId" value="task" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="maker" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="maker" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="tests" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="maker" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
               <option name="myItemId" value="project" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="maker" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="maker" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="src" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="maker" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="task" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="Task.scala" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.ClassesTreeStructureProvider$PsiClassOwnerTreeNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="maker" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="maker" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="src" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="maker" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="task" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="maker" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="maker" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="src" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="maker" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="project" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="Project.scala" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.ClassesTreeStructureProvider$PsiClassOwnerTreeNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="maker" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="maker" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="src" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="maker" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="project" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="maker" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="maker" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="src" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="maker" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
@@ -724,13 +842,6 @@
         <state line="76" column="31" selection-start="3357" selection-end="3357" vertical-scroll-proportion="0.0" />
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/maker/src/maker/project/Project.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="109" column="0" selection-start="4309" selection-end="4309" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="jar:///usr/local/scala/src/scala-library-src.jar!/scala/reflect/generic/Symbols.scala">
       <provider selected="true" editor-type-id="text-editor">
         <state line="30" column="75" selection-start="719" selection-end="719" vertical-scroll-proportion="0.0" />
@@ -755,30 +866,16 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/maker/src/maker/project/Project.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="74" column="21" selection-start="2583" selection-end="2583" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/maker/src/maker/task/Task.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="176" column="27" selection-start="6521" selection-end="6521" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/maker/src/maker/task/Clean.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="5" column="13" selection-start="73" selection-end="73" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/maker/src/maker/task/Compile.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="15" column="0" selection-start="254" selection-end="2137" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/maker/src/maker/task/Package.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="8" column="45" selection-start="198" selection-end="198" vertical-scroll-proportion="0.29268292">
+        <state line="46" column="0" selection-start="1164" selection-end="1164" vertical-scroll-proportion="0.88664985">
           <folding />
         </state>
       </provider>

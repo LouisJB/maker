@@ -14,33 +14,33 @@ import maker.os.Command
 import maker.utils.FileUtils
 import org.apache.commons.io.{FileUtils => ApacheFileUtils}
 
-case class TaskFailed(task : Task[_], reason : String)
+//case class TaskFailed(task : Task[_], reason : String)
 
-trait Task[T]{
-  def lock : Object
-  def exec : Either[TaskFailed, T] = {
-    dependentTasks.foreach(
-      _.exec match {
-        case Left(TaskFailed(task, reason)) => return Left(TaskFailed(task, reason))
-        case _ =>
-      }
-    )
-
-    lock.synchronized{
-      try {
-        execSelf
-      } catch {
-        case ex =>
-          Left(TaskFailed(this, ex.getMessage))
-          ex.printStackTrace()
-          throw ex
-      }
-    }
-  }
-  protected def execSelf : Either[TaskFailed, T]
-  def dependentTasks : Seq[Task[_]]
-  def dependsOn(tasks : Task[_]*) : Task[T]
-}
+//trait Task[T]{
+//  def lock : Object
+//  def exec : Either[TaskFailed, T] = {
+//    dependentTasks.foreach(
+//      _.exec match {
+//        case Left(TaskFailed(task, reason)) => return Left(TaskFailed(task, reason))
+//        case _ =>
+//      }
+//    )
+//
+//    lock.synchronized{
+//      try {
+//        execSelf
+//      } catch {
+//        case ex =>
+//          Left(TaskFailed(this, ex.getMessage))
+//          ex.printStackTrace()
+//          throw ex
+//      }
+//    }
+//  }
+//  protected def execSelf : Either[TaskFailed, T]
+//  def dependentTasks : Seq[Task[_]]
+//  def dependsOn(tasks : Task[_]*) : Task[T]
+//}
 
 case class TaskFailed2(task : SingleProjectTask, reason : String)
 

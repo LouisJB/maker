@@ -79,15 +79,7 @@ case class Project(
 
   def outputJar = new File(packageDir.getAbsolutePath, name + ".jar")
 
-  //private val cleanTask : Clean = Clean(this, dependentProjects.map(_.cleanTask))
-//private val javaCompileTask : JavaCompile = JavaCompile(this, dependentProjects.map(_.compileTask))
-//private val compileTask : Compile = Compile(this, dependentProjects.map(_.compileTask)) dependsOn javaCompileTask
-//private val testCompileTask : TestCompile = TestCompile(this, compileTask::dependentProjects.map(_.testCompileTask))
-//private val packageTask = Package(this) dependsOn (compileTask)
   private val makerDirectory = mkdirs(new File(root, ".maker"))
-
-  //private val testTask : Test = Test(this, testCompileTask :: dependentProjects.map(_.testTask))
-  //private val testOnlyTask : Test = Test(this, List(testCompileTask))
 
   def clean = Build(allDependencies(), CleanTask())//cleanTask.exec
 
