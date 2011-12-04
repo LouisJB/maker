@@ -12,9 +12,13 @@ object Dependencies {
     val deps : Map[File, Set[File]] = extractMapFromFile(
       file,
       (line : String) => {
-        val sourceFile :: itsDependenciesAsString :: Nil = line.split(":").toList
-        val itsDependencies : Set[File] = itsDependenciesAsString.split(",").toSet.map {s : String => new File(s)}
-        (new File(sourceFile), itsDependencies)
+        line.split(":").toList match {
+          case sourceFile :: Nil => (new File(sourceFile), Set[File]())
+          case sourceFile :: itsDependenciesAsString :: Nil =>
+            val itsDependencies : Set[File] = itsDependenciesAsString.toString.split(",").toSet.map {s : String => new File(s)}
+            (new File(sourceFile), itsDependencies)
+          case _ => throw new Exception("Unexpected line in deps file " + file)
+        }
       }
     )
     new Dependencies(deps, file)

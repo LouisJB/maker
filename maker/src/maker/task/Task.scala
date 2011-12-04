@@ -10,6 +10,9 @@ import akka.routing.CyclicIterator
 import Actor._
 import Routing._
 import org.scalatest.tools.Runner
+import maker.os.Command
+import maker.utils.FileUtils
+import org.apache.commons.io.{FileUtils => ApacheFileUtils}
 
 case class TaskFailed(task : Task[_], reason : String)
 
@@ -100,6 +103,55 @@ case class CompileTestsTask(dependentTasks : List[SingleProjectTask] = List(Comp
   def compiler(proj : Project) = proj.testCompiler
 }
 
+case class CompileJavaSourceTask(dependentTasks : List[SingleProjectTask] = Nil) extends SingleProjectTask{
+
+  def execSelf(project : Project, acc : List[AnyRef]) = {
+    import project._
+    javaOutputDir.mkdirs
+    val javaFilesToCompile = changedJavaFiles
+    if (javaFilesToCompile.isEmpty)
+      Right(Set())
+    else {
+      val parameters = "javac"::"-cp"::compilationClasspath::"-d"::javaOutputDir.getAbsolutePath::javaSrcFiles.toList.map(_.getAbsolutePath)
+      Command(parameters : _*).exec match {
+        case (0, _) => Right(javaFilesToCompile)
+        case (_, error) => Left(TaskFailed2(this, error))
+      }
+    }
+  }
+}
+
+case class CleanTask(dependentTasks : List[SingleProjectTask] = Nil) extends SingleProjectTask{
+  def execSelf(project : Project, acc : List[AnyRef]) = {
+    Log.info("cleaning " + project)
+    project.classFiles.foreach(_.delete)
+    project.testClassFiles.foreach(_.delete)
+    project.outputJar.delete
+    Right(Unit)
+  }
+}
+
+case class PackageTask(dependentTasks : List[SingleProjectTask] = List(CompileSourceTask())) extends SingleProjectTask{
+  import maker.os.Environment._
+  def execSelf(project : Project, acc : List[AnyRef]) = {
+    import project._
+    if (!packageDir.exists)
+      packageDir.mkdirs
+    FileUtils.withTempDir({
+      dir : File =>
+        allDependencies().foreach{
+          depProj =>
+            ApacheFileUtils.copyDirectory(depProj.outputDir, dir)
+        }
+      val cmd = Command(jar, "cf", project.outputJar.getAbsolutePath, "-C", dir.getAbsolutePath, ".")
+      cmd.exec match {
+        case (0, _) => Right(Unit)
+        case (errNo, errMessage) => Left(TaskFailed2(this, errMessage))
+      }
+    }, false)
+
+  }
+}
 case class TestTask(dependentTasks : List[SingleProjectTask] = List(CompileTestsTask())) extends SingleProjectTask{
 
   def dependsOn(tasks : SingleProjectTask*) = copy(dependentTasks = (dependentTasks ::: tasks.toList).distinct)
@@ -179,9 +231,8 @@ class QueueManager(projects : Set[Project], nWorkers : Int, val task : SinglePro
 }
 
 object Build{
-  def apply(project : Project, task : SingleProjectTask) = {
-    implicit val timeout = Timeout(10000)
-    val projects = project.allDependencies().toSet
+  def apply(projects : Set[Project], task : SingleProjectTask) = {
+    implicit val timeout = Timeout(100000)
     val future = actorOf(new QueueManager(projects, 2, task)).start ? StartBuild
     future.get.asInstanceOf[BuildResult].res
   }

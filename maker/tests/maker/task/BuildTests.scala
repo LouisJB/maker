@@ -65,7 +65,7 @@ class BuildTests extends FunSuite {
       root, 
       List(new File(root, "src")), 
       List(new File(root, "tests")), 
-      Nil
+      List(new File("lib"))
     )
   }
   test("Build of single project"){
@@ -73,7 +73,7 @@ class BuildTests extends FunSuite {
       val proj = makeProject("foox", root)
 
       writeToFile(new File(root, "src/foo/Foo.scala"), fooContent)
-    assert(Build(proj, CompileSourceTask()) === Right("OK"))
+    assert(proj.compile === Right("OK"))
     proj.delete
   }
 
@@ -85,7 +85,7 @@ class BuildTests extends FunSuite {
 
     writeToFile(new File(root1, "src/foo/Foo.scala"), fooContent)
     writeToFile(new File(root2, "src/bar/Bar.scala"), barContent)
-    assert(Build(proj1, CompileSourceTask()) === Right("OK"))
+    assert(proj1.compile === Right("OK"))
     proj1.delete
     proj2.delete
   }
@@ -98,7 +98,7 @@ class BuildTests extends FunSuite {
 
     writeToFile(new File(root1, "src/foo/Foo.scala"), fooContent)
     writeToFile(new File(root2, "src/bar/Bar.scala"), barContentWithError)
-    Build(proj2, CompileSourceTask()) match {
+     proj2.compile match {
       case Left(taskFailure) =>
       case r => fail("Expected build to fail, got " + r)
     }
@@ -111,7 +111,7 @@ class BuildTests extends FunSuite {
     val proj = makeProject("foo_with_test", root)
     writeToFile(new File(root, "src/foo/Foo.scala"), fooContent)
     writeToFile(new File(root, "tests/foo/FooTest.scala"), fooTestContent)
-    assert(Build(proj, TestTask()) === Right("OK"))
+    assert(proj.test === Right("OK"))
     proj.delete
   }
 
@@ -119,7 +119,7 @@ class BuildTests extends FunSuite {
     val root = tempDir("fred")
     val proj = makeProject("with_failing_test", root)
     writeToFile(new File(root, "tests/foo/FooTest.scala"), failingTestContent)
-    Build(proj, TestTask()) match {
+    proj.test match {
       case Left(_) =>
       case r => fail("Expected test to fail, got " + r)
     }

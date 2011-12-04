@@ -118,8 +118,8 @@ class ProjectTests extends FunSuite with BeforeAndAfterEach{
     //}
 
     //test("Compilation of dependent classes is not done if signature of public method is unchanged"){
+    sleepToNextSecond
     writeToFile(fooSrc, originalFooContent)
-    //proj.clean
     proj.compile
     compilationTime = proj.compilationTime.get
     sleepToNextSecond

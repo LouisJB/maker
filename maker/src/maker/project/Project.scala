@@ -79,25 +79,25 @@ case class Project(
 
   def outputJar = new File(packageDir.getAbsolutePath, name + ".jar")
 
-  private val cleanTask : Clean = Clean(this, dependentProjects.map(_.cleanTask))
-  private val javaCompileTask : JavaCompile = JavaCompile(this, dependentProjects.map(_.compileTask))
-  private val compileTask : Compile = Compile(this, dependentProjects.map(_.compileTask)) dependsOn javaCompileTask
-  private val testCompileTask : TestCompile = TestCompile(this, compileTask::dependentProjects.map(_.testCompileTask))
-  private val packageTask = Package(this) dependsOn (compileTask)
+  //private val cleanTask : Clean = Clean(this, dependentProjects.map(_.cleanTask))
+//private val javaCompileTask : JavaCompile = JavaCompile(this, dependentProjects.map(_.compileTask))
+//private val compileTask : Compile = Compile(this, dependentProjects.map(_.compileTask)) dependsOn javaCompileTask
+//private val testCompileTask : TestCompile = TestCompile(this, compileTask::dependentProjects.map(_.testCompileTask))
+//private val packageTask = Package(this) dependsOn (compileTask)
   private val makerDirectory = mkdirs(new File(root, ".maker"))
 
-  private val testTask : Test = Test(this, testCompileTask :: dependentProjects.map(_.testTask))
-  private val testOnlyTask : Test = Test(this, List(testCompileTask))
+  //private val testTask : Test = Test(this, testCompileTask :: dependentProjects.map(_.testTask))
+  //private val testOnlyTask : Test = Test(this, List(testCompileTask))
 
-  def clean = cleanTask.exec
+  def clean = Build(allDependencies(), CleanTask())//cleanTask.exec
 
-  def compile = compileTask.exec
-  def javaCompile = javaCompileTask.exec
-  def testCompile = testCompileTask.exec
-  def test = testTask.exec
-  def testOnly = testOnlyTask.exec
+  def compile = Build(allDependencies(), CompileSourceTask())
+  def javaCompile = Build(allDependencies(), CompileJavaSourceTask())
+  def testCompile = Build(allDependencies(), CompileTestsTask())
+  def test = Build(allDependencies(), TestTask())
+  def testOnly = Build(Set(this), TestTask())
 
-  def pack = packageTask.exec
+  def pack = Build(allDependencies(), PackageTask())
 
   def delete = FileUtils.recursiveDelete(root)
 
@@ -143,8 +143,8 @@ case class Project(
 
   val compiler: Global = makeCompiler(isTestCompiler = false)
   val testCompiler: Global = makeCompiler(isTestCompiler = true)
-  def allDependencies(projectsSoFar : Set[Project] = Set()) : List[Project] = {
-    (this :: dependentProjects.filterNot(projectsSoFar).flatMap(_.allDependencies(projectsSoFar + this))).distinct
+  def allDependencies(projectsSoFar : Set[Project] = Set()) : Set[Project] = {
+    (Set(this) ++ dependentProjects.filterNot(projectsSoFar).flatMap(_.allDependencies(projectsSoFar + this)))
   }
 
 }
