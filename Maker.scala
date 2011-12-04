@@ -18,6 +18,9 @@ val utils = standardProject("utils")
 val plugin = standardProject("plugin") dependsOn utils
 val maker = standardProject("maker") dependsOn plugin
 
+// when loading self, make sure we're built by default
+maker compile
+
 //def copyClasses{
   //maker.compile match {
     //case Left(_) => 

@@ -18,22 +18,15 @@ import plugin._
 import maker.utils.FileUtils
 import scala.collection.immutable.MapProxy
 
-
-//object Project {
-//
-//  private def java_home = ("/usr/local/jdk" :: List("JAVA_HOME", "MAKER_JAVA_HOME").flatMap {
-//    e: String => Option(System.getenv(e))
-//  }).filter(new File(_).exists).headOption.getOrElse(throw new Exception("Can't find scala home"))
-//
-//  private def jar: String = java_home + "/bin/jar"
-//
-//}
+object `package` {
+  def file(f : String) = new File(f)
+}
 
 case class Project(
   name: String,
   root: File,
-  srcDirs: List[File],
-  testDirs: List[File],
+  srcDirs: List[File] = List(file(root, "src")),
+  testDirs: List[File] = List(file(root, "test")),
   jarDirs: List[File],
   dependentProjects: List[Project] = Nil,
   compilationClasspathOverride : Option[String] = None

@@ -2,7 +2,7 @@ How hard is it to replace SBT?
 
 
 To bootstrap
-$ ./bin/build-from-scratch.sh
+$ ./bin/build-from-scratch.rb
 
 This outputs classes to the out directory 
 
