@@ -18,7 +18,7 @@ import plugin._
 import maker.utils.FileUtils
 import scala.collection.immutable.MapProxy
 
-object `package` {
+package object maker {
   def file(f : String) = new File(f)
 }
 
