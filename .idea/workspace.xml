@@ -20,7 +20,7 @@
   </component>
   <component name="DebuggerManager">
     <line_breakpoints>
-      <breakpoint url="file://$PROJECT_DIR$/plugin/src/plugin/ProjectSignatures.scala" line="74" class="plugin.ProjectSignatures" package="">
+      <breakpoint url="file://$PROJECT_DIR$/plugin/src/plugin/ProjectSignatures.scala" line="42" class="plugin.ProjectSignatures" package="">
         <option name="ENABLED" value="true" />
         <option name="LOG_ENABLED" value="false" />
         <option name="LOG_EXPRESSION_ENABLED" value="false" />
@@ -121,7 +121,7 @@
       <file leaf-file-name="QueueManager.scala" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/maker/src/maker/task/QueueManager.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="23" column="0" selection-start="1140" selection-end="1140" vertical-scroll-proportion="0.0">
+            <state line="26" column="0" selection-start="1210" selection-end="1210" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
@@ -846,7 +846,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/maker/src/maker/task/QueueManager.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="23" column="0" selection-start="1140" selection-end="1140" vertical-scroll-proportion="0.0">
+        <state line="26" column="0" selection-start="1210" selection-end="1210" vertical-scroll-proportion="0.0">
           <folding />
         </state>
       </provider>
