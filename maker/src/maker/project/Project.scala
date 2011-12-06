@@ -1,6 +1,6 @@
-package maker.project
+package maker
+package project 
 
-import maker.utils.Log
 import java.io.File
 import java.io.FileWriter
 import java.io.BufferedWriter
@@ -10,34 +10,41 @@ import java.io.ByteArrayOutputStream
 import java.io.InputStream
 import java.lang.System
 import scala.collection.JavaConversions._
-import maker.task._
 import tools.nsc.{Settings, Global}
 import tools.nsc.io.{Directory, PlainDirectory}
 import tools.nsc.reporters.ConsoleReporter
 import plugin._
-import maker.utils.FileUtils
 import scala.collection.immutable.MapProxy
-
-package object maker {
-  def file(f : String) = new File(f)
-}
+import task._
+import utils.Log
+import utils.FileUtils
+import maker._
 
 case class Project(
   name: String,
   root: File,
-  srcDirs: List[File] = List(file(root, "src")),
-  testDirs: List[File] = List(file(root, "test")),
-  jarDirs: List[File],
+  sourceDirs: List[File] = Nil,
+  tstDirs: List[File] = Nil,
+  libDirs: List[File] = Nil,
   dependentProjects: List[Project] = Nil,
   compilationClasspathOverride : Option[String] = None
 ) {
+  import maker._
+
+  val defaultSrcDir = "src"
+  val defaultTestDir = "test"
+  val defaultLibDir = "lib"
+  
+  def srcDirs : List[File] = if (sourceDirs.isEmpty) List(file(root, defaultSrcDir)) else sourceDirs
+  def testDirs : List[File] = if (tstDirs.isEmpty) List(file(root, defaultTestDir)) else tstDirs
+  def jarDirs : List[File] = if (libDirs.isEmpty) List(file(root, defaultLibDir)) else libDirs
 
   def outputDir = new File(root, "classes")
   def javaOutputDir = new File(root, "java-classes")
   def testOutputDir = new File(root, "test-classes")
   def packageDir = new File(root, "package")
   import Project._
-  import maker.utils.FileUtils._
+  import utils.FileUtils._
 
   def dependsOn(projects: Project*) = copy(dependentProjects = dependentProjects ::: projects.toList)
 
