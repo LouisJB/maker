@@ -43,6 +43,7 @@ class GenerateSigs(val global: Global, signatures : ProjectSignatures) extends P
           val sig = vd.symbol.fullName + " : val, modifiers " + vd.mods.flags + ", type " + vd.tpt
           collector += sig
         }
+//        case cd : ClassDef
         case _ =>
       }
     }

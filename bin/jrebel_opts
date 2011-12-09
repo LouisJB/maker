@@ -1,1 +1,0 @@
-export JAVA_OPTS="$JAVA_OPTS -javaagent:/usr/local/jrebel/jrebel.jar -noverify"
