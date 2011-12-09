@@ -10,11 +10,14 @@ modules.each do |m|
     if f =~ /\.scala$/ 
       source_files.unshift(f)
     end
-    if f =~ /\.class/ 
-      File.delete(f)
-    end
   end
 end
+Find.find(".") do |f|
+  if f =~ /\.class/ 
+    File.delete(f)
+  end
+end
+
 
 jars = Dir.glob("lib/*.jar")
 raise "fsc not found - set SCALA_HOME" unless File.exist?("#{ENV["SCALA_HOME"]}/bin/fsc")
