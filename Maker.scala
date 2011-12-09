@@ -17,3 +17,5 @@ lazy val utils = standardProject("utils")
 lazy val plugin = standardProject("plugin") dependsOn utils
 lazy val maker = standardProject("maker") dependsOn plugin
 
+// when loading self, make sure we're built by default
+maker compile

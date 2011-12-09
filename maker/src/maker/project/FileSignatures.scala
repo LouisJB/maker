@@ -1,8 +1,9 @@
-package maker.project
+package maker
+package project
 
 import java.io.File
 import scala.io.Source
-import maker.utils.FileUtils._
+import utils.FileUtils._
 
 object FileSignatures{
   def apply(file: File): FileSignatures = {
