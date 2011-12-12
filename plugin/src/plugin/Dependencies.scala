@@ -21,17 +21,17 @@ object Dependencies {
         }
       }
     )
-    new Dependencies(deps, file)
+    new Dependencies(file, deps)
   }
 }
 
-case class Dependencies(private var deps: Map[File, Set[File]], file : File) {
+case class Dependencies(persistFile : File, private var deps: Map[File, Set[File]]) {
 
   import Dependencies._
 
   def persist() {
     writeMapToFile(
-      file, deps,
+      persistFile, deps,
       (f : File, s : Set[File]) => f.getPath + ":" + s.map(_.getPath).mkString("", ",", "")
     )
   }

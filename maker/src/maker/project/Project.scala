@@ -113,22 +113,16 @@ case class Project(
   }
   def taskDependencies(task : Task) = allTaskDependencies(task).filterNot(_ == task)
 
-    //def allProjectTaskDependencies(task : SingleProjectTask) : Set[ProjectAndTask] = allTaskDependencies(task).map(ProjectAndTask(this, _)) ++ dependentProjects.flatMap(_.allProjectTaskDependencies(task))
-  //def projectTaskDependencies(task : SingleProjectTask) = allProjectTaskDependencies(task).filterNot(_ == ProjectAndTask(this, task))
-
   def delete = FileUtils.recursiveDelete(root)
 
   override def toString = "Project " + name
 
   val dependencies= plugin.Dependencies(new File(makerDirectory, "dependencies"))
-  var signatures = plugin.ProjectSignatures()
-  private val signatureFile = new File(makerDirectory, "signatures")
+  var signatures = plugin.ProjectSignatures(new File(makerDirectory, "signatures"))
+  var sourceToClassFiles = plugin.SourceClassFileMapping(new File(makerDirectory, "sourceToClassFiles"))
   def updateSignatures : Set[File] = {
-    val olderSigs = ProjectSignatures(signatureFile)
-    val changedFiles = signatures.changedFiles(olderSigs)
-    signatures.persist(signatureFile)
-    Log.debug("Files with changed sigs " + changedFiles.mkString("\n\t", "\n\t", ""))
-    Log.debug("Sig changes\n" + signatures.changeAsString(olderSigs))
+    val changedFiles = signatures.filesWithChangedSigs
+    signatures.persist
     changedFiles
   }
 
@@ -152,6 +146,7 @@ case class Project(
         super.computeInternalPhases
         phasesSet += new WriteDependencies(self, dependencies).Component
         phasesSet += new GenerateSigs(self, signatures).Component
+        phasesSet += new DetermineClassFiles(self, sourceToClassFiles).Component
       }
     }
     comp

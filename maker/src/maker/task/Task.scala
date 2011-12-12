@@ -50,6 +50,7 @@ abstract class CompileTask extends Task{
         Left(TaskFailed(this, "Failed to compile"))
       else {
         proj.dependencies.persist
+        proj.sourceToClassFiles.persist
         Right((sourceFilesFromThisProjectWithChangedSigs, modifiedSrcFiles ++ dependentFiles))
       }
     } else {

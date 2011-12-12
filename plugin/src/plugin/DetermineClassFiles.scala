@@ -4,19 +4,20 @@ import tools.nsc.plugins.{PluginComponent, Plugin}
 import tools.nsc.{Phase, Global}
 import reflect.generic.ModifierFlags
 import maker.utils.Log
+import java.io.File
 
-class GenerateSigs(val global: Global, signatures : ProjectSignatures) extends Plugin {
+class DetermineClassFiles(val global: Global, sourceToClassFiles : SourceClassFileMapping) extends Plugin {
   import global._
 
-  val name = "gensigs"
-  val description = "signature generator"
+  val name = "determineclassfiles"
+  val description = "generate a map of source file to class files"
 
   val components = List[PluginComponent](Component)
 
   object Component extends PluginComponent{
-    val global: GenerateSigs.this.global.type = GenerateSigs.this.global
+    val global: DetermineClassFiles.this.global.type = DetermineClassFiles.this.global
     val runsAfter = List[String]("typer")
-    val phaseName = "generatesignatures"
+    val phaseName = name
 
     def newPhase(prev: Phase): Phase = new TraverserPhase(prev)
     class TraverserPhase(prev: Phase) extends StdPhase(prev) {
@@ -28,7 +29,7 @@ class GenerateSigs(val global: Global, signatures : ProjectSignatures) extends P
       def apply(unit: CompilationUnit) {
         val collector = scala.collection.mutable.Set[String]()
         newTraverser(collector).traverse(unit.body)
-        signatures += (unit.source.file.file, Set[String]() ++ collector)
+      sourceToClassFiles ++= (unit.source.file.file, Set[File]() ++ collector.map{name => new File(name + ".class")})
       }
     }
 
@@ -47,24 +48,15 @@ class GenerateSigs(val global: Global, signatures : ProjectSignatures) extends P
 
     def check(collector : scala.collection.mutable.Set[String])(tree: Tree): Unit = {
       tree match {
-        case dd : DefDef if ! dd.mods.isPrivate => {
-          val sig = dd.symbol.fullName + " : def, modifiers " + dd.mods.flags + ", type params " + dd.tparams + ", return type " + dd.tpt + ", params " + dd.vparamss.map(_.map(_.tpt)) 
-          collector += sig
-        }
-        case vd : ValDef if ! vd.mods.isPrivate => {
-          val sig = vd.symbol.fullName + " : val, modifiers " + vd.mods.flags + ", type " + vd.tpt
-          collector += sig
-        }
         case cd : ClassDef => {
-          Log.info("Name of class is " + cd.name + ", full name is " + cd.symbol.fullName)
-          Log.info("Another name might be " + javaName(cd.symbol))
+          collector += javaName(cd.symbol)
         }
         case md : ModuleDef => {
-          Log.info("Name of object is " + md.name + ", full name is " + md.symbol.fullName)
-          Log.info("Another name for object " + javaName(md.symbol))
+          collector += javaName(md.symbol)
         }
         case _ =>
       }
     }
   }
 }
+

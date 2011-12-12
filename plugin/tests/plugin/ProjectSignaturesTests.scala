@@ -41,20 +41,20 @@ class ProjectSignaturesTests extends FunSuite{
       "foo", "bar", "baz", "fux", "fob"
     )
 
-    val List(file1, file2) = List(new File("fred/Mike.scala"), new File("Foo.scala"))
-    val sigs = ProjectSignatures()
-    def testSigs(){
-      withTempFile{tempFile : File =>
-        sigs.persist(tempFile)
-        val sigs2 = ProjectSignatures(tempFile)
-        assert(sigs === sigs2)
+    withTempFile{tempFile : File =>
+      val List(file1, file2) = List(new File("fred/Mike.scala"), new File("Foo.scala"))
+      val sigs = ProjectSignatures(tempFile)
+      def testSigs(){
+          sigs.persist()
+          val sigs2 = ProjectSignatures.makeSignatureMap(tempFile)
+          assert(sigs.signature === sigs2)
       }
+      sigs += (file1, Set(c1, c2, c3))
+      testSigs()
+      sigs += (file1, Set(c2, c4))
+      testSigs()
+      sigs += (file2, Set(c3, c5))
+      testSigs()
     }
-    sigs += (file1, Set(c1, c2, c3))
-    testSigs()
-    sigs += (file1, Set(c2, c4))
-    testSigs()
-    sigs += (file2, Set(c3, c5))
-    testSigs()
   }
 }

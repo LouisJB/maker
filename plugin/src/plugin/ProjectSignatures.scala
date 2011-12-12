@@ -4,16 +4,36 @@ import scala.collection.mutable.{Set => MSet, Map => MMap}
 import collection.immutable.Map
 import maker.utils.FileUtils
 import java.io.{BufferedReader, BufferedWriter, File}
+import maker.utils.Log
 
-case class ProjectSignatures(private val sigs : MMap[File, Set[String]] = MMap()){
-  def changedFiles(olderSigs : ProjectSignatures): Set[File] = Set() ++ sigs.keySet.filter{file => sigs.get(file) != olderSigs.sigs.get(file)}
+case class ProjectSignatures(persisted : File, private val sigs : MMap[File, Set[String]] = MMap()){
+  //def changedFiles(): Set[File] = {
+    //val olderSigs = ProjectSignatures.makeSignatureMap(persisted)
+    //val changedFiles = Set() ++ sigs.keySet.filter{file => sigs.get(file) != olderSigs.getOrElse(file, Set[String]())}
+    //}
   def += (sourceFile : File, sig : Set[String]) {
     sigs.update(sourceFile, sig)
   }
 
   def signature: Map[File, Set[String]] = Map[File, Set[String]]() ++ sigs
-  def persist(file : File){
-    FileUtils.withFileWriter(file){
+  def filesWithChangedSigs = {
+    val olderSigs = ProjectSignatures.makeSignatureMap(persisted)
+    val changedFiles = Set() ++ sigs.keySet.filter{file => (sigs(file) != olderSigs.getOrElse(file, Set[String]()))}
+    Log.debug("Files with changed sigs " + changedFiles.mkString("\n\t", "\n\t", ""))
+    sigs.foreach{
+      case (file, sig) => 
+        Log.debug("File = " + file)
+        val os = olderSigs.getOrElse(file, Set[String]())
+        Log.debug("Is same " + (os == sig))
+        Log.debug("Is same " + (os == sig))
+    }
+
+    Log.debug("Sig changes\n" + changeAsString(olderSigs))
+    changedFiles
+  }
+
+  def persist(){
+    FileUtils.withFileWriter(persisted){
       writer : BufferedWriter =>
         sigs.foreach{
           case (sourceFile, sig) =>
@@ -30,15 +50,16 @@ case class ProjectSignatures(private val sigs : MMap[File, Set[String]] = MMap()
 
   private def sigString(sig : Set[String], prefix : String = "\n\t\t", infix : String = "\n\t\t", postfix : String = "") = sig.toList.sortWith(_<_).mkString(prefix, infix, postfix)
 
-  def changeAsString(olderSigs : ProjectSignatures) = {
+  private def changeAsString(olderSigs : MMap[File, Set[String]]) = {
     val buff = new StringBuffer()
     files.foreach{
       file =>
-        val oldSig = olderSigs.sigs.getOrElse(file, Set())
+        val oldSig = olderSigs.getOrElse(file, Set())
         val newSig = sigs.getOrElse(file, Set())
         val deletedSigs = oldSig.filterNot(newSig)
         val newSigs = newSig.filterNot(oldSig)
         buff.append("\n\t" + file + "\n")
+        Log.debug((oldSig == newSig) + ", " + deletedSigs.size + ", " + newSigs.size)
         buff.append(sigString(deletedSigs, "\n\t\t-", "\n\t\t-"))
         buff.append(sigString(newSigs, "\n\t\t+", "\n\t\t+"))
     }
@@ -58,8 +79,8 @@ case class ProjectSignatures(private val sigs : MMap[File, Set[String]] = MMap()
 }
 
 object ProjectSignatures{
-  def apply(file : File) : ProjectSignatures = {
-    var sigs = ProjectSignatures()
+  def makeSignatureMap(file : File) : MMap[File, Set[String]] = {
+    var sigs = MMap[File, Set[String]]()
     var sourceFile : File = null
     var lines = Set[String]()
 
@@ -72,7 +93,7 @@ object ProjectSignatures{
           line match {
             case SourceFile(fileName) => {
               if (sourceFile != null){
-                sigs += (sourceFile, lines)
+                sigs.update(sourceFile, lines)
                 lines = Set[String]()
               }
               sourceFile = new File(fileName)
@@ -83,7 +104,7 @@ object ProjectSignatures{
           line = in.readLine()
         }
         if (sourceFile != null){
-          sigs += (sourceFile, lines)
+          sigs.update(sourceFile, lines)
         }
       }
     }
