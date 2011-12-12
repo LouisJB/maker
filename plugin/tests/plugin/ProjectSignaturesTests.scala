@@ -8,34 +8,6 @@ import java.io.{BufferedWriter, File}
 
 class ProjectSignaturesTests extends FunSuite{
 
-  //test("ClassSignature toString round trip"){
-    //val klasses = List(
-      //ClassSignature(List("foo", "bar"), List("Fred", "Mike")),
-      //ClassSignature(List(), List("Mike")),
-      //ClassSignature(List(), List())
-      //)
-    //for (klass <- klasses){
-      //val klass2 = ClassSignature(klass.toString)
-      //assert(klass === klass2)
-      //}
-      //}
-      //
-      //test("MethodSignature toString round trip"){
-        //val List(c1, c2, c3) = List(
-          //ClassSignature(List("foo", "bar"), List("Fred", "Mike")),
-          //ClassSignature(List(), List("Mike")),
-          //ClassSignature(List(), List())
-          //)
-        //val methods = List(
-          //MethodSignature("Fred", c1, List(c2, c3), c3),
-          //MethodSignature("Mike", c3, List(c2, c3), c1)
-          //)
-        //for (m <- methods){
-          //val m2 = MethodSignature(m.toString)
-          //assert(m === m2)
-          //}
-          //}
-
   test ("ProjectSignature toString round trip"){
     val List(c1, c2, c3, c4, c5) = List(
       "foo", "bar", "baz", "fux", "fob"
@@ -46,9 +18,10 @@ class ProjectSignaturesTests extends FunSuite{
       val sigs = ProjectSignatures(tempFile)
       def testSigs(){
           sigs.persist()
-          val sigs2 = ProjectSignatures.makeSignatureMap(tempFile)
-          assert(sigs.signature === sigs2)
+          val sigs2 = ProjectSignatures(tempFile)
+          assert(sigs === sigs2)
       }
+      testSigs()
       sigs += (file1, Set(c1, c2, c3))
       testSigs()
       sigs += (file1, Set(c2, c4))

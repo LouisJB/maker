@@ -116,7 +116,7 @@ object FileUtils{
     map
   }
 
-  def writeMapToFile[K, V](file : File, map : Map[K, V], fn : (K, V) => String){
+  def writeMapToFile[K, V](file : File, map : scala.collection.Map[K, V], fn : (K, V) => String){
     withFileWriter(file) {
       out: BufferedWriter =>
         map.foreach {

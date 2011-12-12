@@ -13,7 +13,7 @@ class SourceClassFileMappingTests extends FunSuite{
         s ++=(new File("bar.scala"), Set(new File("bar.class"), new File("bar$.class")))
         s.persist()
         val t = SourceClassFileMapping(f)
-//        assert(s === t)
+        assert(s === t)
     }
   }
 }
