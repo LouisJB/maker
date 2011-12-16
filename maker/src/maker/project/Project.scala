@@ -1,5 +1,4 @@
-package maker
-package project 
+package maker.project 
 
 import java.io.File
 import java.io.FileWriter
@@ -15,10 +14,11 @@ import tools.nsc.io.{Directory, PlainDirectory}
 import tools.nsc.reporters.ConsoleReporter
 import plugin._
 import scala.collection.immutable.MapProxy
-import task._
-import utils.Log
-import utils.FileUtils
+import maker.utils.Log
+import maker.utils.FileUtils
 import maker._
+import maker.task._
+import maker.utils.FileUtils
 
 case class Project(
   name: String,
@@ -118,8 +118,10 @@ case class Project(
   override def toString = "Project " + name
 
   val dependencies= plugin.Dependencies(new File(makerDirectory, "dependencies"))
-  var signatures = plugin.ProjectSignatures(new File(makerDirectory, "signatures"))
-  var sourceToClassFiles = plugin.SourceClassFileMapping(new File(makerDirectory, "sourceToClassFiles"))
+  val signatures = plugin.ProjectSignatures(new File(makerDirectory, "signatures"))
+  val sourceToClassFiles = plugin.SourceClassFileMapping(new File(makerDirectory, "sourceToClassFiles"))
+  def classFilesFor(srcFile : File) = sourceToClassFiles.map.getOrElse(srcFile, Set[File]())
+
   def updateSignatures : Set[File] = {
     val changedFiles = signatures.filesWithChangedSigs
     signatures.persist
@@ -132,10 +134,8 @@ case class Project(
     val scalaAndJavaLibs = System.getProperty("sun.boot.class.path")
 
     settings.usejavacp.value = false
-    settings.outputDirs.setSingleOutput(
-      new PlainDirectory(new Directory(
-        if (isTestCompiler) testOutputDir else outputDir
-    )))
+    val compilerOutputDir = if (isTestCompiler) testOutputDir else outputDir
+    settings.outputDirs.setSingleOutput(new PlainDirectory(new Directory(compilerOutputDir)))
     settings.javabootclasspath.value = scalaAndJavaLibs
     settings.classpath.value = compilationClasspath
 
@@ -146,7 +146,7 @@ case class Project(
         super.computeInternalPhases
         phasesSet += new WriteDependencies(self, dependencies).Component
         phasesSet += new GenerateSigs(self, signatures).Component
-        phasesSet += new DetermineClassFiles(self, sourceToClassFiles).Component
+        phasesSet += new DetermineClassFiles(self, compilerOutputDir, sourceToClassFiles).Component
       }
     }
     comp

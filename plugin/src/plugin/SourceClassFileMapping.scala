@@ -34,6 +34,7 @@ case class SourceClassFileMapping(persistFile : File, private var mapping : Map[
     }
   }
   def persistedMapping = SourceClassFileMapping(persistFile).mapping
+  def map = mapping
 }
 
 

@@ -20,7 +20,7 @@
   </component>
   <component name="DebuggerManager">
     <line_breakpoints>
-      <breakpoint url="file://$PROJECT_DIR$/plugin/src/plugin/ProjectSignatures.scala" line="42" class="plugin.ProjectSignatures" package="">
+      <breakpoint url="file://$PROJECT_DIR$/plugin/src/plugin/ProjectSignatures.scala" line="91" class="plugin.ProjectSignatures" package="">
         <option name="ENABLED" value="true" />
         <option name="LOG_ENABLED" value="false" />
         <option name="LOG_EXPRESSION_ENABLED" value="false" />
@@ -91,91 +91,91 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="Trees.scala" pinned="false" current="false" current-in-tab="false">
-        <entry file="jar:///usr/local/scala/src/scala-compiler-src.jar!/scala/tools/nsc/ast/Trees.scala">
+      <file leaf-file-name="GenJVM.scala" pinned="false" current="true" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/scc/scala/tools/nsc/backend/jvm/GenJVM.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="125" column="48" selection-start="4494" selection-end="4494" vertical-scroll-proportion="0.0">
+            <state line="1042" column="48" selection-start="41397" selection-end="41397" vertical-scroll-proportion="0.38652483">
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="Trees.scala" pinned="false" current="false" current-in-tab="false">
-        <entry file="jar:///usr/local/scala/src/scala-library-src.jar!/scala/reflect/generic/Trees.scala">
+      <file leaf-file-name="ScalaSettings.scala" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/scc/scala/tools/nsc/settings/ScalaSettings.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="392" column="0" selection-start="12708" selection-end="12708" vertical-scroll-proportion="0.0">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="Global.scala" pinned="false" current="false" current-in-tab="false">
-        <entry file="jar:///usr/local/scala/src/scala-compiler-src.jar!/scala/tools/nsc/Global.scala">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="1207" column="56" selection-start="44660" selection-end="44660" vertical-scroll-proportion="0.0">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="BytecodeWriters.scala" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/scc/scala/tools/nsc/backend/jvm/BytecodeWriters.scala">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="47" column="45" selection-start="1579" selection-end="1579" vertical-scroll-proportion="0.0">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="GenJVM.scala" pinned="false" current="false" current-in-tab="false">
-        <entry file="jar:///usr/local/scala/src/scala-compiler-src.jar!/scala/tools/nsc/backend/jvm/GenJVM.scala">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="160" column="16" selection-start="5808" selection-end="5808" vertical-scroll-proportion="0.0">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="FJBGContext.class" pinned="false" current="false" current-in-tab="false">
-        <entry file="jar:///usr/local/scala/lib/scala-compiler.jar!/ch/epfl/lamp/fjbg/FJBGContext.class">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="14" column="107" selection-start="537" selection-end="537" vertical-scroll-proportion="0.0">
+            <state line="104" column="6" selection-start="6912" selection-end="6912" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
         </entry>
       </file>
       <file leaf-file-name="ICodes.scala" pinned="false" current="false" current-in-tab="false">
-        <entry file="jar:///usr/local/scala/src/scala-compiler-src.jar!/scala/tools/nsc/backend/icode/ICodes.scala">
+        <entry file="file://$PROJECT_DIR$/scc/scala/tools/nsc/backend/icode/ICodes.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="40" column="55" selection-start="1216" selection-end="1216" vertical-scroll-proportion="0.0">
+            <state line="36" column="11" selection-start="1058" selection-end="1058" vertical-scroll-proportion="0.0">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="GenICode.scala" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/scc/scala/tools/nsc/backend/icode/GenICode.scala">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="56" column="36" selection-start="1415" selection-end="1415" vertical-scroll-proportion="0.0">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="CompilationUnits.scala" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/scc/scala/tools/nsc/CompilationUnits.scala">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="15" column="42" selection-start="529" selection-end="529" vertical-scroll-proportion="0.0">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="SourceFile.scala" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/scc/scala/tools/nsc/util/SourceFile.scala">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="17" column="15" selection-start="397" selection-end="397" vertical-scroll-proportion="0.0">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="Symbols.scala" pinned="false" current="false" current-in-tab="false">
+        <entry file="jar:///usr/local/scala/src/scala-compiler-src.jar!/scala/tools/nsc/symtab/Symbols.scala">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="1249" column="12" selection-start="47967" selection-end="47967" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
         </entry>
       </file>
       <file leaf-file-name="Members.scala" pinned="false" current="false" current-in-tab="false">
-        <entry file="jar:///usr/local/scala/src/scala-compiler-src.jar!/scala/tools/nsc/backend/icode/Members.scala">
+        <entry file="file://$PROJECT_DIR$/scc/scala/tools/nsc/backend/icode/Members.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="124" column="0" selection-start="3232" selection-end="3232" vertical-scroll-proportion="0.0">
+            <state line="181" column="60" selection-start="4888" selection-end="4888" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="GenJVMUtil.scala" pinned="false" current="true" current-in-tab="true">
-        <entry file="jar:///usr/local/scala/src/scala-compiler-src.jar!/scala/tools/nsc/backend/jvm/GenJVMUtil.scala">
+      <file leaf-file-name="AbstractFile.scala" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/scc/scala/tools/nsc/io/AbstractFile.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="90" column="6" selection-start="3016" selection-end="3016" vertical-scroll-proportion="0.07537688">
+            <state line="80" column="15" selection-start="2799" selection-end="2799" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="JClass.class" pinned="false" current="false" current-in-tab="false">
-        <entry file="jar:///usr/local/scala/lib/scala-compiler.jar!/ch/epfl/lamp/fjbg/JClass.class">
+      <file leaf-file-name="Global.scala" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/scc/scala/tools/nsc/Global.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="63" column="3" selection-start="2800" selection-end="2800" vertical-scroll-proportion="0.0">
+            <state line="466" column="9" selection-start="16357" selection-end="16357" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
@@ -195,8 +195,6 @@
   <component name="IdeDocumentHistory">
     <option name="changedFiles">
       <list>
-        <option value="$PROJECT_DIR$/maker/src/maker/utils/FileUtils.scala" />
-        <option value="$PROJECT_DIR$/plugin/tests/plugin/ProjectSignaturesTests.scala" />
         <option value="$PROJECT_DIR$/plugin/src/plugin/Dependencies.scala" />
         <option value="$PROJECT_DIR$/utils/src/maker/utils/FileUtils.scala" />
         <option value="$PROJECT_DIR$/scc/scala/tools/nsc/symtab/Symbols.scala" />
@@ -211,6 +209,8 @@
         <option value="$PROJECT_DIR$/maker/src/maker/project/Project.scala" />
         <option value="$PROJECT_DIR$/plugin/src/plugin/GenerateSigs.scala" />
         <option value="$PROJECT_DIR$/scc/scala/tools/nsc/backend/jvm/BytecodeWriters.scala" />
+        <option value="$PROJECT_DIR$/scc/scala/tools/nsc/Global.scala" />
+        <option value="$PROJECT_DIR$/scc/scala/tools/nsc/typechecker/ConstantFolder.scala" />
       </list>
     </option>
   </component>
@@ -597,24 +597,24 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="28" width="1280" height="774" extended-state="0" />
-    <editor active="false" />
+    <editor active="true" />
     <layout>
       <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
-      <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.28885272" sideWeight="0.2162963" order="1" side_tool="true" content_ui="tabs" />
-      <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
-      <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
-      <window_info id="Dependency Viewer" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="11" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="true" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.2886345" sideWeight="0.67281103" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.47945204" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.58678955" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.40860215" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="12" side_tool="false" content_ui="tabs" />
+      <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
+      <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.28885272" sideWeight="0.2162963" order="1" side_tool="true" content_ui="tabs" />
+      <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
+      <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.2886345" sideWeight="0.5205479" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="Dependency Viewer" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="11" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.40860215" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Phing Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
-      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.32718894" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="SBT Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32961932" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
       <window_info id="IDEtalk Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
       <window_info id="IDEtalk" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
@@ -670,86 +670,116 @@
     <option name="FILTER_TARGETS" value="false" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/maker/src/maker/task/QueueManager.scala">
+    <entry file="file://$PROJECT_DIR$/scc/scala/tools/nsc/ast/Trees.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="26" column="0" selection-start="1210" selection-end="1210" vertical-scroll-proportion="0.0" />
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/maker/src/maker/project/Project.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="59" column="40" selection-start="2007" selection-end="2007" vertical-scroll-proportion="0.0" />
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/maker/src/maker/project/FileSignatures.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="20" column="11" selection-start="433" selection-end="433" vertical-scroll-proportion="0.0" />
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/plugin/src/plugin/WriteDependencies.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="19" column="6" selection-start="577" selection-end="577" vertical-scroll-proportion="0.0" />
-      </provider>
-    </entry>
-    <entry file="jar:///usr/local/scala/src/scala-compiler-src.jar!/scala/tools/nsc/Phase.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="10" column="0" selection-start="161" selection-end="161" vertical-scroll-proportion="0.0" />
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/plugin/src/plugin/GenerateSigs.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="34" column="99" selection-start="1113" selection-end="1113" vertical-scroll-proportion="0.0" />
-      </provider>
-    </entry>
-    <entry file="jar:///usr/local/scala/src/scala-compiler-src.jar!/scala/tools/nsc/ast/Trees.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="125" column="48" selection-start="4494" selection-end="4494" vertical-scroll-proportion="0.0" />
-      </provider>
-    </entry>
-    <entry file="jar:///usr/local/scala/src/scala-library-src.jar!/scala/reflect/generic/Trees.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="392" column="0" selection-start="12708" selection-end="12708" vertical-scroll-proportion="0.0" />
-      </provider>
-    </entry>
-    <entry file="jar:///usr/local/scala/src/scala-compiler-src.jar!/scala/tools/nsc/Global.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="1207" column="56" selection-start="44660" selection-end="44660" vertical-scroll-proportion="0.0" />
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/scc/scala/tools/nsc/backend/jvm/BytecodeWriters.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="47" column="45" selection-start="1579" selection-end="1579" vertical-scroll-proportion="0.0" />
-      </provider>
-    </entry>
-    <entry file="jar:///usr/local/scala/src/scala-compiler-src.jar!/scala/tools/nsc/backend/jvm/GenJVM.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="160" column="16" selection-start="5808" selection-end="5808" vertical-scroll-proportion="0.0" />
-      </provider>
-    </entry>
-    <entry file="jar:///usr/local/scala/lib/scala-compiler.jar!/ch/epfl/lamp/fjbg/FJBGContext.class">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="14" column="107" selection-start="537" selection-end="537" vertical-scroll-proportion="0.0" />
-      </provider>
-    </entry>
-    <entry file="jar:///usr/local/scala/src/scala-compiler-src.jar!/scala/tools/nsc/backend/icode/ICodes.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="40" column="55" selection-start="1216" selection-end="1216" vertical-scroll-proportion="0.0" />
-      </provider>
-    </entry>
-    <entry file="jar:///usr/local/scala/src/scala-compiler-src.jar!/scala/tools/nsc/backend/icode/Members.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="124" column="0" selection-start="3232" selection-end="3232" vertical-scroll-proportion="0.0" />
-      </provider>
-    </entry>
-    <entry file="jar:///usr/local/scala/src/scala-compiler-src.jar!/scala/tools/nsc/backend/jvm/GenJVMUtil.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="90" column="6" selection-start="3016" selection-end="3016" vertical-scroll-proportion="0.07537688">
+        <state line="363" column="1" selection-start="13716" selection-end="13716" vertical-scroll-proportion="0.0">
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="jar:///usr/local/scala/lib/scala-compiler.jar!/ch/epfl/lamp/fjbg/JClass.class">
+    <entry file="jar:///usr/local/scala/src/scala-compiler-src.jar!/scala/tools/nsc/SubComponent.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="63" column="3" selection-start="2800" selection-end="2800" vertical-scroll-proportion="0.0" />
+        <state line="32" column="0" selection-start="808" selection-end="808" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar:///usr/local/scala/src/scala-compiler-src.jar!/scala/tools/nsc/backend/icode/ICodes.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="45" column="0" selection-start="1413" selection-end="1413" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar:///usr/local/scala/src/scala-compiler-src.jar!/scala/tools/nsc/backend/jvm/GenJVM.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="37" column="42" selection-start="1218" selection-end="1218" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/scc/scala/tools/nsc/Phase.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="10" column="0" selection-start="161" selection-end="161" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar:///usr/local/scala/src/scala-library-src.jar!/scala/reflect/generic/Symbols.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="56" column="97" selection-start="1832" selection-end="1832" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar:///usr/local/scala/src/scala-compiler-src.jar!/scala/tools/nsc/symtab/Symbols.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="1249" column="12" selection-start="47967" selection-end="47967" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/scc/scala/tools/nsc/backend/icode/GenICode.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="56" column="36" selection-start="1415" selection-end="1415" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/scc/scala/tools/nsc/util/SourceFile.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="17" column="15" selection-start="397" selection-end="397" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/scc/scala/tools/nsc/CompilationUnits.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="15" column="42" selection-start="529" selection-end="529" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/scc/scala/tools/nsc/Global.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="466" column="9" selection-start="16357" selection-end="16357" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/scc/scala/tools/nsc/settings/ScalaSettings.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="104" column="6" selection-start="6912" selection-end="6912" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/scc/scala/tools/nsc/backend/icode/Members.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="181" column="60" selection-start="4888" selection-end="4888" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/scc/scala/tools/nsc/io/AbstractFile.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="80" column="15" selection-start="2799" selection-end="2799" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/scc/scala/tools/nsc/backend/icode/ICodes.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="36" column="11" selection-start="1058" selection-end="1058" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/scc/scala/tools/nsc/backend/jvm/GenJVM.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="1042" column="48" selection-start="41397" selection-end="41397" vertical-scroll-proportion="0.38652483">
+          <folding />
+        </state>
       </provider>
     </entry>
   </component>
