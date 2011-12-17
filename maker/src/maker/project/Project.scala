@@ -18,7 +18,6 @@ import maker.utils.Log
 import maker.utils.FileUtils
 import maker._
 import maker.task._
-import maker.utils.FileUtils
 
 case class Project(
   name: String,
@@ -70,6 +69,8 @@ case class Project(
   def changedSrcFiles = filterChangedSrcFiles(srcFiles(), compilationTime)
   def changedJavaFiles = filterChangedSrcFiles(javaSrcFiles(), javaCompilationTime)
   def changedTestFiles = filterChangedSrcFiles(testSrcFiles(), testCompilationTime)
+  def deletedSrcFiles = sourceToClassFiles.sourceFiles.filterNot(srcFiles()).filter{sf => srcDirs.exists(sf.isContainedIn(_))}
+  def deletedTestFiles = sourceToClassFiles.sourceFiles.filterNot(testSrcFiles()).filter{sf => testDirs.exists(sf.isContainedIn(_))}
 
   def jars = findJars(jarDirs: _*).toList.sortWith(_.getPath < _.getPath)
 

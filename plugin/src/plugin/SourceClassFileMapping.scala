@@ -35,6 +35,8 @@ case class SourceClassFileMapping(persistFile : File, private var mapping : Map[
   }
   def persistedMapping = SourceClassFileMapping(persistFile).mapping
   def map = mapping
+  def sourceFiles = mapping.keySet
+  def classFilesFor(srcFiles : Set[File]) : Set[File] = srcFiles.flatMap(mapping)
 }
 
 

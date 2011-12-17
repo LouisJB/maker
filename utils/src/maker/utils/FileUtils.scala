@@ -8,6 +8,18 @@ import java.io.FileReader
 
 object FileUtils{
 
+  implicit def toRichFile(f : File) = RichFile(f)
+  case class RichFile(file : File){
+    def isContainedIn(dir : File) = {
+      def recurse(f : File) : Boolean = {
+        if (f == null) false
+        else if (f == dir) true 
+        else if (f == new File("/")) false 
+        else recurse(f.getParentFile)
+      }
+      recurse(file)
+    }
+  }
   def findFiles(pred : File => Boolean, dirs : File*) : Set[File] = {
     def rec(file : File) : List[File] = {
       if (file.isDirectory)

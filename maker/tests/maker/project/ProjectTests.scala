@@ -5,18 +5,10 @@ import maker.utils.FileUtils._
 import org.scalatest.BeforeAndAfterEach
 import maker.utils.Log
 import org.apache.log4j.Level
+import maker._
+import scalaz.Scalaz._
 
-class ProjectTests extends FunSuite with BeforeAndAfterEach{
-
-  val root = tempDir("fred")
-  var proj : Project = _
-  val fooSrc = new File(root, "src/foo/Foo.scala")
-  val barSrc = new File(root, "src/foo/bar/Bar.scala")
-  val bazSrc = new File(root, "src/foo/Baz.scala")
-  def fooClass = new File(proj.outputDir, "foo/Foo.class")
-  def fooObject = new File(proj.outputDir, "foo/Foo$.class")
-  def barClass = new File(proj.outputDir, "foo/bar/Bar.class")
-  def barObject = new File(proj.outputDir, "foo/bar/Bar$.class")
+class ProjectTests extends FunSuite {
 
   val originalFooContent = 
     """
@@ -38,37 +30,35 @@ class ProjectTests extends FunSuite with BeforeAndAfterEach{
     package foo
     case class Baz(y : Int)
     """
-  def writeStandardProject{
-    proj = Project(
+
+  def simpleProject = {
+    val root = tempDir("fred")
+    val outputDir = file(root, "classes")
+    val proj = Project(
       "foox", 
       root, 
       List(new File(root, "src")), 
       Nil,
       Nil
-    )
-
+    ) 
+    val files = new {
+      val fooSrc = new File(root, "src/foo/Foo.scala")
+      val barSrc = new File(root, "src/foo/bar/Bar.scala")
+      val bazSrc = new File(root, "src/foo/Baz.scala")
+      def fooClass = new File(outputDir, "foo/Foo.class")
+      def fooObject = new File(outputDir, "foo/Foo$.class")
+      def barClass = new File(outputDir, "foo/bar/Bar.class")
+      def barObject = new File(outputDir, "foo/bar/Bar$.class")
+    }
+    import files._
     writeToFile(fooSrc, originalFooContent)
     writeToFile(barSrc, originalBarContent)
     writeToFile(bazSrc, originalBazContent)
+    (proj, files)
   }
 
-  override def beforeEach(){
-    writeStandardProject
-  }
-
-  override def afterEach(){
-    proj.delete
-  }
-
-  private def sleepToNextSecond{
-    Thread.sleep(1100)
-  }
-  /**
-   * Done as a single test for speed
-   */
-  test("Incremental compilation"){
-
-    // test("Compilation makes class files, writes dependencies, and package makes jar"){
+  test("Compilation makes class files, writes dependencies, and package makes jar"){
+    val (proj, _) = simpleProject
     proj.clean
     assert(proj.classFiles.size === 0)
     proj.compile
@@ -79,27 +69,28 @@ class ProjectTests extends FunSuite with BeforeAndAfterEach{
     proj.clean
     assert(proj.classFiles.size === 0)
     assert(!proj.outputJar.exists)
-    //}
+    proj.delete
+  }
 
-    // test("Compilation not done if signature unchanged"){
+  test("Compilation not done if signature unchanged"){
+    val (proj, files) = simpleProject
+    import files._
     proj.compile
     var compilationTime = proj.compilationTime.get
-
     sleepToNextSecond
-    //Thread.sleep(1100)
-
     writeToFile(fooSrc, originalFooContent)
     proj.compile
     var changedClassFiles = proj.classFiles.filter(_.lastModified > compilationTime)
     assert(changedClassFiles === Set(fooClass, fooObject))
-    //}
+    proj.delete
+  }
 
-    //test("Compilation is done if signature changed, but only on dependent classes"){
-    //proj.clean
+  test("Compilation is done if signature changed, but only on dependent classes"){
+    val (proj, files) = simpleProject
     proj.compile
-    compilationTime = proj.compilationTime.get
+    import files._
+    val compilationTime = proj.compilationTime.get
     sleepToNextSecond
-    //Thread.sleep(1100)
 
     writeToFile(
       fooSrc,
@@ -113,17 +104,17 @@ class ProjectTests extends FunSuite with BeforeAndAfterEach{
       """
     )
     proj.compile
-    changedClassFiles = proj.classFiles.filter(_.lastModified > compilationTime)
+    val changedClassFiles = proj.classFiles.filter(_.lastModified > compilationTime)
     assert(changedClassFiles === Set(fooClass, fooObject, barClass, barObject))
-    //}
+    proj.delete
+  }
 
-    //test("Compilation of dependent classes is not done if signature of public method is unchanged"){
-    sleepToNextSecond
-    writeToFile(fooSrc, originalFooContent)
+  test("Compilation of dependent classes is not done if signature of public method is unchanged"){
+    val (proj, files) = simpleProject
+    import files._
     proj.compile
-    compilationTime = proj.compilationTime.get
+    val compilationTime = proj.compilationTime.get
     sleepToNextSecond
-    //Thread.sleep(1100)
 
     writeToFile(
       fooSrc,
@@ -131,19 +122,22 @@ class ProjectTests extends FunSuite with BeforeAndAfterEach{
       package foo
       case class Foo(x : Double){
         val fred = 10
-        def double() = x + x + x // implementation changed
+        def double() = x + x + x  //implementation changed
       }
       """
     )
     proj.compile
-    changedClassFiles = proj.classFiles.filter(_.lastModified > compilationTime)
+    val changedClassFiles = proj.classFiles.filter(_.lastModified > compilationTime)
     assert(changedClassFiles === Set(fooClass, fooObject))
-    //}
+    proj.delete
+  }
 
-    // test("Compilation of dependent classes is not done if new private method is added"){
-    compilationTime = proj.compilationTime.get
+  test("Compilation of dependent classes is not done if new private method is added"){
+    val (proj, files) = simpleProject
+    import files._
+    proj.compile
+    val compilationTime = proj.compilationTime.get
     sleepToNextSecond
-    //Thread.sleep(1100)
 
     writeToFile(
       fooSrc,
@@ -157,9 +151,27 @@ class ProjectTests extends FunSuite with BeforeAndAfterEach{
       """
     )
     proj.compile
-    changedClassFiles = proj.classFiles.filter(_.lastModified > compilationTime)
+    val changedClassFiles = proj.classFiles.filter(_.lastModified > compilationTime)
     assert(changedClassFiles === Set(fooClass, fooObject))
-    //}
+    proj.delete
+  }
+
+  test("Deletion of source file causes deletion of class files"){
+    val (proj, files) = simpleProject
+    import files._
+    proj.compile
+    Set(barClass, barObject) |> {
+      s => assert((s & proj.classFiles) === s)
+    }
+    barSrc.delete
+    proj.compile
+    Set(barClass, barObject) |> {
+      s => assert((s & proj.classFiles) === Set())
+    }
+  }
+
+  private def sleepToNextSecond{
+    Thread.sleep(1100)
   }
 
 }
