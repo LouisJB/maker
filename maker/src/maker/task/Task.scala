@@ -97,6 +97,7 @@ case object CompileJavaSourceTask extends Task{
     if (javaFilesToCompile.isEmpty)
       Right(Set())
     else {
+      Log.info("Compiling " + javaFilesToCompile.size + " java files")
       val parameters = "javac"::"-cp"::compilationClasspath::"-d"::javaOutputDir.getAbsolutePath::javaSrcFiles.toList.map(_.getAbsolutePath)
       Command(parameters : _*).exec match {
         case (0, _) => Right(javaFilesToCompile)
@@ -111,6 +112,7 @@ case object CleanTask extends Task{
     Log.info("cleaning " + project)
     project.classFiles.foreach(_.delete)
     project.testClassFiles.foreach(_.delete)
+    project.javaClassFiles.foreach(_.delete)
     project.outputJar.delete
     Right(Unit)
   }
