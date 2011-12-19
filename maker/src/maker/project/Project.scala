@@ -16,8 +16,8 @@ import plugin._
 import scala.collection.immutable.MapProxy
 import maker.utils.Log
 import maker.utils.FileUtils
-import maker._
 import maker.task._
+import maker._
 
 case class Project(
   name: String,
