@@ -8,7 +8,7 @@ import akka.actor.{UntypedChannel, PoisonPill, Actor}
 import maker.utils.Log
 
 case class ProjectAndTask(project : Project, task : Task){
-  val properDependencies : Set[ProjectAndTask] = project.taskDependencies(task).map(ProjectAndTask(project, _)) ++ project.dependentProjects.flatMap(ProjectAndTask(_, task).allDependencies)
+  val properDependencies : Set[ProjectAndTask] = project.taskDependencies(task).map(ProjectAndTask(project, _))// ++ project.dependentProjects.flatMap(ProjectAndTask(_, task).allDependencies)
   def allDependencies = properDependencies + this
   def exec(acc : Map[Task, List[AnyRef]]) = {
     Log.debug("Executing task " + task + ", for project " + project.name)

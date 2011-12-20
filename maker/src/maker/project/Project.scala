@@ -17,6 +17,7 @@ import scala.collection.immutable.MapProxy
 import maker.utils.Log
 import maker.utils.FileUtils
 import maker.task._
+import maker.utils.FileUtils._
 import maker._
 
 case class Project(
@@ -25,25 +26,22 @@ case class Project(
   sourceDirs: List[File] = Nil,
   tstDirs: List[File] = Nil,
   libDirs: List[File] = Nil,
-  dependentProjects: List[Project] = Nil,
-  compilationClasspathOverride : Option[String] = None
+  dependentProjects: List[Project] = Nil
 ) {
-  import maker._
-
-  val defaultSrcDir = "src"
-  val defaultTestDir = "test"
-  val defaultLibDir = "lib"
-  
-  def srcDirs : List[File] = if (sourceDirs.isEmpty) List(file(root, defaultSrcDir)) else sourceDirs
-  def testDirs : List[File] = if (tstDirs.isEmpty) List(file(root, defaultTestDir)) else tstDirs
-  def jarDirs : List[File] = if (libDirs.isEmpty) List(file(root, defaultLibDir)) else libDirs
-
-  def outputDir = new File(root, "classes")
-  def javaOutputDir = new File(root, "java-classes")
-  def testOutputDir = new File(root, "test-classes")
-  def packageDir = new File(root, "package")
   import Project._
-  import utils.FileUtils._
+
+
+  def outputDir = file(root, "classes")
+  def javaOutputDir = file(root, "java-classes")
+  def testOutputDir = file(root, "test-classes")
+  def packageDir = file(root, "package")
+  def managedLibDir = file(root, "maker-lib")
+  def ivySettingsFile = file("maker-ivysettings.xml")
+  def ivyFile = file(root, "maker-ivy.xml")
+
+  def srcDirs : List[File] = if (sourceDirs.isEmpty) List(file(root, "src")) else sourceDirs
+  def testDirs : List[File] = if (tstDirs.isEmpty) List(file(root, "test")) else tstDirs
+  def jarDirs : List[File] = if (libDirs.isEmpty) List(file(root, "lib"), managedLibDir) else libDirs
 
   def dependsOn(projects: Project*) = copy(dependentProjects = dependentProjects ::: projects.toList)
 
@@ -76,7 +74,7 @@ case class Project(
 
   private def classpathDirectoriesAndJars : List[File] = ((outputDir :: javaOutputDir :: jars) ::: dependentProjects.flatMap(_.classpathDirectoriesAndJars)).distinct
 
-  def compilationClasspath = (compilationClasspathOverride.toList ::: classpathDirectoriesAndJars.map(_.getAbsolutePath)).mkString(":")
+  def compilationClasspath = classpathDirectoriesAndJars.map(_.getAbsolutePath).mkString(":")
   def runClasspath = classpathDirectoriesAndJars.map(_.getAbsolutePath).mkString(":")
 
   def outputJar = new File(packageDir.getAbsolutePath, name + ".jar")
@@ -90,6 +88,8 @@ case class Project(
   def test = QueueManager(allDependencies(), RuntUnitTestsTask)
   def testOnly = QueueManager(Set(this), RuntUnitTestsTask)
   def pack = QueueManager(allDependencies(), PackageTask)
+  def update = QueueManager(allDependencies(), UpdateExternalDependencies)
+  def updateOnly = QueueManager(Set(this), UpdateExternalDependencies)
 
   val projectTaskDependencies = new MapProxy[Task, Set[Task]]{
     val self = Map[Task, Set[Task]](

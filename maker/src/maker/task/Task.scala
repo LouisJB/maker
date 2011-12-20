@@ -23,6 +23,7 @@ abstract class CompileTask extends Task{
   def exec(proj : Project, acc : List[AnyRef]) : Either[TaskFailed, AnyRef] = {
     def listOfFiles(files : Iterable[File]) = files.mkString("\n\t", "\n\t", "")
     val comp = compiler(proj)
+    comp.settings.classpath.value = proj.compilationClasspath
     val reporter = comp.reporter
     outputDir(proj).mkdirs
     
@@ -105,6 +106,38 @@ case object CompileJavaSourceTask extends Task{
       }
     }
   }
+}
+
+case object UpdateExternalDependencies extends Task{
+
+  def exec(project : Project, acc : List[AnyRef]) = {
+    import project._
+    managedLibDir.mkdirs
+    Log.info("Updating " + name)
+    def command(isSources : Boolean) : Command = {
+      val parameters = "java"::"-jar"::"lib/ivy/ivy.jar"::"-settings"::ivySettingsFile.getPath::"-ivy"::ivyFile.getPath::"-retrieve"::nil :::
+        (if (isSources)
+          (managedLibDir.getPath + "/[artifact]-[revision]-source.[ext]")::"-types"::"source"::nil
+        else
+          (managedLibDir.getPath + "/[artifact]-[revision].[ext]")::"-sync"::"-types"::"jar"::nil)
+      val cmd = Command(parameters : _*)
+      Log.debug(cmd)
+      cmd
+    }
+    if (ivyFile.exists){
+      command(false).exec match {
+        case (0, _) => command(true).exec match {
+          case (0, _) => Right("OK")
+          case (_, error) => Left(TaskFailed(this, error))
+        }
+        case (_, error) => Left(TaskFailed(this, error))
+      }
+    } else {
+      Log.info("Nothing to update")
+      Right("OK")
+    }
+  }
+
 }
 
 case object CleanTask extends Task{
