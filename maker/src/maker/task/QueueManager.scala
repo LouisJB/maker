@@ -8,7 +8,7 @@ import akka.actor.{UntypedChannel, PoisonPill, Actor}
 import maker.utils.Log
 
 case class ProjectAndTask(project : Project, task : Task){
-  val properDependencies : Set[ProjectAndTask] = project.taskDependencies(task).map(ProjectAndTask(project, _))// ++ project.dependentProjects.flatMap(ProjectAndTask(_, task).allDependencies)
+  val properDependencies : Set[ProjectAndTask] = project.taskDependencies(task).map(ProjectAndTask(project, _)) ++ project.dependentProjects.flatMap(ProjectAndTask(_, task).allDependencies)
   def allDependencies = properDependencies + this
   def exec(acc : Map[Task, List[AnyRef]]) = {
     Log.debug("Executing task " + task + ", for project " + project.name)
@@ -69,6 +69,7 @@ class QueueManager(projectTasks : Set[ProjectAndTask], nWorkers : Int) extends A
 
 object QueueManager{
   def apply(projects : Set[Project], task : Task) = {
+    Log.info("About to do " + task + " for projects " + projects.toList.mkString(","))
     val projectTasks = projects.flatMap(ProjectAndTask(_, task).allDependencies)
     implicit val timeout = Timeout(100000)
     val future = actorOf(new QueueManager(projectTasks, 2)).start ? StartBuild

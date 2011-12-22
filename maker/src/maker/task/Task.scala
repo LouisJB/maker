@@ -122,6 +122,7 @@ case object UpdateExternalDependencies extends Task{
           (managedLibDir.getPath + "/[artifact]-[revision].[ext]")::"-sync"::"-types"::"jar"::nil)
       val cmd = Command(parameters : _*)
       Log.debug(cmd)
+      println(cmd)
       cmd
     }
     if (ivyFile.exists){
