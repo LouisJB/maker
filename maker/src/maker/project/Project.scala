@@ -1,23 +1,15 @@
 package maker.project 
 
 import java.io.File
-import java.io.FileWriter
-import java.io.BufferedWriter
-import java.lang.ProcessBuilder
-import java.io.BufferedInputStream
-import java.io.ByteArrayOutputStream
-import java.io.InputStream
 import java.lang.System
-import scala.collection.JavaConversions._
 import tools.nsc.{Settings, Global}
 import tools.nsc.io.{Directory, PlainDirectory}
 import tools.nsc.reporters.ConsoleReporter
 import plugin._
 import scala.collection.immutable.MapProxy
-import _root_.maker.utils.Log
 import _root_.maker.utils.FileUtils
-import _root_.maker.task._
 import _root_.maker.utils.FileUtils._
+import _root_.maker.task._
 import _root_.maker._
 
 case class Project(
@@ -28,8 +20,6 @@ case class Project(
   libDirs: List[File] = Nil,
   dependentProjects: List[Project] = Nil
 ) {
-  import Project._
-
 
   def outputDir = file(root, "classes")
   def javaOutputDir = file(root, "java-classes")
@@ -169,4 +159,3 @@ object Project {
 
   def apply(name : String,  libDirectories : => List[File]) : Project = Project(name, file(name), libDirs = libDirectories)
 }
-

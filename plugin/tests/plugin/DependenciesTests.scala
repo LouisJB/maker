@@ -3,6 +3,7 @@ package plugin
 import org.scalatest.FunSuite
 import java.io.File
 import maker.utils.FileUtils._
+import scala.collection.mutable.Map
 
 class DependenciesTests extends FunSuite{
 

@@ -3,7 +3,6 @@ package plugin
 import scala.collection.mutable.{Set => MSet, Map => MMap}
 import java.io.{BufferedReader, BufferedWriter, File}
 import maker.utils.FileUtils
-import maker.utils.Log
 
 case class SourceClassFileMapping(persistFile : File, private var mapping : Map[File, Set[File]] = Map[File, Set[File]]()){
   if (mapping.isEmpty && persistFile.exists){
@@ -18,12 +17,15 @@ case class SourceClassFileMapping(persistFile : File, private var mapping : Map[
       }
     }
   }
+
   def += (sourceFile : File, classFile : File){
     mapping = mapping.updated(sourceFile, mapping.getOrElse(sourceFile, Set[File]()) + classFile)
   }
+
   def ++=(sourceFile : File, classFiles : Iterable[File]){
     mapping = mapping.updated(sourceFile, mapping.getOrElse(sourceFile, Set[File]()) ++ classFiles)
   }
+
   def persist(){
     FileUtils.withFileWriter(persistFile){
       writer : BufferedWriter =>
@@ -33,10 +35,10 @@ case class SourceClassFileMapping(persistFile : File, private var mapping : Map[
         }
     }
   }
+
   def persistedMapping = SourceClassFileMapping(persistFile).mapping
   def map = mapping
   def sourceFiles = mapping.keySet
   def classFilesFor(srcFiles : Set[File]) : Set[File] = srcFiles.flatMap(mapping)
 }
-
 

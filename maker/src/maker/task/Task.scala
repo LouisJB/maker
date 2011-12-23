@@ -1,4 +1,5 @@
 package maker.task
+
 import maker.project.Project
 import java.io.File
 import scala.tools.nsc.Global
@@ -10,9 +11,7 @@ import maker.utils.FileUtils
 import org.apache.commons.io.{FileUtils => ApacheFileUtils}
 import scalaz.Scalaz._
 
-
 case class TaskFailed(task : Task, reason : String)
-
 
 abstract class CompileTask extends Task{
   def compiler(proj : Project) : Global
@@ -188,4 +187,3 @@ case object RuntUnitTestsTask extends Task{
 trait Task{
   def exec(project : Project, acc : List[AnyRef] = Nil) : Either[TaskFailed, AnyRef]
 }
-

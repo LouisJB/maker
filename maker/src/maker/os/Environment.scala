@@ -11,8 +11,6 @@ object Environment{
   def fsc : String = scala_home + "/bin/fsc"
   val xargs = "/usr/bin/xargs"
 
-
-
   def findFiles(pred : File => Boolean, dirs : File*) : List[File] = {
     def rec(file : File) : List[File] = {
       if (file.isDirectory)

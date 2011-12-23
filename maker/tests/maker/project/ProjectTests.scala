@@ -1,11 +1,10 @@
 package maker.project
+
 import org.scalatest.FunSuite
 import java.io.File
-import maker.utils.FileUtils._
-import org.scalatest.BeforeAndAfterEach
-import maker.utils.Log
-import org.apache.log4j.Level
-import maker._
+import _root_.maker.utils.FileUtils._
+import _root_.maker._
+import _root_.maker.project._
 import scalaz.Scalaz._
 
 class ProjectTests extends FunSuite {

@@ -47,8 +47,5 @@ class DetermineClassFiles(val global: Global, outputDir : File, sourceToClassFil
     }
 
     def isObject(sym : Symbol) = sym.hasModuleFlag && !sym.isMethod && !sym.isImplClass && !sym.isJavaDefined
-
-
   }
 }
-

@@ -6,6 +6,9 @@ package object maker {
   def file(f : File, d : String) : File = new File(f, d)
 
   // utilities
-  def time(f :  => Unit) = { val s = System.currentTimeMillis; f; println("Took: " + (System.currentTimeMillis - s) + "ms") } 
+  def time(f : => Unit) = {
+    val s = System.currentTimeMillis
+    f
+    println("Took: " + (System.currentTimeMillis - s) + "ms")
+  }
 }
-

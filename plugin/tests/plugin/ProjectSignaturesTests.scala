@@ -1,14 +1,12 @@
 package plugin
 
 import org.scalatest.FunSuite
-import org.scalatest.Assertions._
 import maker.utils.FileUtils._
-import java.io.{BufferedWriter, File}
+import java.io.File
 
+class ProjectSignaturesTests extends FunSuite {
 
-class ProjectSignaturesTests extends FunSuite{
-
-  test ("ProjectSignature toString round trip"){
+  test ("ProjectSignature toString round trip") {
     val List(c1, c2, c3, c4, c5) = List(
       "foo", "bar", "baz", "fux", "fob"
     )

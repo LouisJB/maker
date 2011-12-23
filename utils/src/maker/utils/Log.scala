@@ -2,14 +2,12 @@ package maker.utils
 
 import org.apache.log4j._
 
-import util.DynamicVariable
-
-
-object Log extends Log(Logger.getRootLogger){
-}
+object Log extends Log(Logger.getRootLogger)
 
 case class Log(logger: Logger) {
+
   def level = logger.getEffectiveLevel
+
   def infoWithTime[T](message:String)(f: =>T) = {
     val stopwatch = new Stopwatch()
     val oldThreadName = Thread.currentThread.getName
@@ -19,10 +17,12 @@ case class Log(logger: Logger) {
       val result = f;
       println (message + " Complete. Time: " + stopwatch)
       result
-    } finally {
+    }
+    finally {
       Thread.currentThread.setName(oldThreadName)
     }
   }
+
   def trace(msg: => AnyRef) = logger.trace(msg)
 
    def trace(msg: => AnyRef, t: => Throwable) = logger.trace(msg, t)

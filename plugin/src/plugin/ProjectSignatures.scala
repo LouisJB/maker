@@ -105,4 +105,3 @@ case class ProjectSignatures(persistFile : File, private var sigs : Map[File, Se
     buff.toString
   }
 }
-

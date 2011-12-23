@@ -2,8 +2,6 @@ package plugin
 
 import tools.nsc.plugins.{PluginComponent, Plugin}
 import tools.nsc.{Phase, Global}
-import reflect.generic.ModifierFlags
-import maker.utils.Log
 
 class GenerateSigs(val global: Global, signatures : ProjectSignatures) extends Plugin {
   import global._

@@ -1,9 +1,9 @@
 package plugin
 
-import maker._
 import maker.project.Project
-import org.scalatest.FunSuite
 import maker.utils.FileUtils._
+import maker._
+import org.scalatest.FunSuite
 import java.io.File
 
 class DetermineClassFilesTests extends FunSuite{
@@ -57,5 +57,4 @@ class DetermineClassFilesTests extends FunSuite{
         assert(proj.classFiles.forall(allPossibleClassAndObjectFiles))
     }
   }
-    
 }

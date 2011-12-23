@@ -3,7 +3,6 @@ package plugin
 import scala.tools.nsc.{Global, Phase}
 import scala.tools.nsc.plugins.PluginComponent
 import scala.tools.nsc.plugins.Plugin
-import java.io.{File, FileWriter, BufferedWriter}
 
 /** This class implements a plugin component using a tree
  *  traverser */
@@ -46,5 +45,4 @@ class WriteDependencies(val global: Global, deps : Dependencies) extends Plugin 
     }
   }
 }
-
 

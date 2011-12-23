@@ -1,9 +1,7 @@
-package maker
-package project
+package maker.project
 
 import java.io.File
-import scala.io.Source
-import utils.FileUtils._
+import _root_.maker.utils.FileUtils._
 
 object FileSignatures{
   def apply(file: File): FileSignatures = {
@@ -19,7 +17,6 @@ object FileSignatures{
 }
 
 case class FileSignatures(private var sigs : Map[File, Long], file : File){
-  import FileSignatures._
 
   def persist() {
     writeMapToFile(

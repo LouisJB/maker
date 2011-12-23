@@ -1,7 +1,6 @@
 package maker.task
 
 import maker.project.Project
-import akka.actor.Actor.Timeout._
 import akka.actor.Actor._
 import akka.routing.{CyclicIterator, Routing}
 import akka.actor.{UntypedChannel, PoisonPill, Actor}
@@ -76,4 +75,3 @@ object QueueManager{
     future.get.asInstanceOf[BuildResult].res
   }
 }
-
