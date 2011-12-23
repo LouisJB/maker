@@ -14,11 +14,11 @@ import tools.nsc.io.{Directory, PlainDirectory}
 import tools.nsc.reporters.ConsoleReporter
 import plugin._
 import scala.collection.immutable.MapProxy
-import maker.utils.Log
-import maker.utils.FileUtils
-import maker.task._
-import maker.utils.FileUtils._
-import maker._
+import _root_.maker.utils.Log
+import _root_.maker.utils.FileUtils
+import _root_.maker.task._
+import _root_.maker.utils.FileUtils._
+import _root_.maker._
 
 case class Project(
   name: String,
@@ -158,5 +158,15 @@ case class Project(
   def allDependencies(projectsSoFar : Set[Project] = Set()) : Set[Project] = {
     (Set(this) ++ dependentProjects.filterNot(projectsSoFar).flatMap(_.allDependencies(projectsSoFar + this)))
   }
+}
+
+object Project {
+
+  def apply(name : String) : Project = Project(
+    name, 
+    file(name) 
+  )
+
+  def apply(name : String,  libDirectories : => List[File]) : Project = Project(name, file(name), libDirs = libDirectories)
 }
 

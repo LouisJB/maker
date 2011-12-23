@@ -1,19 +1,12 @@
 import maker.project.Project
-import java.io.File
-import org.apache.commons.io.{FileUtils => ApacheFileUtils}
+import maker._
 
 System.setProperty("scala.usejavacp", "false")
+System.setProperty("log4j.ignoreTCL", "true")
 
-def standardProject(name : String) = Project(
-  name, 
-  new File(name), 
-  List(new File(name + "/src")), 
-  List(new File(name + "/tests")), 
-  List(new File("./lib")),
-  Nil
-)
+lazy val libDirs = List(file("lib"))
 
-lazy val utils = standardProject("utils")
-lazy val plugin = standardProject("plugin") dependsOn utils
-lazy val maker = standardProject("maker") dependsOn plugin
+lazy val utils = Project("utils", libDirectories = libDirs)
+lazy val plugin = Project("plugin", libDirectories = libDirs) dependsOn utils
+lazy val maker = Project("maker", libDirectories = libDirs) dependsOn plugin
 

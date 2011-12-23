@@ -3,7 +3,6 @@ package maker.utils
 import org.apache.log4j._
 
 import util.DynamicVariable
-import scalaz.Scalaz._
 
 
 object Log extends Log(Logger.getRootLogger){

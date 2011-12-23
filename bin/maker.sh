@@ -1,14 +1,20 @@
 #!/bin/bash
 
+# belt and braces initial state to prevent any funny stuff!
+rm -rf out
+export CLASSPATH=
+fsc -shutdown
+
 ./bin/build-from-scratch.rb
-
-
 ./bin/write-classpath.rb
 
 . ./set-maker-classpath.sh
-export JAVA_OPTS="-Xmx2000m -javaagent:lib/jrebel.jar"
+. ./bin/set-opts.sh
 
-scala -Yrepl-sync -i Maker.scala
+fsc -reset
+
+#$SCALA_HOME/bin/scala -nc -Yrepl-sync -i Maker.scala -e "{ val m =  maker; m compile; }"
+$SCALA_HOME/bin/scala -nc -Yrepl-sync -i Maker.scala
 
 . ./set-classpath.sh
 
