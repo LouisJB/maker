@@ -13,7 +13,7 @@ fsc -shutdown
 
 fsc -reset
 
-#$SCALA_HOME/bin/scala -nc -Yrepl-sync -i Maker.scala -e "maker compile"
+#$SCALA_HOME/bin/scala -nc -Yrepl-sync -i Maker.scala -e "{ val m =  maker; m compile; }"
 $SCALA_HOME/bin/scala -nc -Yrepl-sync -i Maker.scala
 
 . ./set-classpath.sh

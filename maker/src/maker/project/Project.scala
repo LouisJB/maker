@@ -166,5 +166,7 @@ object Project {
     name, 
     file(name) 
   )
+
+  def apply(name : String,  libDirectories : => List[File]) : Project = Project(name, file(name), libDirs = libDirectories)
 }
 
