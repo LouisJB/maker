@@ -94,7 +94,7 @@
       <file leaf-file-name="GenJVM.scala" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/scc/scala/tools/nsc/backend/jvm/GenJVM.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="1042" column="48" selection-start="41397" selection-end="41397" vertical-scroll-proportion="0.38652483">
+            <state line="1037" column="22" selection-start="41092" selection-end="41092" vertical-scroll-proportion="0.120567374">
               <folding />
             </state>
           </provider>
@@ -777,7 +777,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/scc/scala/tools/nsc/backend/jvm/GenJVM.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="1042" column="48" selection-start="41397" selection-end="41397" vertical-scroll-proportion="0.38652483">
+        <state line="1037" column="22" selection-start="41092" selection-end="41092" vertical-scroll-proportion="0.120567374">
           <folding />
         </state>
       </provider>
