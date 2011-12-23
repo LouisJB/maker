@@ -1,14 +1,17 @@
 #!/bin/bash
 
+fsc -reset
+
 ./bin/build-from-scratch.rb
-
-
 ./bin/write-classpath.rb
 
 . ./set-maker-classpath.sh
-export JAVA_OPTS="-Xmx2000m -javaagent:lib/jrebel.jar"
 
-scala -Yrepl-sync -i Maker.scala
+. ./bin/set-opts.sh
+
+fsc -reset
+
+$SCALA_HOME/bin/scala -Yrepl-sync -i Maker.scala -e "maker compile"
 
 . ./set-classpath.sh
 

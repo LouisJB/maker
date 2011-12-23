@@ -4,7 +4,7 @@ import org.apache.commons.io.{FileUtils => ApacheFileUtils}
 
 System.setProperty("scala.usejavacp", "false")
 
-def standardProject(name : String) = Project(
+def standardProject(name : String) : Project = Project(
   name, 
   new File(name), 
   List(new File(name + "/src")), 
