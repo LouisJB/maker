@@ -98,7 +98,8 @@ case object CompileJavaSourceTask extends Task{
       Right(Set())
     else {
       Log.info("Compiling " + javaFilesToCompile.size + " java files")
-      val parameters = "javac"::"-cp"::compilationClasspath::"-d"::javaOutputDir.getAbsolutePath::javaSrcFiles.toList.map(_.getAbsolutePath)
+      val javac = project.props.JavaHome().getAbsolutePath + "/bin/javac"
+      val parameters = javac::"-cp"::compilationClasspath::"-d"::javaOutputDir.getAbsolutePath::javaSrcFiles.toList.map(_.getAbsolutePath)
       Command(parameters : _*).exec match {
         case (0, _) => Right(javaFilesToCompile)
         case (_, error) => Left(TaskFailed(this, error))
@@ -114,7 +115,9 @@ case object UpdateExternalDependencies extends Task{
     managedLibDir.mkdirs
     Log.info("Updating " + name)
     def command(isSources : Boolean) : Command = {
-      val parameters = "java"::"-jar"::"lib/ivy/ivy.jar"::"-settings"::ivySettingsFile.getPath::"-ivy"::ivyFile.getPath::"-retrieve"::nil :::
+      val java = project.props.JavaHome().getAbsolutePath + "/bin/java"
+      val ivyJar = project.props.IvyJar().getAbsolutePath
+      val parameters = java::"-jar"::ivyJar::"-settings"::ivySettingsFile.getPath::"-ivy"::ivyFile.getPath::"-retrieve"::nil :::
         (if (isSources)
           (managedLibDir.getPath + "/[artifact]-[revision]-source.[ext]")::"-types"::"source"::nil
         else
@@ -152,7 +155,6 @@ case object CleanTask extends Task{
 }
 
 case object PackageTask extends Task{
-  import maker.os.Environment._
   def exec(project : Project, acc : List[AnyRef]) = {
     import project._
     if (!packageDir.exists)
@@ -163,6 +165,7 @@ case object PackageTask extends Task{
           depProj =>
             ApacheFileUtils.copyDirectory(depProj.outputDir, dir)
         }
+      val jar = project.props.JavaHome().getAbsolutePath + "/bin/jar"
       val cmd = Command(jar, "cf", project.outputJar.getAbsolutePath, "-C", dir.getAbsolutePath, ".")
       cmd.exec match {
         case (0, _) => Right(Unit)

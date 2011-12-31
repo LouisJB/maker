@@ -7,10 +7,10 @@ import tools.nsc.io.{Directory, PlainDirectory}
 import tools.nsc.reporters.ConsoleReporter
 import plugin._
 import scala.collection.immutable.MapProxy
-import _root_.maker.utils.FileUtils
-import _root_.maker.utils.FileUtils._
-import _root_.maker.task._
-import _root_.maker._
+import maker.utils.Log
+import maker.task._
+import maker.utils.FileUtils._
+import maker.Props
 
 case class Project(
   name: String,
@@ -18,7 +18,8 @@ case class Project(
   sourceDirs: List[File] = Nil,
   tstDirs: List[File] = Nil,
   libDirs: List[File] = Nil,
-  dependentProjects: List[Project] = Nil
+  dependentProjects: List[Project] = Nil,
+  props : Props = Props()
 ) {
 
   def outputDir = file(root, "classes")
@@ -104,7 +105,7 @@ case class Project(
   }
   def taskDependencies(task : Task) = allTaskDependencies(task).filterNot(_ == task)
 
-  def delete = FileUtils.recursiveDelete(root)
+  def delete = recursiveDelete(root)
 
   override def toString = "Project " + name
 

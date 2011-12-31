@@ -6,6 +6,7 @@ import reflect.generic.ModifierFlags
 import maker.utils.Log
 import java.io.File
 import maker._
+import maker.utils.FileUtils._
 
 /**
  * Note that the map updated has both classes and companion objects, regardless of whether
