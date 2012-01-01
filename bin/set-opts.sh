@@ -1,1 +1,2 @@
-export JAVA_OPTS="-Xmx1500m -javaagent:lib/jrebel.jar -noverify"
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+export JAVA_OPTS="-Xmx1500m -javaagent:$DIR/../lib/jrebel.jar -noverify"

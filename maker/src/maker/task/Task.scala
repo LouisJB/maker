@@ -114,27 +114,40 @@ case object UpdateExternalDependencies extends Task{
     import project._
     managedLibDir.mkdirs
     Log.info("Updating " + name)
-    def command(isSources : Boolean) : Command = {
-      val java = project.props.JavaHome().getAbsolutePath + "/bin/java"
-      val ivyJar = project.props.IvyJar().getAbsolutePath
-      val parameters = java::"-jar"::ivyJar::"-settings"::ivySettingsFile.getPath::"-ivy"::ivyFile.getPath::"-retrieve"::nil :::
-        (if (isSources)
-          (managedLibDir.getPath + "/[artifact]-[revision]-source.[ext]")::"-types"::"source"::nil
-        else
-          (managedLibDir.getPath + "/[artifact]-[revision].[ext]")::"-sync"::"-types"::"jar"::nil)
-      val cmd = Command(parameters : _*)
-      Log.debug(cmd)
-      println(cmd)
-      cmd
+    def commands() : List[Command] = {
+      val java = props.JavaHome().getAbsolutePath + "/bin/java"
+      val ivyJar = props.IvyJar().getAbsolutePath
+      def proxyParameter(parName : String, property : Option[String]) : List[String] = {
+        property match {
+          case Some(thing) => (parName + "=" + thing) :: Nil
+          case None => Nil
+        }
+      }
+        
+      val parameters = List(java) ::: 
+        proxyParameter("-Dhttp.proxyHost", project.props.HttpProxyHost()) :::
+        proxyParameter("-Dhttp.proxyPort", project.props.HttpProxyPort()) :::
+        proxyParameter("-Dhttp.nonProxyHosts", project.props.HttpNonProxyHosts()) :::
+        ("-jar"::ivyJar::"-settings"::ivySettingsFile.getPath::"-ivy"::ivyFile.getPath::"-retrieve"::nil) 
+
+      List(
+        Command(parameters ::: ((managedLibDir.getPath + "/[artifact]-[revision].[ext]")::"-sync"::"-types"::"jar"::Nil) : _*),
+        Command(parameters ::: ((managedLibDir.getPath + "/[artifact]-[revision].[ext]")::"-types"::"bundle"::Nil) : _*),
+        Command(parameters ::: ((managedLibDir.getPath + "/[artifact]-[revision]-source.[ext]")::"-types"::"source"::Nil) : _*)
+      )
     }
     if (ivyFile.exists){
-      command(false).exec match {
-        case (0, _) => command(true).exec match {
-          case (0, _) => Right("OK")
-          case (_, error) => Left(TaskFailed(this, error))
+      def rec(commands : List[Command]) : Either[TaskFailed, AnyRef] = 
+        commands match {
+          case Nil => Right("OK")
+          case c :: rest => {
+            c.exec match {
+              case (0, _) => rec(rest)
+              case (_, error) => Left(TaskFailed(this, error))
+            }
+          }
         }
-        case (_, error) => Left(TaskFailed(this, error))
-      }
+      rec(commands())
     } else {
       Log.info("Nothing to update")
       Right("OK")
