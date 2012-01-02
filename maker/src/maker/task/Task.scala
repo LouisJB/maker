@@ -131,9 +131,9 @@ case object UpdateExternalDependencies extends Task{
         ("-jar"::ivyJar::"-settings"::ivySettingsFile.getPath::"-ivy"::ivyFile.getPath::"-retrieve"::nil) 
 
       List(
-        Command(parameters ::: ((managedLibDir.getPath + "/[artifact]-[revision].[ext]")::"-sync"::"-types"::"jar"::Nil) : _*),
-        Command(parameters ::: ((managedLibDir.getPath + "/[artifact]-[revision].[ext]")::"-types"::"bundle"::Nil) : _*),
-        Command(parameters ::: ((managedLibDir.getPath + "/[artifact]-[revision]-source.[ext]")::"-types"::"source"::Nil) : _*)
+        Command(parameters ::: ((managedLibDir.getPath + "/[artifact]-[revision](-[classifier]).[ext]")::"-sync"::"-types"::"jar"::Nil) : _*),
+        Command(parameters ::: ((managedLibDir.getPath + "/[artifact]-[revision](-[classifier]).[ext]")::"-types"::"bundle"::Nil) : _*),
+        Command(parameters ::: ((managedLibDir.getPath + "/[artifact]-[revision]-source(-[classifier]).[ext]")::"-types"::"source"::Nil) : _*)
       )
     }
     if (ivyFile.exists){
