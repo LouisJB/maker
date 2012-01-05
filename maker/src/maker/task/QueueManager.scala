@@ -30,6 +30,7 @@ class QueueManager(projectTasks : Set[ProjectAndTask], nWorkers : Int) extends A
 
   var accumuland : Map[Task, List[AnyRef]] = Map[Task, List[AnyRef]]()
   val workers = Vector.fill(nWorkers)(actorOf(new Worker()).start)
+  workers.foreach(_.start())
   val router = Routing.loadBalancerActor(CyclicIterator(workers)).start()
   var remainingProjectTasks = projectTasks
   var completedProjectTasks : Set[ProjectAndTask] = Set()
@@ -70,7 +71,7 @@ object QueueManager{
   def apply(projects : Set[Project], task : Task) = {
     Log.info("About to do " + task + " for projects " + projects.toList.mkString(","))
     val projectTasks = projects.flatMap(ProjectAndTask(_, task).allDependencies)
-    implicit val timeout = Timeout(100000)
+    implicit val timeout = Timeout(1000000)
     val future = actorOf(new QueueManager(projectTasks, 2)).start ? StartBuild
     future.get.asInstanceOf[BuildResult].res
   }
