@@ -3,7 +3,7 @@ package maker.task
 import maker.project.Project
 import akka.actor.Actor._
 import akka.routing.{CyclicIterator, Routing}
-import akka.actor.{UntypedChannel, PoisonPill, Actor}
+import akka.actor.{UntypedChannel, Actor}
 import maker.utils.Log
 
 case class ProjectAndTask(project : Project, task : Task){
@@ -29,8 +29,8 @@ case class BuildResult(res : Either[TaskFailed, AnyRef]) extends BuildMessage
 class QueueManager(projectTasks : Set[ProjectAndTask], nWorkers : Int) extends Actor{
 
   var accumuland : Map[Task, List[AnyRef]] = Map[Task, List[AnyRef]]()
-  val workers = Vector.fill(nWorkers)(actorOf(new Worker()).start)
-  workers.foreach(_.start())
+  val workers = (1 to nWorkers).map{i => actorOf(new Worker()).start}
+
   val router = Routing.loadBalancerActor(CyclicIterator(workers)).start()
   var remainingProjectTasks = projectTasks
   var completedProjectTasks : Set[ProjectAndTask] = Set()
@@ -47,7 +47,8 @@ class QueueManager(projectTasks : Set[ProjectAndTask], nWorkers : Int) extends A
   }
   def receive = {
     case TaskResultMessage(_, Left(taskFailure)) => {
-      router ! PoisonPill
+      Log.debug("Task failed " + taskFailure)
+      router.stop
       originalCaller ! BuildResult(Left(taskFailure))
     }
     case TaskResultMessage(projectTask, Right(result)) => {
@@ -57,7 +58,8 @@ class QueueManager(projectTasks : Set[ProjectAndTask], nWorkers : Int) extends A
         originalCaller ! BuildResult(Right("OK"))
       else {
         remainingProjectTasks = remainingProjectTasks.filterNot(_ == projectTask)
-        execNextLevel
+        if (router.isRunning)
+          execNextLevel
       }
     }
     case StartBuild => {
