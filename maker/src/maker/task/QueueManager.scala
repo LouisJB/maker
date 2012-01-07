@@ -37,8 +37,9 @@ class QueueManager(projectTasks : Set[ProjectAndTask], nWorkers : Int) extends A
   var originalCaller : UntypedChannel = _
   private def execNextLevel{
     Log.debug("Remaining tasks are " + remainingProjectTasks)
+    Log.debug("Completed tasks are " + completedProjectTasks)
     val (canBeProcessed, mustWait) = remainingProjectTasks.partition(
-      _.properDependencies.filterNot(completedProjectTasks).isEmpty
+      _.properDependencies.filterNot(completedProjectTasks).filter(projectTasks).isEmpty
     )
     Log.debug("Can be processed = " + canBeProcessed)
     Log.debug("must wait " + mustWait)
@@ -72,7 +73,7 @@ class QueueManager(projectTasks : Set[ProjectAndTask], nWorkers : Int) extends A
 object QueueManager{
   def apply(projects : Set[Project], task : Task) = {
     Log.info("About to do " + task + " for projects " + projects.toList.mkString(","))
-    val projectTasks = projects.flatMap(ProjectAndTask(_, task).allDependencies)
+  val projectTasks = projects.flatMap{p => p.allTaskDependencies(task).map(ProjectAndTask(p, _))}
     implicit val timeout = Timeout(1000000)
     val future = actorOf(new QueueManager(projectTasks, 2)).start ? StartBuild
     future.get.asInstanceOf[BuildResult].res

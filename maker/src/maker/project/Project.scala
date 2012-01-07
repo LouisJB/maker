@@ -31,7 +31,7 @@ case class Project(
   def ivyFile = file(root, "maker-ivy.xml")
 
   def srcDirs : List[File] = if (sourceDirs.isEmpty) List(file(root, "src")) else sourceDirs
-  def testDirs : List[File] = if (tstDirs.isEmpty) List(file(root, "test")) else tstDirs
+  def testDirs : List[File] = if (tstDirs.isEmpty) List(file(root, "tests")) else tstDirs
   def jarDirs : List[File] = if (libDirs.isEmpty) List(file(root, "lib"), managedLibDir) else libDirs
 
   def dependsOn(projects: Project*) = copy(dependentProjects = dependentProjects ::: projects.toList)
@@ -79,8 +79,8 @@ case class Project(
   def test = QueueManager(allDependencies(), RuntUnitTestsTask)
   def testOnly = QueueManager(Set(this), RuntUnitTestsTask)
   def pack = QueueManager(allDependencies(), PackageTask)
-  def update = QueueManager(allDependencies(), UpdateExternalDependencies)
-  def updateOnly = QueueManager(Set(this), UpdateExternalDependencies)
+  def updateAll = QueueManager(allDependencies(), UpdateExternalDependencies)
+  def update = QueueManager(Set(this), UpdateExternalDependencies)
 
   val projectTaskDependencies = new MapProxy[Task, Set[Task]]{
     val self = Map[Task, Set[Task]](
@@ -103,7 +103,7 @@ case class Project(
     }
     recurse(Set(task))
   }
-  def taskDependencies(task : Task) = allTaskDependencies(task).filterNot(_ == task)
+  def taskDependencies(task : Task) : Set[Task] = allTaskDependencies(task).filterNot(_ == task)
 
   def delete = recursiveDelete(root)
 
