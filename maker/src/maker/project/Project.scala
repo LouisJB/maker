@@ -144,8 +144,16 @@ case class Project(
     comp
   }
 
-  val compiler: Global = makeCompiler(isTestCompiler = false)
-  val testCompiler: Global = makeCompiler(isTestCompiler = true)
+  private val compiler_ : Global = makeCompiler(isTestCompiler = false)
+  def compiler : Global = {
+    compiler_.settings.classpath.value = compilationClasspath
+    compiler_
+  }
+  private val testCompiler_ : Global = makeCompiler(isTestCompiler = true)
+  def testCompiler : Global = {
+    testCompiler_.settings.classpath.value = compilationClasspath
+    testCompiler_
+  }
   def allDependencies(projectsSoFar : Set[Project] = Set()) : Set[Project] = {
     (Set(this) ++ dependentProjects.filterNot(projectsSoFar).flatMap(_.allDependencies(projectsSoFar + this)))
   }
