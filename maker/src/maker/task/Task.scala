@@ -143,7 +143,10 @@ case object UpdateExternalDependencies extends Task{
           case c :: rest => {
             c.exec match {
               case (0, _) => rec(rest)
-              case (_, error) => Left(TaskFailed(this, error))
+              case (_, error) => {
+                Log.info("Command failed\n" + c)
+                Left(TaskFailed(this, error))
+              }
             }
           }
         }
@@ -192,11 +195,21 @@ case object RuntUnitTestsTask extends Task{
 
   def exec(project : Project, acc : List[AnyRef]) = {
     Log.info("Testing " + project)
-    val path = project.testOutputDir.getAbsolutePath + " " + project.outputDir.getAbsolutePath
-    if (Runner.run(Array("-c", "-o", "-p", path)))
-      Right(Unit)
-    else
-      Left(TaskFailed(this, "Bad test"))
+    //val path = project.runClasspath.split(":").toList.mkString(" ")
+    val path = project.testOutputDir.getAbsolutePath //+ " " + project.outputDir.getAbsolutePath
+    val scala = project.props.ScalaHome().getAbsolutePath + "/bin/scala"
+    val cmd = Command(scala, "-classpath", project.compilationClasspath, "org.scalatest.tools.Runner", "-c", "-e", "-p", path)
+
+
+    println(cmd)
+    cmd.exec match {
+      case (0, message) => {println(message);Right(Unit)}
+      case (errNo, errMessage) => Left(TaskFailed(this, errMessage))
+    }
+    //if (Runner.run(Array("-c", "-o", "-p", path)))
+    //Right(Unit)
+    //else
+    //Left(TaskFailed(this, "Bad test"))
   }
 }
 

@@ -63,10 +63,11 @@ case class Project(
 
   def jars = findJars(jarDirs: _*).toList.sortWith(_.getPath < _.getPath)
 
-  private def classpathDirectoriesAndJars : List[File] = ((outputDir :: javaOutputDir :: jars) ::: dependentProjects.flatMap(_.classpathDirectoriesAndJars)).distinct
+  private def classpathDirectoriesAndJars : List[File] = ((outputDir :: javaOutputDir :: testOutputDir :: jars) ::: dependentProjects.flatMap(_.classpathDirectoriesAndJars)).distinct
 
   def compilationClasspath = classpathDirectoriesAndJars.map(_.getAbsolutePath).mkString(":")
   def runClasspath = classpathDirectoriesAndJars.map(_.getAbsolutePath).mkString(":")
+  def printClasspath = compilationClasspath.split(":").foreach(println)
 
   def outputJar = new File(packageDir.getAbsolutePath, name + ".jar")
 

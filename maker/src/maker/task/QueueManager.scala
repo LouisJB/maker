@@ -75,7 +75,8 @@ object QueueManager{
     Log.info("About to do " + task + " for projects " + projects.toList.mkString(","))
   val projectTasks = projects.flatMap{p => p.allTaskDependencies(task).map(ProjectAndTask(p, _))}
     implicit val timeout = Timeout(1000000)
-    val future = actorOf(new QueueManager(projectTasks, 2)).start ? StartBuild
+    val nWorkers = (Runtime.getRuntime.availableProcessors / 2) max 1
+    val future = actorOf(new QueueManager(projectTasks, nWorkers)).start ? StartBuild
     future.get.asInstanceOf[BuildResult].res
   }
 }
