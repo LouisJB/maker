@@ -4,6 +4,9 @@ import java.lang.ProcessBuilder
 import java.io.BufferedInputStream
 import java.io.ByteArrayOutputStream
 import java.io.InputStream
+import java.io.InputStreamReader
+import java.io.BufferedReader
+import java.io.BufferedWriter
 
 case class Command(args : String*){
   override def toString = "Command: " + args.mkString(" ")
@@ -12,21 +15,19 @@ case class Command(args : String*){
     val procBuilder = new ProcessBuilder(args : _*)
     procBuilder.redirectErrorStream(true)
     val proc = procBuilder.start
+    val isr = new InputStreamReader(proc.getInputStream);
+    val br = new BufferedReader(isr);
+    val buf = new StringBuffer()
+    var line : String =null;
+    line = br.readLine()
+    while ( line != null){
+      System.out.println(line);
+      line = br.readLine()
+      buf.append(line)
+    }
     val procResult = proc.waitFor
-    val output = getStringFromInputStream(proc.getInputStream)
-    (procResult, output)
+    (procResult, buf.toString)
   }
 
-  private def getStringFromInputStream(s : InputStream) : String = {
-    val bis = new BufferedInputStream(s)
-    val buf = new ByteArrayOutputStream()
-    var result = bis.read()
-    while(result != -1) {
-      val b = result.asInstanceOf[Byte]
-      buf.write(b)
-      result = bis.read()
-    }        
-    buf.toString()
-  }
 }
 

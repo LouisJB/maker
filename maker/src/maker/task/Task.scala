@@ -195,21 +195,15 @@ case object RuntUnitTestsTask extends Task{
 
   def exec(project : Project, acc : List[AnyRef]) = {
     Log.info("Testing " + project)
-    //val path = project.runClasspath.split(":").toList.mkString(" ")
-    val path = project.testOutputDir.getAbsolutePath //+ " " + project.outputDir.getAbsolutePath
+    val path = project.testOutputDir.getAbsolutePath 
     val scala = project.props.ScalaHome().getAbsolutePath + "/bin/scala"
     val cmd = Command(scala, "-classpath", project.compilationClasspath, "org.scalatest.tools.Runner", "-c", "-e", "-p", path)
 
-
-    println(cmd)
     cmd.exec match {
-      case (0, message) => {println(message);Right(Unit)}
-      case (errNo, errMessage) => Left(TaskFailed(this, errMessage))
+      // This sucks but can't be fixed until https://issues.scala-lang.org/browse/SI-4953 is done
+      case (_, message) if message.contains("TEST FAILED") => Left(TaskFailed(this, message))
+      case _ => Right("OK")
     }
-    //if (Runner.run(Array("-c", "-o", "-p", path)))
-    //Right(Unit)
-    //else
-    //Left(TaskFailed(this, "Bad test"))
   }
 }
 
