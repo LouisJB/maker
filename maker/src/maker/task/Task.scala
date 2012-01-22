@@ -191,7 +191,7 @@ case object PackageTask extends Task{
 
   }
 }
-case object RuntUnitTestsTask extends Task{
+case object RunUnitTestsTask extends Task{
 
   def exec(project : Project, acc : List[AnyRef]) = {
     Log.info("Testing " + project)

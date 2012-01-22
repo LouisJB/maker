@@ -77,8 +77,8 @@ case class Project(
   def compile = QueueManager(allDependencies(), CompileSourceTask)
   def javaCompile = QueueManager(allDependencies(), CompileJavaSourceTask)
   def testCompile = QueueManager(allDependencies(), CompileTestsTask)
-  def test = QueueManager(allDependencies(), RuntUnitTestsTask)
-  def testOnly = QueueManager(Set(this), RuntUnitTestsTask)
+  def test = QueueManager(allDependencies(), RunUnitTestsTask)
+  def testOnly = QueueManager(Set(this), RunUnitTestsTask)
   def pack = QueueManager(allDependencies(), PackageTask)
   def updateAll = QueueManager(allDependencies(), UpdateExternalDependencies)
   def update = QueueManager(Set(this), UpdateExternalDependencies)
@@ -87,7 +87,7 @@ case class Project(
     val self = Map[Task, Set[Task]](
       CompileSourceTask -> Set(CompileJavaSourceTask),
       CompileTestsTask -> Set(CompileSourceTask),
-      RuntUnitTestsTask -> Set(CompileTestsTask)
+      RunUnitTestsTask -> Set(CompileTestsTask)
     )
     override def default(task : Task) = Set[Task]()
   }
