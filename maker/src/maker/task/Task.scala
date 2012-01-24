@@ -199,11 +199,7 @@ case object RunUnitTestsTask extends Task{
   def exec(project : Project, acc : List[AnyRef]) = {
     try {
       Log.info("Testing " + project)
-      //val fooClass = project.classLoader.loadClass("foo.Foo")
-      //println("foo class " + fooClass)
-      //val path = "\"" + project.testOutputDir.getAbsolutePath + " " + project.outputDir.getAbsolutePath + "\""
       val path = project.testOutputDir.getAbsolutePath + " " + project.outputDir.getAbsolutePath 
-      //val path = project.testOutputDir.getAbsolutePath 
       val runnerClass = project.classLoader.loadClass("org.scalatest.tools.Runner$")
       val cons = runnerClass.getDeclaredConstructors
       cons(0).setAccessible(true)
