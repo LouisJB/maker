@@ -8,11 +8,13 @@
       <root url="jar://$PROJECT_DIR$/lib/akka-actor-1.2-RC6.jar!/" />
       <root url="jar://$PROJECT_DIR$/lib/slf4j-log4j12-1.6.1.jar!/" />
       <root url="file://$PROJECT_DIR$/lib/resources" />
-      <root url="jar://$PROJECT_DIR$/lib/scalatest_2.9.0-1.4.1.jar!/" />
       <root url="jar://$PROJECT_DIR$/lib/commons-io-2.1.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/scalatest_2.9.1-1.6.1.jar!/" />
     </CLASSES>
     <JAVADOC />
-    <SOURCES />
+    <SOURCES>
+      <root url="jar://$PROJECT_DIR$/lib/scalatest_2.9.1-1.6.1-sources.jar!/" />
+    </SOURCES>
     <jarDirectory url="file://$PROJECT_DIR$/lib/resources" recursive="false" />
   </library>
 </component>

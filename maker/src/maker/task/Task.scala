@@ -18,9 +18,11 @@ abstract class CompileTask extends Task{
   def outputDir(proj : Project) : File
   def changedSrcFiles(proj : Project) : Set[File]
   def deletedSrcFiles(proj : Project) : Set[File]
+  def taskName : String
 
   def exec(proj : Project, acc : List[AnyRef]) : Either[TaskFailed, AnyRef] = {
     def listOfFiles(files : Iterable[File]) = files.mkString("\n\t", "\n\t", "")
+    def info(msg : String) = Log.info("\t" + taskName + proj + ": " + msg)
     val comp = compiler(proj)
     comp.settings.classpath.value = proj.compilationClasspath
     val reporter = comp.reporter
@@ -28,22 +30,21 @@ abstract class CompileTask extends Task{
     
     val modifiedSrcFiles = changedSrcFiles(proj)
     val deletedSrcFiles_ = deletedSrcFiles(proj)
-    Log.info("Project " + proj)
-    deletedSrcFiles_.foreach(println)
+    Log.info("Compiling " + proj)
 
     if (modifiedSrcFiles.isEmpty && deletedSrcFiles_.isEmpty) {
-      Log.info("Already Compiled " + proj.name)
+      info(" Already Compiled")
       Right((Set[File](), Set[File]()))
     } else {
       proj.sourceToClassFiles.classFilesFor(deletedSrcFiles_) |> {
         classFiles =>
-          Log.info("Deleting " + classFiles.size + " class files")
+          info("Deleting " + classFiles.size + " class files")
           classFiles.foreach(_.delete)
       }
-      Log.info("Compiling " + proj + ", " + modifiedSrcFiles.size + " modified or uncompiled files")
+      info("Compiling, " + modifiedSrcFiles.size + " modified or uncompiled files")
       val sw = new Stopwatch
       
-      Log.debug("Changed files are " + listOfFiles(modifiedSrcFiles))
+      Log.debug("\t" + proj + "  Changed files are " + listOfFiles(modifiedSrcFiles))
       reporter.reset
       // First compile those files who have changed
       new comp.Run() compile modifiedSrcFiles.toList.map(_.getPath)
@@ -51,15 +52,15 @@ abstract class CompileTask extends Task{
       // Determine which source files have changed signatures
       val sourceFilesFromThisProjectWithChangedSigs: Set[File] = Set() ++ proj.updateSignatures
       val sourceFilesFromOtherProjectsWithChangedSigs = (Set[File]() /: acc.map(_.asInstanceOf[(Set[File], Set[File])]).map(_._1))(_ ++ _)
-      Log.debug("Files with changed sigs in " + proj + " is , " + listOfFiles(sourceFilesFromThisProjectWithChangedSigs))
+      Log.debug("\t" + proj + "Files with changed sigs in " + proj + " is , " + listOfFiles(sourceFilesFromThisProjectWithChangedSigs))
 
       val dependentFiles = (sourceFilesFromThisProjectWithChangedSigs ++ sourceFilesFromOtherProjectsWithChangedSigs ++ deletedSrcFiles_) |> {
         filesWhoseDependentsMustRecompile => 
           val dependentFiles = proj.dependencies.dependentFiles(filesWhoseDependentsMustRecompile).filterNot(filesWhoseDependentsMustRecompile)
-          Log.debug("Files dependent on those with shanged sigs" + listOfFiles(dependentFiles))
-          Log.info("Compiling " + dependentFiles.size + " dependent files")
+          Log.debug("\t" + proj + "Files dependent on those with shanged sigs" + listOfFiles(dependentFiles))
+          info("Compiling " + dependentFiles.size + " dependent files")
           new comp.Run() compile dependentFiles.toList.map(_.getPath)
-          Log.info("time taken " + sw.toStringSeconds)
+          info("time taken " + sw.toStringSeconds)
           dependentFiles
       }
 
@@ -79,6 +80,7 @@ case object CompileSourceTask extends CompileTask{
   def changedSrcFiles(proj : Project) = proj.changedSrcFiles
   def outputDir(proj : Project) = proj.outputDir
   def compiler(proj : Project) = proj.compiler
+  def taskName = "Compile source"
 }
 
 case object CompileTestsTask extends CompileTask{
@@ -86,6 +88,7 @@ case object CompileTestsTask extends CompileTask{
   def changedSrcFiles(proj : Project) = proj.changedTestFiles
   def outputDir(proj : Project) = proj.testOutputDir
   def compiler(proj : Project) = proj.testCompiler
+  def taskName = "Compile test"
 }
 
 case object CompileJavaSourceTask extends Task{
@@ -194,15 +197,30 @@ case object PackageTask extends Task{
 case object RunUnitTestsTask extends Task{
 
   def exec(project : Project, acc : List[AnyRef]) = {
-    Log.info("Testing " + project)
-    val path = project.testOutputDir.getAbsolutePath 
-    val scala = project.props.ScalaHome().getAbsolutePath + "/bin/scala"
-    val cmd = Command(scala, "-classpath", project.compilationClasspath, "org.scalatest.tools.Runner", "-c", "-e", "-p", path)
-
-    cmd.exec match {
-      // This sucks but can't be fixed until https://issues.scala-lang.org/browse/SI-4953 is done
-      case (_, message) if message.contains("TEST FAILED") => Left(TaskFailed(this, message))
-      case _ => Right("OK")
+    try {
+      Log.info("Testing " + project)
+      //val fooClass = project.classLoader.loadClass("foo.Foo")
+      //println("foo class " + fooClass)
+      //val path = "\"" + project.testOutputDir.getAbsolutePath + " " + project.outputDir.getAbsolutePath + "\""
+      val path = project.testOutputDir.getAbsolutePath + " " + project.outputDir.getAbsolutePath 
+      //val path = project.testOutputDir.getAbsolutePath 
+      val runnerClass = project.classLoader.loadClass("org.scalatest.tools.Runner$")
+      val cons = runnerClass.getDeclaredConstructors
+      cons(0).setAccessible(true)
+      import org.scalatest.tools.Runner
+      val runner = cons(0).newInstance()
+      val method = runnerClass.getMethod("run", classOf[Array[String]])
+      val pars = Array("-c", "-o", "-p", path)
+      val result = method.invoke(runner, pars).asInstanceOf[Boolean]
+      if (result)
+        Right(Unit)
+      else
+        Left(TaskFailed(this, "Bad test"))
+    } catch {
+      case e => {
+        e.printStackTrace
+        Left(TaskFailed(this, "Exception thrown"))
+      }
     }
   }
 }

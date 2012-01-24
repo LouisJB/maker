@@ -11,6 +11,11 @@ modules.each do |m|
       source_files.unshift(f)
     end
   end
+  Find.find("#{m}/tests") do |f|
+    if f =~ /\.scala$/ 
+      source_files.unshift(f)
+    end
+  end
 end
 Find.find(".") do |f|
   if f =~ /\.class/ 

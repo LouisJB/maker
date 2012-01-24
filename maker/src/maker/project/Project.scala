@@ -11,6 +11,7 @@ import maker.utils.Log
 import maker.task._
 import maker.utils.FileUtils._
 import maker.Props
+import java.net.URLClassLoader
 
 case class Project(
   name: String,
@@ -63,7 +64,11 @@ case class Project(
 
   def jars = findJars(jarDirs: _*).toList.sortWith(_.getPath < _.getPath)
 
-  private def classpathDirectoriesAndJars : List[File] = ((outputDir :: javaOutputDir :: testOutputDir :: jars) ::: dependentProjects.flatMap(_.classpathDirectoriesAndJars)).distinct
+  def urls = classpathDirectoriesAndJars.map(_.toURI.toURL).toArray
+  def classpathDirectoriesAndJars : List[File] = ((outputDir :: javaOutputDir :: testOutputDir :: jars) ::: dependentProjects.flatMap(_.classpathDirectoriesAndJars)).distinct
+  def classLoader = {
+    new URLClassLoader(urls)
+  }
 
   def compilationClasspath = classpathDirectoriesAndJars.map(_.getAbsolutePath).mkString(":")
   def runClasspath = classpathDirectoriesAndJars.map(_.getAbsolutePath).mkString(":")
@@ -77,7 +82,9 @@ case class Project(
   def compile = QueueManager(allDependencies(), CompileSourceTask)
   def javaCompile = QueueManager(allDependencies(), CompileJavaSourceTask)
   def testCompile = QueueManager(allDependencies(), CompileTestsTask)
-  def test = QueueManager(allDependencies(), RunUnitTestsTask)
+  def test = {
+    QueueManager(allDependencies(), RunUnitTestsTask)
+    }
   def testOnly = QueueManager(Set(this), RunUnitTestsTask)
   def pack = QueueManager(allDependencies(), PackageTask)
   def updateAll = QueueManager(allDependencies(), UpdateExternalDependencies)

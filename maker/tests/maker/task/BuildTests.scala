@@ -110,9 +110,15 @@ class BuildTests extends FunSuite {
 
   test("Unit test runs"){
     val root = tempDir("fred")
-    val proj = makeProject("foo_with_test", root)
-    writeToFile(new File(root, "src/foo/Foo.scala"), fooContent)
+      val proj = makeProject("foo_with_test", root)
+      writeToFile(new File(root, "src/foo/Foo.scala"), fooContent)
     writeToFile(new File(root, "tests/foo/FooTest.scala"), fooTestContent)
+    proj.compile
+    println("There are " + proj.urls.size + "urls")
+    val fooClass = proj.classLoader.loadClass("foo.Foo")
+      println("Foo class in test = " + fooClass)
+
+
     assert(proj.test === Right("OK"))
 
     proj.delete

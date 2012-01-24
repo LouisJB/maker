@@ -11,7 +11,8 @@ class DependenciesTests extends FunSuite{
     withTempFile {
       file : File => 
         val deps = new Dependencies(
-          file,
+          file
+          ,
           Map(
             new File("foo") -> Set(new File("bar"), new File("fred/mike")),
             new File("goo") -> Set(new File("car"), new File("bred/mike"))
