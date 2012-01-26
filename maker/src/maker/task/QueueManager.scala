@@ -10,8 +10,16 @@ case class ProjectAndTask(project : Project, task : Task){
   val properDependencies : Set[ProjectAndTask] = project.taskDependencies(task).map(ProjectAndTask(project, _)) ++ project.dependentProjects.flatMap(ProjectAndTask(_, task).allDependencies)
   def allDependencies = properDependencies + this
   def exec(acc : Map[Task, List[AnyRef]]) = {
-    Log.debug("Executing task " + task + ", for project " + project.name)
-    task.exec(project, acc.getOrElse(task, Nil))
+    val taskAndProject = task + ", for project " + project.name
+    Log.debug("Executing task " + taskAndProject)
+    try {
+      task.exec(project, acc.getOrElse(task, Nil))
+    } catch {
+      case e =>
+        Log.info("Error occured when executing task " + taskAndProject)
+        e.printStackTrace
+        Left(TaskFailed(task, e.getMessage))
+    }
   }
 }
 
@@ -76,6 +84,7 @@ object QueueManager{
   val projectTasks = projects.flatMap{p => p.allTaskDependencies(task).map(ProjectAndTask(p, _))}
     implicit val timeout = Timeout(1000000)
     val nWorkers = (Runtime.getRuntime.availableProcessors / 2) max 1
+    Log.info("Running with " + nWorkers + " workers")
     val future = actorOf(new QueueManager(projectTasks, nWorkers)).start ? StartBuild
     future.get.asInstanceOf[BuildResult].res
   }

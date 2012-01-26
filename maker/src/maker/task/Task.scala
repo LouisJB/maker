@@ -197,27 +197,20 @@ case object PackageTask extends Task{
 case object RunUnitTestsTask extends Task{
 
   def exec(project : Project, acc : List[AnyRef]) = {
-    try {
-      Log.info("Testing " + project)
-      val path = project.testOutputDir.getAbsolutePath + " " + project.outputDir.getAbsolutePath 
-      val runnerClass = project.classLoader.loadClass("org.scalatest.tools.Runner$")
-      val cons = runnerClass.getDeclaredConstructors
-      cons(0).setAccessible(true)
-      import org.scalatest.tools.Runner
-      val runner = cons(0).newInstance()
-      val method = runnerClass.getMethod("run", classOf[Array[String]])
-      val pars = Array("-c", "-o", "-p", path)
-      val result = method.invoke(runner, pars).asInstanceOf[Boolean]
-      if (result)
-        Right(Unit)
-      else
-        Left(TaskFailed(this, "Bad test"))
-    } catch {
-      case e => {
-        e.printStackTrace
-        Left(TaskFailed(this, "Exception thrown"))
-      }
-    }
+    Log.info("Testing " + project)
+    val path = project.testOutputDir.getAbsolutePath + " " + project.outputDir.getAbsolutePath 
+
+    val runnerClass = project.classLoader.loadClass("org.scalatest.tools.Runner$")
+    val cons = runnerClass.getDeclaredConstructors
+    cons(0).setAccessible(true)
+    val runner = cons(0).newInstance()
+    val method = runnerClass.getMethod("run", classOf[Array[String]])
+    val pars = Array("-c", "-o", "-p", path)
+    val result = method.invoke(runner, pars).asInstanceOf[Boolean]
+    if (result)
+      Right(Unit)
+    else
+      Left(TaskFailed(this, "Bad test"))
   }
 }
 
