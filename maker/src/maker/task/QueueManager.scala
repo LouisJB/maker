@@ -86,6 +86,8 @@ object QueueManager{
     val nWorkers = (Runtime.getRuntime.availableProcessors / 2) max 1
     Log.info("Running with " + nWorkers + " workers")
     val future = actorOf(new QueueManager(projectTasks, nWorkers)).start ? StartBuild
-    future.get.asInstanceOf[BuildResult].res
+    val result = future.get.asInstanceOf[BuildResult].res
+    Actor.registry.shutdownAll()
+    result
   }
 }
