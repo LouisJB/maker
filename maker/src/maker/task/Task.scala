@@ -191,7 +191,6 @@ case object PackageTask extends Task{
         case (errNo, errMessage) => Left(TaskFailed(this, errMessage))
       }
     }, false)
-
   }
 }
 case object RunUnitTestsTask extends Task{

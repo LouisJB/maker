@@ -8,12 +8,14 @@ import maker.utils.{Stopwatch, Log}
 
 case class ProjectAndTask(project : Project, task : Task) {
 
-  private var lastRunTimeMs = 0L
+  private var lastRunTimeMs_ = 0L
   private var totalRunTimeMs = 0L
   private var totalSuccessfullRunTimeMs = 0L
   private var numberSuccessfullRuns = 0
   private var numberFailedRuns = 0
   private var lastError : Option[Throwable] = None
+
+  def lastRunTimeMs = lastRunTimeMs_
 
   val properDependencies : Set[ProjectAndTask] = project.taskDependencies(task).map(ProjectAndTask(project, _)) ++ project.dependentProjects.flatMap(ProjectAndTask(_, task).allDependencies)
   def allDependencies = properDependencies + this
@@ -37,11 +39,16 @@ case class ProjectAndTask(project : Project, task : Task) {
         Left(TaskFailed(task, e.getMessage))
     }
     val totalTime = sw.ms()
-    lastRunTimeMs = totalTime
+    lastRunTimeMs_ = totalTime
     totalRunTimeMs += totalTime
     Log.info("Task %s completed in %dms".format(taskAndProject, totalTime))
     taskResult
   }
+
+  override def toString = "Task[" + project.name + ":" + task + "]"
+
+  def runStats =
+    toString + " took " + lastRunTimeMs + "ms"
 }
 
 sealed trait BuildMessage
@@ -102,7 +109,7 @@ class QueueManager(projectTasks : Set[ProjectAndTask], nWorkers : Int) extends A
 object QueueManager{
   def apply(projects : Set[Project], task : Task) = {
     Log.info("About to do " + task + " for projects " + projects.toList.mkString(","))
-  val projectTasks = projects.flatMap{p => p.allTaskDependencies(task).map(ProjectAndTask(p, _))}
+    val projectTasks = projects.flatMap{p => p.allTaskDependencies(task).map(ProjectAndTask(p, _))}
     implicit val timeout = Timeout(1000000)
     val sw = Stopwatch()
     val nWorkers = (Runtime.getRuntime.availableProcessors / 2) max 1
@@ -110,6 +117,7 @@ object QueueManager{
     val future = actorOf(new QueueManager(projectTasks, nWorkers)).start ? StartBuild
     val result = future.get.asInstanceOf[BuildResult].res
     Actor.registry.shutdownAll()
+    Log.info("Stats: \n" + projectTasks.map(_.runStats).mkString("\n"))
     Log.info("Completed, took" + sw)
     result
   }
