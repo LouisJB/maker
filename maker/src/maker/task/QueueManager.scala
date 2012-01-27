@@ -6,17 +6,17 @@ import akka.routing.{CyclicIterator, Routing}
 import akka.actor.{UntypedChannel, Actor}
 import maker.utils.{Stopwatch, Log}
 
+case class TaskError(reason : String, exception : Option[Throwable]) {
+  override def toString = "Task error, reason: " + reason + exception.map(e => ", exception " + e.getMessage).getOrElse("")
+}
+
 case class ProjectAndTask(project : Project, task : Task) {
 
   private var lastRunTimeMs_ = 0L
-  private var totalRunTimeMs = 0L
-  private var totalSuccessfullRunTimeMs = 0L
-  private var numberSuccessfullRuns = 0
-  private var numberFailedRuns = 0
-  private var lastError : Option[Throwable] = None
+  private var lastError_ : Option[TaskError] = None
 
   def lastRunTimeMs = lastRunTimeMs_
-
+  def lastError = lastError_
   val properDependencies : Set[ProjectAndTask] = project.taskDependencies(task).map(ProjectAndTask(project, _)) ++ project.dependentProjects.flatMap(ProjectAndTask(_, task).allDependencies)
   def allDependencies = properDependencies + this
 
@@ -25,22 +25,21 @@ case class ProjectAndTask(project : Project, task : Task) {
     Log.debug("Executing task " + taskAndProject)
     val sw = new Stopwatch()
     val taskResult = try {
-      val result = task.exec(project, acc.getOrElse(task, Nil))
-      lastError = None
-      numberSuccessfullRuns += 1
-      totalSuccessfullRunTimeMs += sw.ms()
-      result
+      task.exec(project, acc.getOrElse(task, Nil)) match {
+        case res @ Left(err) =>
+          lastError_ = Some(TaskError(err.reason, None))
+          res
+        case res => res
+      }
     } catch {
       case e =>
         Log.info("Error occured when executing task " + taskAndProject)
-        numberFailedRuns += 1
-        lastError = Some(e)
+        lastError_ = Some(TaskError("Internal Exception", Some(e)))
         e.printStackTrace
         Left(TaskFailed(task, e.getMessage))
     }
     val totalTime = sw.ms()
     lastRunTimeMs_ = totalTime
-    totalRunTimeMs += totalTime
     Log.info("Task %s completed in %dms".format(taskAndProject, totalTime))
     taskResult
   }
@@ -49,6 +48,9 @@ case class ProjectAndTask(project : Project, task : Task) {
 
   def runStats =
     toString + " took " + lastRunTimeMs + "ms"
+  
+  def allStats = "%s took %d, status %s".format(
+    toString, lastRunTimeMs, lastError.map(_.toString).getOrElse("OK"))
 }
 
 sealed trait BuildMessage
@@ -60,7 +62,9 @@ class Worker() extends Actor{
     case ExecTaskMessage(projectTask : ProjectAndTask, acc : Map[Task, List[AnyRef]]) => self reply TaskResultMessage(projectTask, projectTask.exec(acc))
   }
 }
-case class BuildResult(res : (Set[ProjectAndTask], Either[TaskFailed, AnyRef])) extends BuildMessage
+case class BuildResult(projectAndTasks : Set[ProjectAndTask], res : Either[TaskFailed, AnyRef]) extends BuildMessage {
+  def stats = projectAndTasks.map(_.allStats).mkString("\n")
+}
 
 class QueueManager(projectTasks : Set[ProjectAndTask], nWorkers : Int) extends Actor{
 
@@ -86,13 +90,13 @@ class QueueManager(projectTasks : Set[ProjectAndTask], nWorkers : Int) extends A
     case TaskResultMessage(_, Left(taskFailure)) => {
       Log.debug("Task failed " + taskFailure)
       router.stop
-      originalCaller ! BuildResult((projectTasks, Left(taskFailure)))
+      originalCaller ! BuildResult(projectTasks, Left(taskFailure))
     }
     case TaskResultMessage(projectTask, Right(result)) => {
       accumuland = accumuland + (projectTask.task -> (result :: accumuland.getOrElse(projectTask.task, Nil)))
       completedProjectTasks += projectTask
       if (completedProjectTasks  == projectTasks)
-        originalCaller ! BuildResult((projectTasks, Right("OK")))
+        originalCaller ! BuildResult(projectTasks, Right("OK"))
       else {
         remainingProjectTasks = remainingProjectTasks.filterNot(_ == projectTask)
         if (router.isRunning)
@@ -115,7 +119,7 @@ object QueueManager{
     val nWorkers = (Runtime.getRuntime.availableProcessors / 2) max 1
     Log.info("Running with " + nWorkers + " workers")
     val future = actorOf(new QueueManager(projectTasks, nWorkers)).start ? StartBuild
-    val result = future.get.asInstanceOf[BuildResult].res
+    val result = future.get.asInstanceOf[BuildResult]
     Actor.registry.shutdownAll()
     Log.info("Stats: \n" + projectTasks.map(_.runStats).mkString("\n"))
     Log.info("Completed, took" + sw)
