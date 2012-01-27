@@ -88,8 +88,8 @@ case class Project(
     }
   def testOnly = QueueManager(Set(this), RunUnitTestsTask)
   def pack = QueueManager(allDependencies(), PackageTask)
-  def updateAll = QueueManager(allDependencies(), UpdateExternalDependencies)
-  def update = QueueManager(Set(this), UpdateExternalDependencies)
+  def update = QueueManager(allDependencies(), UpdateExternalDependencies)
+  def updateOnly = QueueManager(Set(this), UpdateExternalDependencies)
 
   def ~ (task : () => Either[TaskFailed, Any]){
     def printWaitingMessage = println("\nWaiting for source file changes (press 'enter' to interrupt)")
