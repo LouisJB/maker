@@ -118,10 +118,11 @@ object QueueManager{
     val sw = Stopwatch()
     val nWorkers = (Runtime.getRuntime.availableProcessors / 2) max 1
     Log.info("Running with " + nWorkers + " workers")
-    val future = actorOf(new QueueManager(projectTasks, nWorkers)).start ? StartBuild
+    val qm = actorOf(new QueueManager(projectTasks, nWorkers)).start 
+    val future = qm ? StartBuild
     val result = future.get.asInstanceOf[BuildResult]
-    Actor.registry.shutdownAll()
     Log.info("Stats: \n" + projectTasks.map(_.runStats).mkString("\n"))
+    qm.stop
     Log.info("Completed, took" + sw)
     result
   }
