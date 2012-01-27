@@ -13,6 +13,7 @@ import maker.utils.FileUtils._
 import maker.Props
 import java.net.URLClassLoader
 
+
 case class Project(
   name: String,
   root: File,
@@ -89,6 +90,20 @@ case class Project(
   def pack = QueueManager(allDependencies(), PackageTask)
   def updateAll = QueueManager(allDependencies(), UpdateExternalDependencies)
   def update = QueueManager(Set(this), UpdateExternalDependencies)
+
+  def ~ (task : () => Either[TaskFailed, Any]){
+    def printWaitingMessage = println("\nWaiting for source file changes (press 'enter' to interrupt)")
+    printWaitingMessage
+    while (true){
+      Thread.sleep(1000)
+      if (System.in.available  > 0 && System.in.read == 10)
+        return;
+      if (allDependencies().flatMap(_.changedSrcFiles).size > 0){
+        task()
+        printWaitingMessage
+      }
+    }
+  }
 
   val projectTaskDependencies = new MapProxy[Task, Set[Task]]{
     val self = Map[Task, Set[Task]](
