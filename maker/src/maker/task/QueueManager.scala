@@ -4,22 +4,43 @@ import maker.project.Project
 import akka.actor.Actor._
 import akka.routing.{CyclicIterator, Routing}
 import akka.actor.{UntypedChannel, Actor}
-import maker.utils.Log
+import maker.utils.{Stopwatch, Log}
 
-case class ProjectAndTask(project : Project, task : Task){
+case class ProjectAndTask(project : Project, task : Task) {
+
+  private var lastRunTimeMs = 0L
+  private var totalRunTimeMs = 0L
+  private var totalSuccessfullRunTimeMs = 0L
+  private var numberSuccessfullRuns = 0
+  private var numberFailedRuns = 0
+  private var lastError : Option[Throwable] = None
+
   val properDependencies : Set[ProjectAndTask] = project.taskDependencies(task).map(ProjectAndTask(project, _)) ++ project.dependentProjects.flatMap(ProjectAndTask(_, task).allDependencies)
   def allDependencies = properDependencies + this
+
   def exec(acc : Map[Task, List[AnyRef]]) = {
     val taskAndProject = task + ", for project " + project.name
     Log.debug("Executing task " + taskAndProject)
-    try {
-      task.exec(project, acc.getOrElse(task, Nil))
+    val sw = new Stopwatch()
+    val taskResult = try {
+      val result = task.exec(project, acc.getOrElse(task, Nil))
+      lastError = None
+      numberSuccessfullRuns += 1
+      totalSuccessfullRunTimeMs += sw.ms()
+      result
     } catch {
       case e =>
         Log.info("Error occured when executing task " + taskAndProject)
+        numberFailedRuns += 1
+        lastError = Some(e)
         e.printStackTrace
         Left(TaskFailed(task, e.getMessage))
     }
+    val totalTime = sw.ms()
+    lastRunTimeMs = totalTime
+    totalRunTimeMs += totalTime
+    Log.info("Task %s completed in %dms".format(taskAndProject, totalTime))
+    taskResult
   }
 }
 
@@ -83,11 +104,13 @@ object QueueManager{
     Log.info("About to do " + task + " for projects " + projects.toList.mkString(","))
   val projectTasks = projects.flatMap{p => p.allTaskDependencies(task).map(ProjectAndTask(p, _))}
     implicit val timeout = Timeout(1000000)
+    val sw = Stopwatch()
     val nWorkers = (Runtime.getRuntime.availableProcessors / 2) max 1
     Log.info("Running with " + nWorkers + " workers")
     val future = actorOf(new QueueManager(projectTasks, nWorkers)).start ? StartBuild
     val result = future.get.asInstanceOf[BuildResult].res
     Actor.registry.shutdownAll()
+    Log.info("Completed, took" + sw)
     result
   }
 }
