@@ -37,5 +37,7 @@ $SCALA_HOME/bin/fsc -reset
 
 $SCALA_HOME/bin/scala -nc -Yrepl-sync -i Maker.scala -e "{ val m =  makerProj; m compile}"
 
+./bin/write-classpath.rb
+
 
 
