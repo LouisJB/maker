@@ -30,7 +30,7 @@ $ export JAVA_OPTS="-Xmx2000m -javaagent:"<path to jrebel.jar> -noverify"
 The project needs a scala file to desribe the modules and their dependencies. See Maker.scala in the Maker code for an example. Starling's Maker config file is in maker/Maker.scala
 
 
-$ scala -Yrepl-sync -i Maker.scala
+$ scala -nc -Yrepl-sync -i Maker.scala
 
 You should see the list of projects loaded into the repl. Each project can run the usual set of Tasks, these are currently compile, testCompile, clean, test, update, pack. These will run across the project and its dependencies. most of these tasks have a 'just this project' equivalent. E.g. compileOnly, testOnly.
 
