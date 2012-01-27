@@ -101,7 +101,7 @@ class BuildTests extends FunSuite {
     writeToFile(new File(root1, "src/foo/Foo.scala"), fooContent)
     writeToFile(new File(root2, "src/bar/Bar.scala"), barContentWithError)
     proj2.compile match {
-      case Left(taskFailure) =>
+      case (_, Left(taskFailure)) =>
       case r => fail("Expected build to fail, got " + r)
     }
     proj1.delete
@@ -129,7 +129,7 @@ class BuildTests extends FunSuite {
       val proj = makeProject("with_failing_test", root)
       writeToFile(new File(root, "tests/foo/FooTest.scala"), failingTestContent)
     proj.test match {
-      case Left(_) =>
+      case (_, Left(_)) =>
       case r => fail("Expected test to fail, got " + r)
     }
     proj.delete

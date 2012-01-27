@@ -60,7 +60,7 @@ class Worker() extends Actor{
     case ExecTaskMessage(projectTask : ProjectAndTask, acc : Map[Task, List[AnyRef]]) => self reply TaskResultMessage(projectTask, projectTask.exec(acc))
   }
 }
-case class BuildResult(res : Either[TaskFailed, AnyRef]) extends BuildMessage
+case class BuildResult(res : (Set[ProjectAndTask], Either[TaskFailed, AnyRef])) extends BuildMessage
 
 class QueueManager(projectTasks : Set[ProjectAndTask], nWorkers : Int) extends Actor{
 
@@ -86,13 +86,13 @@ class QueueManager(projectTasks : Set[ProjectAndTask], nWorkers : Int) extends A
     case TaskResultMessage(_, Left(taskFailure)) => {
       Log.debug("Task failed " + taskFailure)
       router.stop
-      originalCaller ! BuildResult(Left(taskFailure))
+      originalCaller ! BuildResult((projectTasks, Left(taskFailure)))
     }
     case TaskResultMessage(projectTask, Right(result)) => {
       accumuland = accumuland + (projectTask.task -> (result :: accumuland.getOrElse(projectTask.task, Nil)))
       completedProjectTasks += projectTask
       if (completedProjectTasks  == projectTasks)
-        originalCaller ! BuildResult(Right("OK"))
+        originalCaller ! BuildResult((projectTasks, Right("OK")))
       else {
         remainingProjectTasks = remainingProjectTasks.filterNot(_ == projectTask)
         if (router.isRunning)
