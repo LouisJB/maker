@@ -1,16 +1,10 @@
 package maker.os
 
 import java.lang.ProcessBuilder
-import java.io.BufferedInputStream
-import java.io.ByteArrayOutputStream
-import java.io.InputStream
 import java.io.InputStreamReader
 import java.io.BufferedReader
-import java.io.BufferedWriter
 
 case class Command(args : String*){
-  override def toString = "Command: " + args.mkString(" ")
-
   def exec : (Int, String) = {
     val procBuilder = new ProcessBuilder(args : _*)
     procBuilder.redirectErrorStream(true)
@@ -29,5 +23,5 @@ case class Command(args : String*){
     (procResult, buf.toString)
   }
 
+  override def toString = "Command: " + args.mkString(" ")
 }
-

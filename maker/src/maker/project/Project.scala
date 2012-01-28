@@ -3,7 +3,6 @@ package maker.project
 import java.io.File
 import java.lang.System
 import tools.nsc.{Settings, Global}
-import tools.nsc.io.{Directory, PlainDirectory}
 import tools.nsc.reporters.ConsoleReporter
 import plugin._
 import scala.collection.immutable.MapProxy
@@ -12,6 +11,10 @@ import maker.task._
 import maker.utils.FileUtils._
 import maker.Props
 import java.net.URLClassLoader
+import maker.os.Command
+import tools.nsc.io.{Directory, PlainDirectory}
+import maker.graphviz.GraphVizUtils._
+import maker.graphviz.GraphVizDiGrapher._
 
 
 case class Project(
@@ -128,6 +131,14 @@ case class Project(
   }
   def taskDependencies(task : Task) : Set[Task] = allTaskDependencies(task).filterNot(_ == task)
 
+  def listDeps() : List[(Project, List[Project])] = {
+    (this, dependentProjects) :: dependentProjects.flatMap(dp => dp.listDeps())
+  }
+
+  def showDependencyGraph() {
+    showGraph(makeDot(this.listDeps))
+  }
+  
   def delete = recursiveDelete(root)
 
   override def toString = "Project " + name
@@ -183,11 +194,6 @@ case class Project(
 }
 
 object Project {
-
-  def apply(name : String) : Project = Project(
-    name, 
-    file(name) 
-  )
-
+  def apply(name : String) : Project = Project(name, file(name))
   def apply(name : String,  libDirectories : => List[File]) : Project = Project(name, file(name), libDirs = libDirectories)
 }

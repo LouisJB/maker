@@ -23,7 +23,7 @@ then
   else
     totalMem=$(cat /proc/meminfo | head -n 1 | awk '/[0-9]/ {print $2}')
   fi
-    echo "Total memory = $totalMem MB"
+    echo "Total available physical memory = $totalMem KB"
     mem=$[$totalMem/1024/4]
 else
   mem=$MAKER_BUILD_MEM
