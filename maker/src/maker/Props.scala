@@ -1,6 +1,6 @@
 package maker
 
-import _root_.maker.utils.FileUtils._
+import maker.utils.FileUtils._
 import java.io.File
 import java.io.BufferedReader
 import java.util.Properties
