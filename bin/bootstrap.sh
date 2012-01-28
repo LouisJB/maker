@@ -16,7 +16,7 @@ export CLASSPATH=
 # Set java heap size to something nice and big
 if [ -z $MAKER_BUILD_MEM ];
 then
-  if [ os==darwin ];
+  if [ "$os" = "darwin" ];
   then
     totalMem=$(sysctl hw.memsize | awk '/[:s]/ {print $2}')
     totalMem=$[$totalMem/1024]
