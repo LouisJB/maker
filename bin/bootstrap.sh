@@ -1,5 +1,8 @@
 #!/bin/bash
 
+os=${OSTYPE//[0-9.]/}
+echo "OS type = $os"
+
 if [ ! -f $SCALA_HOME/bin/fsc ];
 then
   echo "Can't find fsc, set SCALA_HOME"
@@ -13,8 +16,15 @@ export CLASSPATH=
 # Set java heap size to something nice and big
 if [ -z $MAKER_BUILD_MEM ];
 then
-  totalMem=$(cat /proc/meminfo | head -n 1 | awk '/[0-9]/ {print $2}')
-  mem=$[$totalMem/1024/4]
+  if [ os==darwin ];
+  then
+    totalMem=$(sysctl hw.memsize | awk '/[:s]/ {print $2}')
+    totalMem=$[$totalMem/1024]
+  else
+    totalMem=$(cat /proc/meminfo | head -n 1 | awk '/[0-9]/ {print $2}')
+  fi
+    echo "Total memory = $totalMem MB"
+    mem=$[$totalMem/1024/4]
 else
   mem=$MAKER_BUILD_MEM
 fi
@@ -24,7 +34,7 @@ then
   echo "Memory may be too low - try setting MAKER_BUILD_MEM to at least 2000"
 fi
 
-echo "Using ${mem} memory"
+echo "Using ${mem} MB of memory"
 export JAVA_OPTS="-Xmx${mem}m"
 
 # build maker once
