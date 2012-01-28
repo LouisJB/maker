@@ -2,6 +2,7 @@ package maker.graphviz
 
 import maker.project.Project
 import maker.os.Command
+import maker.utils.os.OsUtils._
 import java.io.File
 
 
@@ -25,6 +26,9 @@ object GraphVizUtils {
 
   def showGraph(graphDef : String, file : java.io.File = DEFAULT_TMP_FILE) {
     val f = createDotFile(graphDef, file)
-    Command("open", f.getAbsolutePath).exec
+    if (isLinux)
+      Command("xdg-open", f.getAbsolutePath).exec
+    else // assume OSX unless we want to support other OSes such as windows
+      Command("open", f.getAbsolutePath).exec
   }
 }
