@@ -2,9 +2,11 @@ package maker.task
 
 import maker.project.Project
 import akka.actor.Actor._
+import akka.actor.ActorRef
 import akka.routing.{CyclicIterator, Routing}
 import akka.actor.{UntypedChannel, Actor}
 import maker.utils.{Stopwatch, Log}
+import akka.event.EventHandler
 
 case class TaskError(reason : String, exception : Option[Throwable]) {
   override def toString = "Task error, reason: " + reason + exception.map(e => ", exception " + e.getMessage).getOrElse("")
@@ -66,12 +68,9 @@ case class BuildResult(projectAndTasks : Set[ProjectAndTask], res : Either[TaskF
   def stats = projectAndTasks.map(_.allStats).mkString("\n")
 }
 
-class QueueManager(projectTasks : Set[ProjectAndTask], nWorkers : Int) extends Actor{
+class QueueManager(projectTasks : Set[ProjectAndTask], router : ActorRef) extends Actor{
 
   var accumuland : Map[Task, List[AnyRef]] = Map[Task, List[AnyRef]]()
-  val workers = (1 to nWorkers).map{i => actorOf(new Worker()).start}
-
-  val router = Routing.loadBalancerActor(CyclicIterator(workers)).start()
   var remainingProjectTasks = projectTasks
   var completedProjectTasks : Set[ProjectAndTask] = Set()
   var originalCaller : UntypedChannel = _
@@ -118,11 +117,16 @@ object QueueManager{
     val sw = Stopwatch()
     val nWorkers = (Runtime.getRuntime.availableProcessors / 2) max 1
     Log.info("Running with " + nWorkers + " workers")
-    val qm = actorOf(new QueueManager(projectTasks, nWorkers)).start 
+    val workers = (1 to nWorkers).map{i => actorOf(new Worker()).start}
+    val router = Routing.loadBalancerActor(CyclicIterator(workers)).start()
+    val qm = actorOf(new QueueManager(projectTasks, router)).start 
     val future = qm ? StartBuild
     val result = future.get.asInstanceOf[BuildResult]
     Log.info("Stats: \n" + projectTasks.map(_.runStats).mkString("\n"))
     qm.stop
+    workers.foreach(_.stop)
+    router.stop
+    EventHandler.shutdown()
     Log.info("Completed, took" + sw)
     result
   }
