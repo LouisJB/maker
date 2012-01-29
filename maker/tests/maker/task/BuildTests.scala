@@ -75,7 +75,7 @@ class BuildTests extends FunSuite {
       val proj = makeProject("foox", root)
 
       writeToFile(new File(root, "src/foo/Foo.scala"), fooContent)
-    assert(proj.compile === Right("OK"))
+    assert(proj.compile.res.isRight)
     proj.delete
   }
 
@@ -87,7 +87,7 @@ class BuildTests extends FunSuite {
 
     writeToFile(new File(root1, "src/foo/Foo.scala"), fooContent)
     writeToFile(new File(root2, "src/bar/Bar.scala"), barContent)
-    assert(proj1.compile === Right("OK"))
+    assert(proj1.compile.res.isRight)
     proj1.delete
     proj2.delete
   }
@@ -119,7 +119,9 @@ class BuildTests extends FunSuite {
       println("Foo class in test = " + fooClass)
 
 
-    assert(proj.test === Right("OK"))
+    assert(
+      proj.test.res.isRight 
+    )
 
     proj.delete
   }
