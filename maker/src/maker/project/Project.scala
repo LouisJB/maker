@@ -132,10 +132,13 @@ case class Project(
 
   def taskDependencies(task : Task) : Set[Task] = allTaskDependencies(task).filterNot(_ == task)
 
-  def listDependentProjects() : List[(Project, List[Project])] =
-    (this, dependentProjects) :: dependentProjects.flatMap(dp => dp.listDependentProjects())
+  def listDependentProjects(depth : Int = 100) : List[(Project, List[Project])] =
+    if (depth >= 0)
+      (this, dependentProjects) :: dependentProjects.flatMap(dp => dp.listDependentProjects(depth - 1))
+    else
+      Nil
 
-  def showDependencyProjectGraph() = showGraph(makeDot(listDependentProjects))
+  def showDependencyProjectGraph(depth : Int = 100, showLibDirs : Boolean = false, showLibs : Boolean = false) = showGraph(makeDot(listDependentProjects(depth), showLibDirs, showLibs))
 
   def listDependentLibs() : List[(Project, List[String])] =
     (this, Option(libDirs).map(_.flatMap(x => Option(x.listFiles()).map(_.toList.map(_.getPath)))).getOrElse(Nil).flatten) :: dependentProjects.flatMap(dp => dp.listDependentLibs())

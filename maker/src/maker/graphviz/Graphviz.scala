@@ -7,11 +7,21 @@ import java.io.File
 
 
 object GraphVizDiGrapher {
-  def makeDot(graph : List[(Project, List[Project])]) : String = {
+  def makeDot(graph : List[(Project, List[Project])], showLibDirs : Boolean = false, showLibs : Boolean = false) : String = {
     // take the distinct set here as we want to ignore duplicated paths caused by indirect dependencies
-    val g = graph.distinct.flatMap(pd => pd._2.map(x =>
-          "\\\"Project-%s\\\"->\\\"Project-%s\\\"".format(pd._1.name, x.name))).mkString(" ")
-    val dot = "digraph G { %s }".format(g)
+    val g = graph.distinct.flatMap{ case (proj, deps) => deps.flatMap(pd => {
+        ("\\\"Project-%s\\\"->\\\"Project-%s\\\"".format(proj.name, pd.name)) :: { if (showLibDirs) {
+              proj.libDirs.flatMap(libDir => "\\\"Project-%s\\\"->\\\"LibDir-%s\\\"".format(proj.name, libDir.getPath) :: { if (showLibs) {
+                Option(libDir.listFiles()).map(_.toList.map(_.getName)).getOrElse(Nil).map(x => "\\\"LibDir-%s\\\"->\\\"LibFile-%s\\\"".format(libDir.getName, x))
+              }
+              else Nil
+            })
+          }
+          else Nil
+        }
+      })
+    }
+    val dot = "digraph G { %s }".format(g.mkString(" "))
     println("dot = " + dot)
     dot
   }
