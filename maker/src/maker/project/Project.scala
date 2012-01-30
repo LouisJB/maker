@@ -70,12 +70,15 @@ case class Project(
 
   def urls = classpathDirectoriesAndJars.map(_.toURI.toURL).toArray
   def classpathDirectoriesAndJars : List[File] = ((outputDir :: javaOutputDir :: testOutputDir :: jars) ::: dependentProjects.flatMap(_.classpathDirectoriesAndJars)).distinct
+  def nonTestClasspathDirectoriesAndJars : List[File] = ((outputDir :: javaOutputDir :: jars) ::: dependentProjects.flatMap(_.nonTestClasspathDirectoriesAndJars)).distinct
   def classLoader = {
     new URLClassLoader(urls)
   }
 
   def compilationClasspath = classpathDirectoriesAndJars.map(_.getAbsolutePath).mkString(":")
   def runClasspath = classpathDirectoriesAndJars.map(_.getAbsolutePath).mkString(":")
+  def scalatestRunpath = (testOutputDir :: nonTestClasspathDirectoriesAndJars).mkString(" ")
+
   def printClasspath = compilationClasspath.split(":").foreach(println)
 
   def outputJar = new File(packageDir.getAbsolutePath, name + ".jar")
@@ -94,7 +97,7 @@ case class Project(
   def update = QueueManager(allDependencies(), UpdateExternalDependencies)
   def updateOnly = QueueManager(Set(this), UpdateExternalDependencies)
 
-  def ~ (task : () => Either[TaskFailed, Any]){
+  def ~ (task : () => BuildResult){
     def printWaitingMessage = println("\nWaiting for source file changes (press 'enter' to interrupt)")
     printWaitingMessage
     while (true){

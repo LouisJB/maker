@@ -17,9 +17,11 @@ all_files = [project_resource_dir] + jars + module_class_dirs.flatten
 classpath = ((all_files.select do |f| File.exists?(f) end) .collect do |f| File.expand_path(f) end).join(":")
 
 File.open("set-classpath.sh", "w") do |s|
-  s.puts("export CLASSPATH=#{classpath}")
+  s.puts("export MAKER_CLASSPATH=#{classpath}")
+  s.puts("export CLASSPATH=$MAKER_CLASSPATH")
 end
 
 File.open("set-maker-classpath.sh", "w") do |s|
-  s.puts("export CLASSPATH=#{File.expand_path("out")}:#{classpath}")
+  s.puts("export MAKER_CLASSPATH=#{File.expand_path("out")}:#{classpath}")
+  s.puts("export CLASSPATH=$MAKER_CLASSPATH")
 end
