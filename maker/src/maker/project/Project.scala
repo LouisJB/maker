@@ -129,16 +129,19 @@ case class Project(
     }
     recurse(Set(task))
   }
+
   def taskDependencies(task : Task) : Set[Task] = allTaskDependencies(task).filterNot(_ == task)
 
-  def listDeps() : List[(Project, List[Project])] = {
-    (this, dependentProjects) :: dependentProjects.flatMap(dp => dp.listDeps())
-  }
+  def listDependentProjects() : List[(Project, List[Project])] =
+    (this, dependentProjects) :: dependentProjects.flatMap(dp => dp.listDependentProjects())
 
-  def showDependencyGraph() {
-    showGraph(makeDot(this.listDeps))
-  }
-  
+  def showDependencyProjectGraph() = showGraph(makeDot(listDependentProjects))
+
+  def listDependentLibs() : List[(Project, List[String])] =
+    (this, libDirs.flatMap(_.listFiles().map(_.getPath))) :: dependentProjects.flatMap(dp => dp.listDependentLibs())
+
+  def showDependencyLibraryGraph() = showGraph(makeDotFromString(listDependentLibs()))
+
   def delete = recursiveDelete(root)
 
   override def toString = "Project " + name
