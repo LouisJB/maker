@@ -138,7 +138,7 @@ case class Project(
   def showDependencyProjectGraph() = showGraph(makeDot(listDependentProjects))
 
   def listDependentLibs() : List[(Project, List[String])] =
-    (this, libDirs.flatMap(_.listFiles().map(_.getPath))) :: dependentProjects.flatMap(dp => dp.listDependentLibs())
+    (this, Option(libDirs).map(_.flatMap(x => Option(x.listFiles()).map(_.toList.map(_.getPath)))).getOrElse(Nil).flatten) :: dependentProjects.flatMap(dp => dp.listDependentLibs())
 
   def showDependencyLibraryGraph() = showGraph(makeDotFromString(listDependentLibs()))
 
