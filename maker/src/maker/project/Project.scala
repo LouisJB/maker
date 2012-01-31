@@ -243,5 +243,6 @@ class TopLevelProject(name:String,
 
 object Project {
   def apply(name : String) : Project = Project(name, file(name))
-  def apply(name : String,  libDirectories : => List[File]) : Project = Project(name, file(name), libDirs = libDirectories)
+  def apply(name : String,  libDirectories : => List[File]) : Project = Project(name, file(name), libDirs = libDirectories, props = Props())
+  def apply(name : String,  libDirectories : => List[File], props : Props) : Project = Project(name, file(name), libDirs = libDirectories, props = props)
 }
