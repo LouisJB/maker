@@ -66,6 +66,7 @@ class Worker() extends Actor{
 }
 case class BuildResult(projectAndTasks : Set[ProjectAndTask], res : Either[TaskFailed, AnyRef]) extends BuildMessage {
   def stats = projectAndTasks.map(_.allStats).mkString("\n")
+  override def toString = res.toString
 }
 
 class QueueManager(projectTasks : Set[ProjectAndTask], router : ActorRef) extends Actor{
