@@ -218,6 +218,29 @@ case class Project(
   }
 }
 
+class TopLevelProject(name:String,
+                      dependentProjects:List[Project],
+                      props:Props = Props()) extends Project(name, file("."), Nil, Nil, Nil, dependentProjects, props) {
+
+  private def allProjects(project:Project):List[Project] = {
+    if (project.dependentProjects.isEmpty) {
+      project :: Nil
+    } else {
+      project :: project.dependentProjects.flatMap(allProjects(_))
+    }.distinct
+  }
+
+  def generateIDEAProject() {
+    val allModules = allProjects(this)
+
+    IDEAProjectGenerator.generateTopLevelModule(root, name)
+    IDEAProjectGenerator.generateIDEAProjectDir(root, name)
+    allModules.filterNot(_ == this) foreach IDEAProjectGenerator.generateModule
+
+    IDEAProjectGenerator.generateModulesFile(file(root, ".idea"), allModules.map(_.name))
+  }
+}
+
 object Project {
   def apply(name : String) : Project = Project(name, file(name))
   def apply(name : String,  libDirectories : => List[File]) : Project = Project(name, file(name), libDirs = libDirectories)
