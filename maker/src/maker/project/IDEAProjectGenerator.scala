@@ -114,7 +114,7 @@ object IDEAProjectGenerator {
         <SOURCES />
       </library>
     </orderEntry>""".format(jarEntry)
-    def jarEntry0(jarName:String) = """<root url="jar://$MODULE_DIR$/maker-lib/%s!/" />""".format(jarName)
+    def jarEntry0(jarName:String) = """          <root url="jar://$MODULE_DIR$/maker-lib/%s!/" />""".format(jarName)
     val libraryDependencies = project.jars.map(file => {
       val jarName = file.getName
       val jarEntry = jarEntry0(jarName)

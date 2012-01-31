@@ -52,4 +52,5 @@ $SCALA_HOME/bin/scala -nc -Yrepl-sync -i Maker.scala -e "{ val m =  makerProj; m
 
 echo "Maker built successfully"
 echo "Note, use '. set-maker-classpath.sh' to set up the classpath for maker in the environment of this shell"
+echo "and then  'scala -nc -Yrepl-sync -i Maker.scala' to launch maker in order to be able to build maker using itself, from the repl"
 
