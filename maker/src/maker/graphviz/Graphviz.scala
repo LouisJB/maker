@@ -17,11 +17,11 @@ object GraphVizDiGrapher {
       //"\\\"%s\\\"->{ node [shape=polygon sides=4 skew=0.2 color=red];\\\"%s\\\";}".format(p.name, d.getPath)
 
     def mkLibFileDep(d : File, df : File) =
-      "\\\"%s\\\"->{ node[color=none; shape=plaintext]; \\\"%s\\\" ;}".format(d.getName, df.getName())
+      "\\\"%s\\\"->{ node[color=none; shape=plaintext]; \\\"%s\\\" ;}".format(d.getPath, df.getName())
 
     def mkGraph(name : String,  graphDef : String) = {
-      val g = "digraph \\\"%s\\\" { graph[size=\\\"10.25, 7.75\\\"]; "
-      (g + "{ node[ratio=compress size = \\\"10.0, 10.0\\\" nodesep=\\\"0.1\\\" ranksep=\\\"0.1\\\" fontname=Helvetica fontsize=8]; %s ;} ;}")
+      val g = "digraph \\\"%s\\\" { graph[size=\\\"100.0, 100.0\\\"]; "
+      (g + "{ node[ratio=compress size = \\\"100.0, 100.0\\\" nodesep=\\\"0.1\\\" ranksep=\\\"0.1\\\" fontname=Helvetica fontsize=8]; %s ;} ;}")
         .format(name, graphDef)
     }
 
