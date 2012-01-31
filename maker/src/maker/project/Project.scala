@@ -23,7 +23,7 @@ case class Project(
   sourceDirs: List[File] = Nil,
   tstDirs: List[File] = Nil,
   libDirs: List[File] = Nil,
-  dependentProjects: List[Project] = Nil,
+  immediateDependentProjects: List[Project] = Nil,
   props : Props = Props()
 ) {
 
@@ -39,7 +39,7 @@ case class Project(
   def testDirs : List[File] = if (tstDirs.isEmpty) List(file(root, "tests")) else tstDirs
   def jarDirs : List[File] = if (libDirs.isEmpty) List(file(root, "lib"), managedLibDir) else libDirs
 
-  def dependsOn(projects: Project*) = copy(dependentProjects = dependentProjects ::: projects.toList)
+  def dependsOn(projects: Project*) = copy(immediateDependentProjects = immediateDependentProjects ::: projects.toList)
 
   def srcFiles() = findSourceFiles(srcDirs: _*)
   def testSrcFiles() = findSourceFiles(testDirs: _*)
@@ -69,8 +69,8 @@ case class Project(
   def jars = findJars(jarDirs: _*).toList.sortWith(_.getPath < _.getPath)
 
   def urls = classpathDirectoriesAndJars.map(_.toURI.toURL).toArray
-  def classpathDirectoriesAndJars : List[File] = ((outputDir :: javaOutputDir :: testOutputDir :: jars) ::: dependentProjects.flatMap(_.classpathDirectoriesAndJars)).distinct
-  def nonTestClasspathDirectoriesAndJars : List[File] = ((outputDir :: javaOutputDir :: jars) ::: dependentProjects.flatMap(_.nonTestClasspathDirectoriesAndJars)).distinct
+  def classpathDirectoriesAndJars : List[File] = ((outputDir :: javaOutputDir :: testOutputDir :: jars) ::: immediateDependentProjects.flatMap(_.classpathDirectoriesAndJars)).distinct
+  def nonTestClasspathDirectoriesAndJars : List[File] = ((outputDir :: javaOutputDir :: jars) ::: immediateDependentProjects.flatMap(_.nonTestClasspathDirectoriesAndJars)).distinct
   def classLoader = {
     new URLClassLoader(urls)
   }
@@ -85,16 +85,16 @@ case class Project(
 
   private val makerDirectory = mkdirs(new File(root, ".maker"))
 
-  def clean = QueueManager(allDependencies(), CleanTask)
-  def compile = QueueManager(allDependencies(), CompileSourceTask)
-  def javaCompile = QueueManager(allDependencies(), CompileJavaSourceTask)
-  def testCompile = QueueManager(allDependencies(), CompileTestsTask)
+  def clean = QueueManager(allProjectDependencies + this, CleanTask)
+  def compile = QueueManager(allProjectDependencies + this, CompileSourceTask)
+  def javaCompile = QueueManager(allProjectDependencies + this, CompileJavaSourceTask)
+  def testCompile = QueueManager(allProjectDependencies + this, CompileTestsTask)
   def test = {
-    QueueManager(allDependencies(), RunUnitTestsTask)
+    QueueManager(allProjectDependencies + this, RunUnitTestsTask)
     }
   def testOnly = QueueManager(Set(this), RunUnitTestsTask)
-  def pack = QueueManager(allDependencies(), PackageTask)
-  def update = QueueManager(allDependencies(), UpdateExternalDependencies)
+  def pack = QueueManager(allProjectDependencies + this, PackageTask)
+  def update = QueueManager(allProjectDependencies + this, UpdateExternalDependencies)
   def updateOnly = QueueManager(Set(this), UpdateExternalDependencies)
 
   def ~ (task : () => BuildResult){
@@ -127,40 +127,33 @@ case class Project(
     }
   }
 
-  val projectTaskDependencies = new MapProxy[Task, Set[Task]]{
-    val self = Map[Task, Set[Task]](
-      CompileSourceTask -> Set(CompileJavaSourceTask),
-      CompileTestsTask -> Set(CompileSourceTask),
-      RunUnitTestsTask -> Set(CompileTestsTask)
-    )
-    override def default(task : Task) = Set[Task]()
+  def allProjectDependencies : Set[Project] = {
+    immediateDependentProjects.toSet ++ immediateDependentProjects.flatMap(_.allProjectDependencies)
   }
 
-  def allTaskDependencies(task : Task) : Set[Task] = {
-    def recurse(tasks : Set[Task], acc : Set[Task] = Set[Task]()) : Set[Task] = {
-      if (tasks.forall(acc.contains))
-        acc
-      else
-        recurse(
-          (Set[Task]() /: tasks.map(projectTaskDependencies.getOrElse(_, Set[Task]())))(_ ++ _),
-          acc ++ tasks
-        )
-    }
-    recurse(Set(task))
+  def withinProjectTaskDependencies(task : Task) : Set[Task] = Task.standardWithinProjectDependencies.getOrElse(task, Set())
+  def dependentProjectsTaskDependencies(task : Task) : Set[Task] = Task.standardDependentProjectDependencies.getOrElse(task, Set())
+
+  def acrossProjectImmediateDependencies(task : Task) : Set[ProjectAndTask] = {
+    val withinProjectDeps : Set[ProjectAndTask] = withinProjectTaskDependencies(task).map(ProjectAndTask(this, _)) 
+    val childProjectDependencies : Set[ProjectAndTask] = immediateDependentProjects.flatMap{p => dependentProjectsTaskDependencies(task).map{t => ProjectAndTask(p, t)}}.toSet
+    withinProjectDeps ++ childProjectDependencies
   }
 
-  def taskDependencies(task : Task) : Set[Task] = allTaskDependencies(task).filterNot(_ == task)
+  def dependentTasksWithinProject(task : Task) : Set[Task] = {
+    withinProjectTaskDependencies(task).toSet ++ withinProjectTaskDependencies(task).flatMap(dependentTasksWithinProject(_)).toSet
+  }
 
   def listDependentProjects(depth : Int = 100) : List[(Project, List[Project])] =
     if (depth >= 0)
-      (this, dependentProjects) :: dependentProjects.flatMap(dp => dp.listDependentProjects(depth - 1))
+      (this, immediateDependentProjects) :: immediateDependentProjects.flatMap(dp => dp.listDependentProjects(depth - 1))
     else
       Nil
 
   def showDependencyProjectGraph(depth : Int = 100, showLibDirs : Boolean = false, showLibs : Boolean = false) = showGraph(makeDot(listDependentProjects(depth), showLibDirs, showLibs))
 
   def listDependentLibs() : List[(Project, List[String])] =
-    (this, Option(libDirs).map(_.flatMap(x => Option(x.listFiles()).map(_.toList.map(_.getPath)))).getOrElse(Nil).flatten) :: dependentProjects.flatMap(dp => dp.listDependentLibs())
+    (this, Option(libDirs).map(_.flatMap(x => Option(x.listFiles()).map(_.toList.map(_.getPath)))).getOrElse(Nil).flatten) :: immediateDependentProjects.flatMap(dp => dp.listDependentLibs())
 
   def showDependencyLibraryGraph() = showGraph(makeDotFromString(listDependentLibs()))
 
@@ -213,20 +206,17 @@ case class Project(
     testCompiler_.settings.classpath.value = compilationClasspath
     testCompiler_
   }
-  def allDependencies(projectsSoFar : Set[Project] = Set()) : Set[Project] = {
-    (Set(this) ++ dependentProjects.filterNot(projectsSoFar).flatMap(_.allDependencies(projectsSoFar + this)))
-  }
 }
 
 class TopLevelProject(name:String,
-                      dependentProjects:List[Project],
-                      props:Props = Props()) extends Project(name, file("."), Nil, Nil, Nil, dependentProjects, props) {
+                      immediateDependentProjects:List[Project],
+                      props:Props = Props()) extends Project(name, file("."), Nil, Nil, Nil, immediateDependentProjects, props) {
 
   private def allProjects(project:Project):List[Project] = {
-    if (project.dependentProjects.isEmpty) {
+    if (project.immediateDependentProjects.isEmpty) {
       project :: Nil
     } else {
-      project :: project.dependentProjects.flatMap(allProjects(_))
+      project :: project.immediateDependentProjects.flatMap(allProjects(_))
     }.distinct
   }
 

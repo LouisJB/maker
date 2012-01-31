@@ -10,8 +10,9 @@ import maker.os.Command
 import maker.utils.FileUtils
 import org.apache.commons.io.{FileUtils => ApacheFileUtils}
 import scalaz.Scalaz._
+import scala.collection.immutable.MapProxy
 
-case class TaskFailed(task : Task, reason : String)
+case class TaskFailed(task : ProjectAndTask, reason : String)
 
 abstract class CompileTask extends Task{
   def compiler(proj : Project) : Global
@@ -23,6 +24,7 @@ abstract class CompileTask extends Task{
   def exec(proj : Project, acc : List[AnyRef]) : Either[TaskFailed, AnyRef] = {
     def listOfFiles(files : Iterable[File]) = files.mkString("\n\t", "\n\t", "")
     def info(msg : String) = Log.info("\t" + taskName + proj + ": " + msg)
+    def debug(msg : String) = Log.debug("\t" + taskName + proj + ": " + msg)
     val comp = compiler(proj)
     comp.settings.classpath.value = proj.compilationClasspath
     val reporter = comp.reporter
@@ -33,18 +35,18 @@ abstract class CompileTask extends Task{
     Log.info("Compiling " + proj)
 
     if (modifiedSrcFiles.isEmpty && deletedSrcFiles_.isEmpty) {
-      info(" Already Compiled")
       Right((Set[File](), Set[File]()))
     } else {
       proj.sourceToClassFiles.classFilesFor(deletedSrcFiles_) |> {
         classFiles =>
-          info("Deleting " + classFiles.size + " class files")
+          if (classFiles.size > 0)
+            info("Deleting " + classFiles.size + " class files")
           classFiles.foreach(_.delete)
       }
-      info("Compiling, " + modifiedSrcFiles.size + " modified or uncompiled files")
+      debug("Compiling, " + modifiedSrcFiles.size + " modified or uncompiled files")
       val sw = new Stopwatch
       
-      Log.debug("\t" + proj + "  Changed files are " + listOfFiles(modifiedSrcFiles))
+      debug("Changed files are " + listOfFiles(modifiedSrcFiles))
       reporter.reset
       // First compile those files who have changed
       new comp.Run() compile modifiedSrcFiles.toList.map(_.getPath)
@@ -52,20 +54,19 @@ abstract class CompileTask extends Task{
       // Determine which source files have changed signatures
       val sourceFilesFromThisProjectWithChangedSigs: Set[File] = Set() ++ proj.updateSignatures
       val sourceFilesFromOtherProjectsWithChangedSigs = (Set[File]() /: acc.map(_.asInstanceOf[(Set[File], Set[File])]).map(_._1))(_ ++ _)
-      Log.debug("\t" + proj + "Files with changed sigs in " + proj + " is , " + listOfFiles(sourceFilesFromThisProjectWithChangedSigs))
+      debug("Files with changed sigs is , " + listOfFiles(sourceFilesFromThisProjectWithChangedSigs))
 
       val dependentFiles = (sourceFilesFromThisProjectWithChangedSigs ++ sourceFilesFromOtherProjectsWithChangedSigs ++ deletedSrcFiles_) |> {
         filesWhoseDependentsMustRecompile => 
           val dependentFiles = proj.dependencies.dependentFiles(filesWhoseDependentsMustRecompile).filterNot(filesWhoseDependentsMustRecompile)
-          Log.debug("\t" + proj + "Files dependent on those with shanged sigs" + listOfFiles(dependentFiles))
-          info("Compiling " + dependentFiles.size + " dependent files")
+          debug("Files dependent on those with shanged sigs" + listOfFiles(dependentFiles))
+          debug("Compiling " + dependentFiles.size + " dependent files")
           new comp.Run() compile dependentFiles.toList.map(_.getPath)
-          info("time taken " + sw.toStringSeconds)
           dependentFiles
       }
 
       if (reporter.hasErrors)
-        Left(TaskFailed(this, "Failed to compile"))
+        Left(TaskFailed(ProjectAndTask(proj, this), "Failed to compile"))
       else {
         proj.dependencies.persist
         proj.sourceToClassFiles.persist
@@ -105,7 +106,7 @@ case object CompileJavaSourceTask extends Task{
       val parameters = javac::"-cp"::compilationClasspath::"-d"::javaOutputDir.getAbsolutePath::javaSrcFiles.toList.map(_.getAbsolutePath)
       Command(parameters : _*).exec match {
         case (0, _) => Right(javaFilesToCompile)
-        case (_, error) => Left(TaskFailed(this, error))
+        case (_, error) => Left(TaskFailed(ProjectAndTask(project, this), error))
       }
     }
   }
@@ -148,7 +149,7 @@ case object UpdateExternalDependencies extends Task{
               case (0, _) => rec(rest)
               case (_, error) => {
                 Log.info("Command failed\n" + c)
-                Left(TaskFailed(this, error))
+                Left(TaskFailed(ProjectAndTask(project, this), error))
               }
             }
           }
@@ -180,7 +181,7 @@ case object PackageTask extends Task{
       packageDir.mkdirs
     FileUtils.withTempDir({
       dir : File =>
-        allDependencies().foreach{
+        (project.allProjectDependencies + project).foreach{
           depProj =>
             ApacheFileUtils.copyDirectory(depProj.outputDir, dir)
         }
@@ -188,7 +189,7 @@ case object PackageTask extends Task{
       val cmd = Command(jar, "cf", project.outputJar.getAbsolutePath, "-C", dir.getAbsolutePath, ".")
       cmd.exec match {
         case (0, _) => Right(Unit)
-        case (errNo, errMessage) => Left(TaskFailed(this, errMessage))
+        case (errNo, errMessage) => Left(TaskFailed(ProjectAndTask(project, this), errMessage))
       }
     }, false)
   }
@@ -209,14 +210,26 @@ case object RunUnitTestsTask extends Task{
     val pars = Array("-c", "-o", "-p", path)
     Log.info("Test parameters are " + pars.toList)
     val result = method.invoke(runner, pars).asInstanceOf[Boolean]
-  //val result = org.scalatest.tools.Runner.run(pars)
     if (result)
       Right(Unit)
     else
-      Left(TaskFailed(this, "Test failed in " + project))
+      Left(TaskFailed(ProjectAndTask(project, this), "Test failed in " + project))
   }
 }
 
 trait Task{
   def exec(project : Project, acc : List[AnyRef] = Nil) : Either[TaskFailed, AnyRef]
+}
+
+object Task {
+  lazy val standardWithinProjectDependencies = Map[Task, Set[Task]](
+    CompileSourceTask -> Set(CompileJavaSourceTask),
+    CompileTestsTask -> Set(CompileSourceTask),
+    RunUnitTestsTask -> Set(CompileTestsTask)
+  )
+  lazy val standardDependentProjectDependencies = Map[Task, Set[Task]](
+    CompileSourceTask -> Set(CompileSourceTask),
+    CompileTestsTask -> Set(CompileTestsTask),
+    CompileJavaSourceTask → Set(CompileSourceTask)
+  )
 }

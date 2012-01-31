@@ -12,6 +12,30 @@ case class TaskError(reason : String, exception : Option[Throwable]) {
   override def toString = "Task error, reason: " + reason + exception.map(e => ", exception " + e.getMessage).getOrElse("")
 }
 
+object ProjectAndTask{
+  val lock = new Object
+  var runningTasks = List[ProjectAndTask]()
+  private def reportTasks{
+    lock.synchronized{
+      println("There are " + runningTasks.size + " task(s) currently running")
+      println(runningTasks.mkString("\t", "\n\t", "\n"))
+    }
+  }
+  def addTask(pt : ProjectAndTask){
+    lock.synchronized{
+      println("Adding task " + pt)
+      runningTasks = pt :: runningTasks
+      reportTasks
+    }
+  }
+  def removeTask(pt : ProjectAndTask){
+    lock.synchronized{
+      println("Removing task " + pt)
+      runningTasks = runningTasks.filterNot(_ == pt)
+      reportTasks
+    }
+  }
+}
 case class ProjectAndTask(project : Project, task : Task) {
 
   private var lastRunTimeMs_ = 0L
@@ -19,12 +43,13 @@ case class ProjectAndTask(project : Project, task : Task) {
 
   def lastRunTimeMs = lastRunTimeMs_
   def lastError = lastError_
-  val properDependencies : Set[ProjectAndTask] = project.taskDependencies(task).map(ProjectAndTask(project, _)) ++ project.dependentProjects.flatMap(ProjectAndTask(_, task).allDependencies)
-  def allDependencies = properDependencies + this
+  val immediateDependencies : Set[ProjectAndTask] = {
+    project.acrossProjectImmediateDependencies(task)
+  }
 
   def exec(acc : Map[Task, List[AnyRef]]) = {
-    val taskAndProject = task + ", for project " + project.name
-    Log.debug("Executing task " + taskAndProject)
+    ProjectAndTask.addTask(this)
+    Log.debug("Executing " + this)
     val sw = new Stopwatch()
     val taskResult = try {
       task.exec(project, acc.getOrElse(task, Nil)) match {
@@ -35,14 +60,14 @@ case class ProjectAndTask(project : Project, task : Task) {
       }
     } catch {
       case e =>
-        Log.info("Error occured when executing task " + taskAndProject)
+        Log.info("Error occured when executing " + this)
         lastError_ = Some(TaskError("Internal Exception", Some(e)))
         e.printStackTrace
-        Left(TaskFailed(task, e.getMessage))
+        Left(TaskFailed(this, e.getMessage))
     }
     val totalTime = sw.ms()
     lastRunTimeMs_ = totalTime
-    Log.info("Task %s completed in %dms".format(taskAndProject, totalTime))
+    Log.info("%s completed in %dms".format(this, totalTime))
     taskResult
   }
 
@@ -79,20 +104,26 @@ class QueueManager(projectTasks : Set[ProjectAndTask], router : ActorRef) extend
     Log.debug("Remaining tasks are " + remainingProjectTasks)
     Log.debug("Completed tasks are " + completedProjectTasks)
     val (canBeProcessed, mustWait) = remainingProjectTasks.partition(
-      _.properDependencies.filterNot(completedProjectTasks).filter(projectTasks).isEmpty
+      _.immediateDependencies.filterNot(completedProjectTasks).filter(projectTasks).isEmpty
     )
-    Log.debug("Can be processed = " + canBeProcessed)
+    Log.info("Can be processed = " + canBeProcessed)
     Log.debug("must wait " + mustWait)
     remainingProjectTasks = mustWait
-    canBeProcessed.foreach(router ! ExecTaskMessage(_, accumuland))
+    canBeProcessed.foreach{
+      pt =>
+        Log.info("Launching " + pt)
+        router ! ExecTaskMessage(pt, accumuland)
+    }
   }
   def receive = {
-    case TaskResultMessage(_, Left(taskFailure)) => {
+    case TaskResultMessage(projectTask, Left(taskFailure)) => {
+      ProjectAndTask.removeTask(projectTask)
       Log.debug("Task failed " + taskFailure)
       router.stop
       originalCaller ! BuildResult(projectTasks, Left(taskFailure))
     }
     case TaskResultMessage(projectTask, Right(result)) => {
+      ProjectAndTask.removeTask(projectTask)
       accumuland = accumuland + (projectTask.task -> (result :: accumuland.getOrElse(projectTask.task, Nil)))
       completedProjectTasks += projectTask
       if (completedProjectTasks  == projectTasks)
@@ -111,23 +142,41 @@ class QueueManager(projectTasks : Set[ProjectAndTask], router : ActorRef) extend
 }
 
 object QueueManager{
-  def apply(projects : Set[Project], task : Task) = {
+  def apply(projects : Set[Project], task : Task) : BuildResult = {
+    val projectTasks = {
+      def recurse(moreProjectTasks : Set[ProjectAndTask], acc : Set[ProjectAndTask]) : Set[ProjectAndTask] = {
+        if (moreProjectTasks.isEmpty)
+          acc
+        else {
+          recurse(moreProjectTasks.flatMap(_.immediateDependencies), acc ++ moreProjectTasks)
+        }
+      }
+      recurse(projects.map(ProjectAndTask(_, task)), Set[ProjectAndTask]())
+    }
+
     Log.info("About to do " + task + " for projects " + projects.toList.mkString(","))
-    val projectTasks = projects.flatMap{p => p.allTaskDependencies(task).map(ProjectAndTask(p, _))}
-    implicit val timeout = Timeout(1000000)
+    apply(projectTasks)
+  }
+
+  def apply(projectTasks : Set[ProjectAndTask]) : BuildResult = {
     val sw = Stopwatch()
-    val nWorkers = (Runtime.getRuntime.availableProcessors / 2) max 1
-    Log.info("Running with " + nWorkers + " workers")
+    implicit val timeout = Timeout(1000000)
+    def nWorkers = (Runtime.getRuntime.availableProcessors / 2) max 1
+
+
     val workers = (1 to nWorkers).map{i => actorOf(new Worker()).start}
+    Log.info("Running with " + nWorkers + " workers")
     val router = Routing.loadBalancerActor(CyclicIterator(workers)).start()
     val qm = actorOf(new QueueManager(projectTasks, router)).start 
+    
     val future = qm ? StartBuild
     val result = future.get.asInstanceOf[BuildResult]
-    Log.info("Stats: \n" + projectTasks.map(_.runStats).mkString("\n"))
+
     qm.stop
     workers.foreach(_.stop)
     router.stop
     EventHandler.shutdown()
+    Log.info("Stats: \n" + projectTasks.map(_.runStats).mkString("\n"))
     Log.info("Completed, took" + sw)
     result
   }

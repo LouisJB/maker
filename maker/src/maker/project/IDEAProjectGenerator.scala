@@ -122,7 +122,7 @@ object IDEAProjectGenerator {
     }).mkString("\n")
 
     def moduleDependency(module:String) = """<orderEntry type="module" module-name="%s" exported="" />""".format(module)
-    val moduleDependencies = project.dependentProjects.map(project => moduleDependency(project.name)).mkString("\n")
+    val moduleDependencies = project.immediateDependentProjects.map(project => moduleDependency(project.name)).mkString("\n")
 
     val dependencies = moduleDependencies + libraryDependencies
 
