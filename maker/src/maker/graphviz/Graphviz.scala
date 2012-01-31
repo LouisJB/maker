@@ -4,6 +4,7 @@ import maker.project.Project
 import maker.os.Command
 import maker.utils.os.OsUtils._
 import java.io.File
+import maker.task.ProjectAndTask
 
 
 object GraphVizDiGrapher {
@@ -41,8 +42,15 @@ object GraphVizDiGrapher {
     dot
   }
   
+  def makeDotFromProjectAndTask(ps : List[(ProjectAndTask, List[ProjectAndTask])]) : String = {
+    val g = ps.distinct.flatMap(pt => pt._2.map(p =>
+      "\\\"%s\\\"->\\\"%s\\\"".format(pt._1.runStats, p.runStats))).mkString(" ")
+    val dot = "digraph G { %s }".format(g)
+    println("dot = " + dot)
+    dot
+  }
+  
   def makeDotFromString(graph : List[(Project, List[String])]) : String = {
-    // take the distinct set here as we want to ignore duplicated paths caused by indirect dependencies
     val g = graph.distinct.flatMap(pd => pd._2.map(p =>
           "\\\"-Project-%s\\\"->\\\"%s\\\"".format(pd._1.name, p))).mkString(" ")
     val dot = "digraph G { %s }".format(g)

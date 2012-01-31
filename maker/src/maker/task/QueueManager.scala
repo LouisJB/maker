@@ -8,7 +8,11 @@ import akka.actor.{UntypedChannel, Actor}
 import maker.utils.{Stopwatch, Log}
 import akka.event.EventHandler
 
-case class TaskError(reason : String, exception : Option[Throwable]) {
+trait TaskResult
+case object TaskSuccess extends TaskResult { 
+  override def toString = "OK"
+}
+case class TaskError(reason : String, exception : Option[Throwable]) extends TaskResult {
   override def toString = "Task error, reason: " + reason + exception.map(e => ", exception " + e.getMessage).getOrElse("")
 }
 
@@ -78,6 +82,12 @@ case class ProjectAndTask(project : Project, task : Task) {
   
   def allStats = "%s took %d, status %s".format(
     toString, lastRunTimeMs, lastError.map(_.toString).getOrElse("OK"))
+
+  def getTaskTree : List[(ProjectAndTask, List[ProjectAndTask])] = getTaskTree(this)
+  def getTaskTree(pt : ProjectAndTask) : List[(ProjectAndTask, List[ProjectAndTask])] =
+    (pt -> pt.project.acrossProjectImmediateDependencies(task).toList) :: 
+      pt.project.immediateDependentProjects.flatMap(pd => getTaskTree(ProjectAndTask(pd, task)))
+
 }
 
 sealed trait BuildMessage
@@ -89,12 +99,22 @@ class Worker() extends Actor{
     case ExecTaskMessage(projectTask : ProjectAndTask, acc : Map[Task, List[AnyRef]]) => self reply TaskResultMessage(projectTask, projectTask.exec(acc))
   }
 }
-case class BuildResult(projectAndTasks : Set[ProjectAndTask], res : Either[TaskFailed, AnyRef]) extends BuildMessage {
+case class BuildResult(res : Either[TaskFailed, AnyRef], projectAndTasks : Set[ProjectAndTask], originalProjectAndTask : ProjectAndTask) extends BuildMessage {
+  import maker.graphviz.GraphVizDiGrapher._
+  import maker.graphviz.GraphVizUtils._
   def stats = projectAndTasks.map(_.allStats).mkString("\n")
+  
+  def resultTree(pt : ProjectAndTask = originalProjectAndTask) = {
+    pt.getTaskTree.map(p => (projectAndTasks.find(_ == p._1).get, p._2.map(x => projectAndTasks.find(_ == x).get)))
+  }
+  
+  def showBuildGraph() = 
+    showGraph(makeDotFromProjectAndTask(resultTree()))
+
   override def toString = res.toString
 }
 
-class QueueManager(projectTasks : Set[ProjectAndTask], router : ActorRef) extends Actor{
+class QueueManager(projectTasks : Set[ProjectAndTask], router : ActorRef, originalProjectAndTask : ProjectAndTask) extends Actor{
 
   var accumuland : Map[Task, List[AnyRef]] = Map[Task, List[AnyRef]]()
   var remainingProjectTasks = projectTasks
@@ -120,14 +140,14 @@ class QueueManager(projectTasks : Set[ProjectAndTask], router : ActorRef) extend
       ProjectAndTask.removeTask(projectTask)
       Log.debug("Task failed " + taskFailure)
       router.stop
-      originalCaller ! BuildResult(projectTasks, Left(taskFailure))
+      originalCaller ! BuildResult(Left(taskFailure), projectTasks, originalProjectAndTask)
     }
     case TaskResultMessage(projectTask, Right(result)) => {
       ProjectAndTask.removeTask(projectTask)
       accumuland = accumuland + (projectTask.task -> (result :: accumuland.getOrElse(projectTask.task, Nil)))
       completedProjectTasks += projectTask
       if (completedProjectTasks  == projectTasks)
-        originalCaller ! BuildResult(projectTasks, Right("OK"))
+        originalCaller ! BuildResult(Right(TaskSuccess), projectTasks, originalProjectAndTask)
       else {
         remainingProjectTasks = remainingProjectTasks.filterNot(_ == projectTask)
         if (router.isRunning)
@@ -142,7 +162,7 @@ class QueueManager(projectTasks : Set[ProjectAndTask], router : ActorRef) extend
 }
 
 object QueueManager{
-  def apply(projects : Set[Project], task : Task) : BuildResult = {
+  def apply(projects : Set[Project], task : Task, originalProjectAndTask : ProjectAndTask) : BuildResult = {
     val projectTasks = {
       def recurse(moreProjectTasks : Set[ProjectAndTask], acc : Set[ProjectAndTask]) : Set[ProjectAndTask] = {
         if (moreProjectTasks.isEmpty)
@@ -155,10 +175,10 @@ object QueueManager{
     }
 
     Log.info("About to do " + task + " for projects " + projects.toList.mkString(","))
-    apply(projectTasks)
+    apply(projectTasks, originalProjectAndTask)
   }
 
-  def apply(projectTasks : Set[ProjectAndTask]) : BuildResult = {
+  def apply(projectTasks : Set[ProjectAndTask], originalProjectAndTask : ProjectAndTask) : BuildResult = {
     val sw = Stopwatch()
     implicit val timeout = Timeout(1000000)
     def nWorkers = (Runtime.getRuntime.availableProcessors / 2) max 1
@@ -167,7 +187,7 @@ object QueueManager{
     val workers = (1 to nWorkers).map{i => actorOf(new Worker()).start}
     Log.info("Running with " + nWorkers + " workers")
     val router = Routing.loadBalancerActor(CyclicIterator(workers)).start()
-    val qm = actorOf(new QueueManager(projectTasks, router)).start 
+    val qm = actorOf(new QueueManager(projectTasks, router, originalProjectAndTask)).start
     
     val future = qm ? StartBuild
     val result = future.get.asInstanceOf[BuildResult]

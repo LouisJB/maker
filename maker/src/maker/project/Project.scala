@@ -85,17 +85,17 @@ case class Project(
 
   private val makerDirectory = mkdirs(new File(root, ".maker"))
 
-  def clean = QueueManager(allProjectDependencies + this, CleanTask)
-  def compile = QueueManager(allProjectDependencies + this, CompileSourceTask)
-  def javaCompile = QueueManager(allProjectDependencies + this, CompileJavaSourceTask)
-  def testCompile = QueueManager(allProjectDependencies + this, CompileTestsTask)
+  def clean = QueueManager(allProjectDependencies + this, CleanTask, ProjectAndTask(this, CleanTask))
+  def compile = QueueManager(allProjectDependencies + this, CompileSourceTask, ProjectAndTask(this, CompileSourceTask))
+  def javaCompile = QueueManager(allProjectDependencies + this, CompileJavaSourceTask, ProjectAndTask(this, CompileJavaSourceTask))
+  def testCompile = QueueManager(allProjectDependencies + this, CompileTestsTask, ProjectAndTask(this, CompileTestsTask))
   def test = {
-    QueueManager(allProjectDependencies + this, RunUnitTestsTask)
+    QueueManager(allProjectDependencies + this, RunUnitTestsTask, ProjectAndTask(this, RunUnitTestsTask))
     }
-  def testOnly = QueueManager(Set(this), RunUnitTestsTask)
-  def pack = QueueManager(allProjectDependencies + this, PackageTask)
-  def update = QueueManager(allProjectDependencies + this, UpdateExternalDependencies)
-  def updateOnly = QueueManager(Set(this), UpdateExternalDependencies)
+  def testOnly = QueueManager(Set(this), RunUnitTestsTask, ProjectAndTask(this, RunUnitTestsTask))
+  def pack = QueueManager(allProjectDependencies + this, PackageTask, ProjectAndTask(this, PackageTask))
+  def update = QueueManager(allProjectDependencies + this, UpdateExternalDependencies, ProjectAndTask(this, UpdateExternalDependencies))
+  def updateOnly = QueueManager(Set(this), UpdateExternalDependencies, ProjectAndTask(this, UpdateExternalDependencies))
 
   def ~ (task : () => BuildResult){
     var lastTaskTime : Option[Long] = None
@@ -156,6 +156,11 @@ case class Project(
     (this, Option(libDirs).map(_.flatMap(x => Option(x.listFiles()).map(_.toList.map(_.getPath)))).getOrElse(Nil).flatten) :: immediateDependentProjects.flatMap(dp => dp.listDependentLibs())
 
   def showDependencyLibraryGraph() = showGraph(makeDotFromString(listDependentLibs()))
+
+  def getTaskTree(p : Project, task : Task) : List[(ProjectAndTask, List[ProjectAndTask])] =
+    (ProjectAndTask(p, task) -> p.acrossProjectImmediateDependencies(task).toList) :: p.immediateDependentProjects.flatMap(d => getTaskTree(d, task))
+
+
 
   def delete = recursiveDelete(root)
 
