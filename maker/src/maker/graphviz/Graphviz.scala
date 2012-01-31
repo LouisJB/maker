@@ -8,20 +8,35 @@ import java.io.File
 
 object GraphVizDiGrapher {
   def makeDot(graph : List[(Project, List[Project])], showLibDirs : Boolean = false, showLibs : Boolean = false) : String = {
+    
+    def mkProjectDep(p1 : Project,  p2 : Project) =
+      "{ node[fillcolor=yellow style=filled]; \\\"%s\\\"->\\\"%s\\\" ;}".format(p1.name, p2.name)
+
+    def mkLibDirDep(p : Project,  d : File) =
+      "\\\"%s\\\"->{ node[shape=box color=blue style=filled fillcolor=lightskyblue]; \\\"%s\\\" ;}".format(p.name, d.getPath)
+      //"\\\"%s\\\"->{ node [shape=polygon sides=4 skew=0.2 color=red];\\\"%s\\\";}".format(p.name, d.getPath)
+
+    def mkLibFileDep(d : File, df : File) =
+      "\\\"%s\\\"->{ node[color=none; shape=plaintext]; \\\"%s\\\" ;}".format(d.getName, df.getName())
+
+    def mkGraph(name : String,  graphDef : String) = {
+      val g = "digraph \\\"%s\\\" { graph[size=\\\"10.25, 7.75\\\"]; "
+      (g + "{ node[ratio=compress size = \\\"10.0, 10.0\\\" nodesep=\\\"0.1\\\" ranksep=\\\"0.1\\\" fontname=Helvetica fontsize=8]; %s ;} ;}")
+        .format(name, graphDef)
+    }
+
     // take the distinct set here as we want to ignore duplicated paths caused by indirect dependencies
     val g = graph.distinct.flatMap{ case (proj, deps) => deps.flatMap(pd => {
-        ("\\\"Project-%s\\\"->\\\"Project-%s\\\"".format(proj.name, pd.name)) :: { if (showLibDirs) {
-              proj.libDirs.flatMap(libDir => "\\\"Project-%s\\\"->\\\"LibDir-%s\\\"".format(proj.name, libDir.getPath) :: { if (showLibs) {
-                Option(libDir.listFiles()).map(_.toList.map(_.getName)).getOrElse(Nil).map(x => "\\\"LibDir-%s\\\"->\\\"LibFile-%s\\\"".format(libDir.getName, x))
-              }
+        mkProjectDep(proj, pd) :: { if (showLibDirs)
+              proj.libDirs.flatMap(libDir => mkLibDirDep(proj, libDir) :: { if (showLibs)
+                Option(libDir.listFiles()).map(_.toList).getOrElse(Nil).map(x => mkLibFileDep(libDir, x))
               else Nil
             })
-          }
           else Nil
         }
       })
     }
-    val dot = "digraph G { %s }".format(g.mkString(" "))
+    val dot = mkGraph("Maker-Project-Graph", g.distinct.mkString(" "))
     println("dot = " + dot)
     dot
   }
