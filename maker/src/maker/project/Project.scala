@@ -98,15 +98,31 @@ case class Project(
   def updateOnly = QueueManager(Set(this), UpdateExternalDependencies)
 
   def ~ (task : () => BuildResult){
+    var lastTaskTime : Option[Long] = None
     def printWaitingMessage = println("\nWaiting for source file changes (press 'enter' to interrupt)")
+    def rerunTask{
+      task()
+      lastTaskTime = Some(System.currentTimeMillis)
+      printWaitingMessage
+    }
+
     printWaitingMessage
     while (true){
       Thread.sleep(1000)
       if (System.in.available  > 0 && System.in.read == 10)
         return;
-      if (allDependencies().flatMap(_.changedSrcFiles).size > 0){
-        task()
-        printWaitingMessage
+
+      if (changedSrcFiles.size > 0){
+        (lastTaskTime, lastModificationTime(srcFiles)) match {
+          // Task has never been run
+          case (None, _) => { rerunTask }
+
+          // Code has changed since task last run
+          case (Some(t1), Some(t2)) if t1 < t2 => { rerunTask }
+
+          // Either no code yet or code has not changed
+          case _ => 
+        }
       }
     }
   }

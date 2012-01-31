@@ -152,4 +152,15 @@ object FileUtils{
     dir.mkdirs
     dir
   }
+
+  def relativise(dir: File, file : File) : String = {
+    def pathComponents(f : File) = {
+      f.getAbsolutePath.split("/").filterNot(_ == "").toList
+    }
+    val dirComponents = pathComponents(dir)
+    val fileComponents = pathComponents(file)
+    if (! (fileComponents.take(dirComponents.size) == dirComponents))
+      throw new Exception("Can't relativize, " + file + " is not under directory " + dir)
+    fileComponents.drop(dirComponents.size).toList.mkString("/")
+  }
 }
