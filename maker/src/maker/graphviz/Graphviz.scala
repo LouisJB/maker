@@ -74,16 +74,16 @@ object GraphVizUtils {
   val DEFAULT_IMAGE_FORMAT = "png"
   val DEFAULT_TMP_FILE = new File("maker-gv-tmp." + DEFAULT_IMAGE_FORMAT)
   def createDotFile(graphDef : String, file : java.io.File = DEFAULT_TMP_FILE) = {
-    Command("/bin/sh", "-c", "echo \"" + graphDef + "\" | dot -T" + DEFAULT_IMAGE_FORMAT + " > " + file.getAbsolutePath).exec
+    Command("/bin/sh", "-c", "echo \"" + graphDef + "\" | dot -T" + DEFAULT_IMAGE_FORMAT + " > " + file.getAbsolutePath).exec()
     file
   }
 
   def showGraph(graphDef : String, file : java.io.File = DEFAULT_TMP_FILE) {
     val f = createDotFile(graphDef, file)
     if (isLinux)
-      Command("xdg-open", f.getAbsolutePath).exec
+      Command("xdg-open", f.getAbsolutePath).exec(true)
     else // assume OSX unless we want to support other OSes such as windows
-      Command("open", f.getAbsolutePath).exec
+      Command("open", f.getAbsolutePath).exec()
   }
 }
 

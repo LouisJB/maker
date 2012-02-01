@@ -104,7 +104,7 @@ case object CompileJavaSourceTask extends Task{
       Log.info("Compiling " + javaFilesToCompile.size + " java files")
       val javac = project.props.JavaHome().getAbsolutePath + "/bin/javac"
       val parameters = javac::"-cp"::compilationClasspath::"-d"::javaOutputDir.getAbsolutePath::javaSrcFiles.toList.map(_.getAbsolutePath)
-      Command(parameters : _*).exec match {
+      Command(parameters : _*).exec() match {
         case (0, _) => Right(javaFilesToCompile)
         case (_, error) => Left(TaskFailed(ProjectAndTask(project, this), error))
       }
@@ -145,7 +145,7 @@ case object UpdateExternalDependencies extends Task{
         commands match {
           case Nil => Right("OK")
           case c :: rest => {
-            c.exec match {
+            c.exec() match {
               case (0, _) => rec(rest)
               case (_, error) => {
                 Log.info("Command failed\n" + c)
@@ -187,7 +187,7 @@ case object PackageTask extends Task{
         }
       val jar = project.props.JavaHome().getAbsolutePath + "/bin/jar"
       val cmd = Command(jar, "cf", project.outputJar.getAbsolutePath, "-C", dir.getAbsolutePath, ".")
-      cmd.exec match {
+      cmd.exec() match {
         case (0, _) => Right(Unit)
         case (errNo, errMessage) => Left(TaskFailed(ProjectAndTask(project, this), errMessage))
       }
