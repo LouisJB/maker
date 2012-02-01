@@ -43,8 +43,16 @@ object GraphVizDiGrapher {
   }
   
   def makeDotFromProjectAndTask(ps : List[(ProjectAndTask, List[ProjectAndTask])]) : String = {
-    val g = ps.distinct.flatMap(pt => pt._2.map(p =>
-      "\\\"%s\\\"->\\\"%s\\\"".format(pt._1.runStats, p.runStats))).mkString(" ")
+    val allTimes = ps.distinct.flatMap(pt => pt._2.map(p => pt._1.lastRunTimeMs))
+    val numberOfTasks = allTimes.size
+    val avgTime = allTimes.sum / numberOfTasks
+    def ptLabel(pt : ProjectAndTask) = "<%s>\\\n%s\\\nTook %dms".format(pt.task, pt.project.name, pt.lastRunTimeMs)
+    val g = ps.distinct.flatMap(pt => pt._2.map(p => {
+      val pSize = pt._1.lastRunTimeMs.toDouble/avgTime
+      val cSize = p.lastRunTimeMs.toDouble/avgTime
+      "{\\\"%s\\\" [width=%f height=%f] }->{\\\"%s\\\" [width=%f height=%f]}"
+        .format(ptLabel(pt._1), pSize*2.0, pSize, ptLabel(p), cSize*2.0, cSize)
+    })).mkString(" ")
     val dot = "digraph G { %s }".format(g)
     println("dot = " + dot)
     dot
