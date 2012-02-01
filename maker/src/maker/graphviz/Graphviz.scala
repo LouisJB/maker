@@ -4,10 +4,12 @@ import maker.project.Project
 import maker.os.Command
 import maker.utils.os.OsUtils._
 import java.io.File
-import maker.task.ProjectAndTask
+import maker.task.{CompileJavaSourceTask, ProjectAndTask}
 
 
 object GraphVizDiGrapher {
+  val tmpImageFileName = "Maker-Project-Graph"
+
   def makeDot(graph : List[(Project, List[Project])], showLibDirs : Boolean = false, showLibs : Boolean = false) : String = {
     
     def mkProjectDep(p1 : Project,  p2 : Project) =
@@ -37,7 +39,7 @@ object GraphVizDiGrapher {
         }
       })
     }
-    val dot = mkGraph("Maker-Project-Graph", g.distinct.mkString(" "))
+    val dot = mkGraph(tmpImageFileName, g.distinct.mkString(" "))
     println("dot = " + dot)
     dot
   }
@@ -46,14 +48,15 @@ object GraphVizDiGrapher {
     val allTimes = ps.distinct.flatMap(pt => pt._2.map(p => pt._1.lastRunTimeMs))
     val numberOfTasks = allTimes.size
     val avgTime = allTimes.sum / numberOfTasks
-    def ptLabel(pt : ProjectAndTask) = "<%s>\\\n%s\\\nTook %dms".format(pt.task, pt.project.name, pt.lastRunTimeMs)
+    def ptLabel(pt : ProjectAndTask) = {
+      val size = pt.lastRunTimeMs.toDouble / avgTime
+      val nodeAttrs = if (pt.task == CompileJavaSourceTask) " style=filled fillcolor=lightskyblue" else ""
+      "{ \\\"<%s>\\\n%s\\\nTook %dms \\\" [width=%f height=%f %s] }".format(pt.task, pt.project.name, pt.lastRunTimeMs, size*2.0, size, nodeAttrs)
+    }
     val g = ps.distinct.flatMap(pt => pt._2.map(p => {
-      val pSize = pt._1.lastRunTimeMs.toDouble/avgTime
-      val cSize = p.lastRunTimeMs.toDouble/avgTime
-      "{\\\"%s\\\" [width=%f height=%f] }->{\\\"%s\\\" [width=%f height=%f]}"
-        .format(ptLabel(pt._1), pSize*2.0, pSize, ptLabel(p), cSize*2.0, cSize)
+      "%s->%s".format(ptLabel(pt._1), ptLabel(p))
     })).mkString(" ")
-    val dot = "digraph G { %s }".format(g)
+    val dot = "digraph \\\"" + tmpImageFileName + "\\\" { %s }".format(g)
     println("dot = " + dot)
     dot
   }
@@ -61,7 +64,7 @@ object GraphVizDiGrapher {
   def makeDotFromString(graph : List[(Project, List[String])]) : String = {
     val g = graph.distinct.flatMap(pd => pd._2.map(p =>
           "\\\"-Project-%s\\\"->\\\"%s\\\"".format(pd._1.name, p))).mkString(" ")
-    val dot = "digraph G { %s }".format(g)
+    val dot = "digraph \\\"" + tmpImageFileName + "\\\" { %s }".format(g)
     println("dot = " + dot)
     dot
   }
@@ -83,3 +86,4 @@ object GraphVizUtils {
       Command("open", f.getAbsolutePath).exec
   }
 }
+

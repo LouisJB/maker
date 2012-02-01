@@ -131,7 +131,7 @@ case class Project(
     immediateDependentProjects.toSet ++ immediateDependentProjects.flatMap(_.allProjectDependencies)
   }
 
-  def withinProjectTaskDependencies(task : Task) : Set[Task] = Task.standardWithinProjectDependencies.getOrElse(task, Set())
+  def withinProjectTaskDependencies(task : Task) : Set[Task] = Task.standardWithinProjectDependencies.getOrElse(task, Set[Task]()).filterNot{tsk=> javaSrcFiles.isEmpty && tsk == CompileJavaSourceTask}
   def dependentProjectsTaskDependencies(task : Task) : Set[Task] = Task.standardDependentProjectDependencies.getOrElse(task, Set())
 
   def acrossProjectImmediateDependencies(task : Task) : Set[ProjectAndTask] = {
