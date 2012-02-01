@@ -1,11 +1,11 @@
 package maker.task
 
 import maker.project.Project
+import maker.utils.{Stopwatch, Log}
 import akka.actor.Actor._
 import akka.actor.ActorRef
 import akka.routing.{CyclicIterator, Routing}
 import akka.actor.{UntypedChannel, Actor}
-import maker.utils.{Stopwatch, Log}
 import akka.event.EventHandler
 
 trait TaskResult
@@ -14,80 +14,6 @@ case object TaskSuccess extends TaskResult {
 }
 case class TaskError(reason : String, exception : Option[Throwable]) extends TaskResult {
   override def toString = "Task error, reason: " + reason + exception.map(e => ", exception " + e.getMessage).getOrElse("")
-}
-
-object ProjectAndTask{
-  val lock = new Object
-  var runningTasks = List[ProjectAndTask]()
-  private def reportTasks{
-    lock.synchronized{
-      println("There are " + runningTasks.size + " task(s) currently running")
-      println(runningTasks.mkString("\t", "\n\t", "\n"))
-    }
-  }
-  def addTask(pt : ProjectAndTask){
-    lock.synchronized{
-      println("Adding task " + pt)
-      runningTasks = pt :: runningTasks
-      reportTasks
-    }
-  }
-  def removeTask(pt : ProjectAndTask){
-    lock.synchronized{
-      println("Removing task " + pt)
-      runningTasks = runningTasks.filterNot(_ == pt)
-      reportTasks
-    }
-  }
-}
-case class ProjectAndTask(project : Project, task : Task) {
-
-  private var lastRunTimeMs_ = 0L
-  private var lastError_ : Option[TaskError] = None
-
-  def lastRunTimeMs = lastRunTimeMs_
-  def lastError = lastError_
-  val immediateDependencies : Set[ProjectAndTask] = {
-    project.acrossProjectImmediateDependencies(task)
-  }
-
-  def exec(acc : Map[Task, List[AnyRef]]) = {
-    ProjectAndTask.addTask(this)
-    Log.debug("Executing " + this)
-    val sw = new Stopwatch()
-    val taskResult = try {
-      task.exec(project, acc.getOrElse(task, Nil)) match {
-        case res @ Left(err) =>
-          lastError_ = Some(TaskError(err.reason, None))
-          res
-        case res => res
-      }
-    } catch {
-      case e =>
-        Log.info("Error occured when executing " + this)
-        lastError_ = Some(TaskError("Internal Exception", Some(e)))
-        e.printStackTrace
-        Left(TaskFailed(this, e.getMessage))
-    }
-    val totalTime = sw.ms()
-    lastRunTimeMs_ = totalTime
-    Log.info("%s completed in %dms".format(this, totalTime))
-    taskResult
-  }
-
-  override def toString = "Task[" + project.name + ":" + task + "]"
-
-  def runStats =
-    toString + " took " + lastRunTimeMs + "ms"
-  
-  def allStats = "%s took %d, status %s".format(
-    toString, lastRunTimeMs, lastError.map(_.toString).getOrElse("OK"))
-
-  def getTaskTree : List[(ProjectAndTask, List[ProjectAndTask])] = getTaskTree(this)
-  def getTaskTree(pt : ProjectAndTask) : List[(ProjectAndTask, List[ProjectAndTask])] =
-    (pt -> pt.project.acrossProjectImmediateDependencies(task).toList) :: 
-      pt.project.immediateDependentProjects.flatMap(pd => getTaskTree(ProjectAndTask(pd, task)))
-
 }
 
 sealed trait BuildMessage
@@ -162,7 +88,8 @@ class QueueManager(projectTasks : Set[ProjectAndTask], router : ActorRef, origin
 }
 
 object QueueManager{
-  def apply(projects : Set[Project], task : Task, originalProjectAndTask : ProjectAndTask) : BuildResult = {
+  def apply(projects : List[Project], task : Task) : BuildResult = {
+    val originalProjectAndTask = ProjectAndTask(projects.head, task)
     val projectTasks = {
       def recurse(moreProjectTasks : Set[ProjectAndTask], acc : Set[ProjectAndTask]) : Set[ProjectAndTask] = {
         if (moreProjectTasks.isEmpty)
@@ -171,7 +98,7 @@ object QueueManager{
           recurse(moreProjectTasks.flatMap(_.immediateDependencies), acc ++ moreProjectTasks)
         }
       }
-      recurse(projects.map(ProjectAndTask(_, task)), Set[ProjectAndTask]())
+      recurse(projects.toSet.map{proj : Project => ProjectAndTask(proj, task)}, Set[ProjectAndTask]())
     }
 
     Log.info("About to do " + task + " for projects " + projects.toList.mkString(","))
@@ -197,7 +124,7 @@ object QueueManager{
     router.stop
     EventHandler.shutdown()
     Log.info("Stats: \n" + projectTasks.map(_.runStats).mkString("\n"))
-    Log.info("Completed, took" + sw)
+    Log.info("Completed, took" + sw + ", result " + result)
     result
   }
 }

@@ -6,7 +6,7 @@ import java.io.BufferedReader
 import scala.collection.mutable.Map
 
 
-case class Dependencies(persistFile : File, var deps: Map[File, Set[File]] = Map[File, Set[File]]()) {
+case class ClassFileDependencies(persistFile : File, var deps: Map[File, Set[File]] = Map[File, Set[File]]()) {
 
   if (deps.isEmpty && persistFile.exists){
     withFileReader(persistFile) {

@@ -5,12 +5,12 @@ import java.io.File
 import maker.utils.FileUtils._
 import scala.collection.mutable.Map
 
-class DependenciesTests extends FunSuite{
+class ClassFileDependenciesTests extends FunSuite{
 
   test("Can persist and read back dependencies"){
     withTempFile {
       file : File => 
-        val deps = new Dependencies(
+        val deps = new ClassFileDependencies(
           file
           ,
           Map(
@@ -19,7 +19,7 @@ class DependenciesTests extends FunSuite{
           )
         )
         deps.persist()
-        val deps2 = Dependencies(file)
+        val deps2 = ClassFileDependencies(file)
         assert(deps === deps2)
     }
   }

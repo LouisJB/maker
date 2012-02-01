@@ -6,7 +6,7 @@ import scala.tools.nsc.plugins.Plugin
 
 /** This class implements a plugin component using a tree
  *  traverser */
-class WriteDependencies(val global: Global, deps : Dependencies) extends Plugin {
+class WriteDependencies(val global: Global, deps : ClassFileDependencies) extends Plugin {
   import global._
   var symbolMap = Map[String, Set[String]]()
 

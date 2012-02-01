@@ -75,7 +75,7 @@ class ProjectTests extends FunSuite {
     val (proj, files) = simpleProject
     import files._
     proj.compile
-    var compilationTime = proj.compilationTime.get
+    var compilationTime = proj.state.compilationTime.get
     sleepToNextSecond
     writeToFile(fooSrc, originalFooContent)
     proj.compile
@@ -88,7 +88,7 @@ class ProjectTests extends FunSuite {
     val (proj, files) = simpleProject
     proj.compile
     import files._
-    val compilationTime = proj.compilationTime.get
+    val compilationTime = proj.state.compilationTime.get
     sleepToNextSecond
 
     writeToFile(
@@ -112,7 +112,7 @@ class ProjectTests extends FunSuite {
     val (proj, files) = simpleProject
     import files._
     proj.compile
-    val compilationTime = proj.compilationTime.get
+    val compilationTime = proj.state.compilationTime.get
     sleepToNextSecond
 
     writeToFile(
@@ -135,7 +135,7 @@ class ProjectTests extends FunSuite {
     val (proj, files) = simpleProject
     import files._
     proj.compile
-    val compilationTime = proj.compilationTime.get
+    val compilationTime = proj.state.compilationTime.get
     sleepToNextSecond
 
     writeToFile(
@@ -172,5 +172,6 @@ class ProjectTests extends FunSuite {
   private def sleepToNextSecond{
     Thread.sleep(1100)
   }
+
 
 }

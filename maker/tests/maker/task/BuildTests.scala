@@ -114,7 +114,6 @@ class BuildTests extends FunSuite {
       writeToFile(new File(root, "src/foo/Foo.scala"), fooContent)
     writeToFile(new File(root, "tests/foo/FooTest.scala"), fooTestContent)
     proj.compile
-    println("There are " + proj.urls.size + "urls")
     val fooClass = proj.classLoader.loadClass("foo.Foo")
       println("Foo class in test = " + fooClass)
 
