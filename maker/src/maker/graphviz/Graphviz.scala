@@ -36,7 +36,6 @@ object GraphVizDiGrapher {
       })
     }
     val dot = mkGraph(graphName, g.distinct.mkString(" "))
-    println("dot = " + dot)
     dot
   }
   

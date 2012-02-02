@@ -61,7 +61,6 @@ object Props{
 
   private def propsFromFile(propsFile:File) : Map[String, String] = {
     val path = propsFile.getAbsolutePath
-    println("Attempting to use props from: " + path)
     val p = new Properties()
     if(propsFile.exists) {
       p.load(new FileInputStream(propsFile))

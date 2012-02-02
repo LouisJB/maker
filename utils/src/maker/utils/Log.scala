@@ -7,7 +7,6 @@ object Log extends Log(Logger.getRootLogger)
 case class Log(logger: Logger) {
 
   def level = logger.getEffectiveLevel
-  println("Level = " + level)
 
   def infoWithTime[T](message:String)(f: =>T) = {
     val stopwatch = new Stopwatch()

@@ -35,7 +35,6 @@ case object RunUnitTestsTask extends Task{
 
   private def suiteClassNames(project : Project) : List[String] = {
     val classNames = project.testClassFiles.map(FileUtils.classNameFromFile(project.testOutputDir, _))
-    classNames.foreach(println)
     classNames.filter(isAccessibleSuite(_, project.classLoader)).toList
   }
   
@@ -52,12 +51,16 @@ case object RunUnitTestsTask extends Task{
     Log.info("Testing " + project)
     val (runner, method) = runnerClassAndMethod(project)
     val suiteParameters = suiteClassNames(project).map(List("-s", _)).flatten
-    val pars = List("-c", "-o", "-p", project.scalatestRunpath) ::: suiteParameters
-    val result = method.invoke(runner, pars.toArray).asInstanceOf[Boolean]
-    if (result)
+    if (suiteParameters.isEmpty){
       Right(Unit)
-    else
-      Left(TaskFailed(ProjectAndTask(project, this), "Test failed in " + project))
+    } else {
+      val pars = List("-c", "-o", "-p", project.scalatestRunpath) ::: suiteParameters
+      val result = method.invoke(runner, pars.toArray).asInstanceOf[Boolean]
+      if (result)
+        Right(Unit)
+      else
+        Left(TaskFailed(ProjectAndTask(project, this), "Test failed in " + project))
+    }
   }
 }
 
