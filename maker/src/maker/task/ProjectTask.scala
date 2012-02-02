@@ -32,7 +32,7 @@ object ProjectAndTask{
       if (newElements.isEmpty)
         acc
       else
-        recurse(acc ++ newElements.map{pt => pt → pt.project.dependencies.childProjectTasks(pt.task).toList}.toSet)
+        recurse(acc ++ newElements.map{pt => pt → pt.immediateDependencies.toList}.toSet)
     }
     recurse(Set(ProjectAndTask(p, task) → p.dependencies.childProjectTasks(task).toList)).toList
     //(ProjectAndTask(p, task) -> p.dependencies.descendents.map{proj => proj.dependencies.childTasksInChildProjects(task).toList.map(ProjectAndTask(proj, _)) :: p.children.flatMap(d => getTaskTree(d, task))
