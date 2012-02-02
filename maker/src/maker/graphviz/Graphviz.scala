@@ -78,6 +78,7 @@ object GraphVizUtils {
     file
   }
 
+
   def showGraph(graphDef : String, file : java.io.File = DEFAULT_TMP_FILE) {
     val f = createDotFile(graphDef, file)
     if (isLinux)

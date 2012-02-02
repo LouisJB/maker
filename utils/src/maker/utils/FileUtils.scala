@@ -159,8 +159,15 @@ object FileUtils{
     }
     val dirComponents = pathComponents(dir)
     val fileComponents = pathComponents(file)
-    if (! (fileComponents.take(dirComponents.size) == dirComponents))
-      throw new Exception("Can't relativize, " + file + " is not under directory " + dir)
-    fileComponents.drop(dirComponents.size).toList.mkString("/")
+    val commonComponents = dirComponents.zip(fileComponents).takeWhile{
+      case (d, f) => d == f
+    }.map(_._1)
+    val directoriesUp = List.fill(dirComponents.size - commonComponents.size)("..")
+    val relativeComponents = directoriesUp ::: fileComponents.drop(commonComponents.size)
+    relativeComponents.mkString("/")
+  }
+
+  def classNameFromFile(classDirectory : File, classFile : File) : String = {
+    relativise(classDirectory, classFile).split('.').head.replace("/", ".")
   }
 }
