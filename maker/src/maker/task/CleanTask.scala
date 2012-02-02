@@ -2,6 +2,7 @@ package maker.task
 
 import maker.project.Project
 import maker.utils.Log
+import maker.utils.FileUtils
 
 case object CleanTask extends Task{
   def exec(project : Project, acc : List[AnyRef]) = {
@@ -10,6 +11,7 @@ case object CleanTask extends Task{
     project.testClassFiles.foreach(_.delete)
     project.javaClassFiles.foreach(_.delete)
     project.outputJar.delete
+    FileUtils.recursiveDelete(project.makerDirectory)
     Right(Unit)
   }
 }
