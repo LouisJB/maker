@@ -17,6 +17,7 @@ case class Project(
   sourceDirs: List[File] = Nil,
   tstDirs: List[File] = Nil,
   libDirs: List[File] = Nil,
+  resourceDirs : List[File] = Nil,
   children: List[Project] = Nil,
   props : Props = Props()
 ) {
@@ -47,8 +48,8 @@ case class Project(
 
   def jars = findJars(jarDirs: _*).toList.sortWith(_.getPath < _.getPath)
 
-  def classpathDirectoriesAndJars : List[File] = ((outputDir :: javaOutputDir :: testOutputDir :: jars) ::: children.flatMap(_.classpathDirectoriesAndJars)).distinct
-  def nonTestClasspathDirectoriesAndJars : List[File] = ((outputDir :: javaOutputDir :: jars) ::: children.flatMap(_.nonTestClasspathDirectoriesAndJars)).distinct
+  def classpathDirectoriesAndJars : List[File] = ((outputDir :: javaOutputDir :: testOutputDir :: jars) ::: resourceDirs ::: children.flatMap(_.classpathDirectoriesAndJars)).distinct
+  def nonTestClasspathDirectoriesAndJars : List[File] = classpathDirectoriesAndJars.filterNot(_ == testOutputDir)
   def compilationClasspath = classpathDirectoriesAndJars.map(_.getAbsolutePath).mkString(":")
   def runClasspath = classpathDirectoriesAndJars.map(_.getAbsolutePath).mkString(":")
   def scalatestRunpath = (testOutputDir :: nonTestClasspathDirectoriesAndJars).mkString(" ")
@@ -148,7 +149,7 @@ case class Project(
 
 class TopLevelProject(name:String,
                       children:List[Project],
-                      props:Props = Props()) extends Project(name, file("."), Nil, Nil, Nil, children, props) {
+                      props:Props = Props()) extends Project(name, file("."), Nil, Nil, Nil, Nil, children, props) {
 
   def generateIDEAProject() {
     val allModules = children.flatMap(_.projectAndDescendents).distinct
