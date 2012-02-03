@@ -52,12 +52,12 @@ class QueueManager(projectTasks : Set[ProjectAndTask], router : ActorRef, origin
     val (canBeProcessed, mustWait) = remainingProjectTasks.partition(
       _.immediateDependencies.filterNot(completedProjectTasks).filter(projectTasks).isEmpty
     )
-    Log.info("Can be processed = " + canBeProcessed)
+    Log.debug("Can be processed = " + canBeProcessed)
     Log.debug("must wait " + mustWait)
     remainingProjectTasks = mustWait
     canBeProcessed.foreach{
       pt =>
-        Log.info("Launching " + pt)
+        Log.debug("Launching " + pt)
         router ! ExecTaskMessage(pt, accumuland)
     }
   }
@@ -101,7 +101,7 @@ object QueueManager{
       recurse(projects.toSet.map{proj : Project => ProjectAndTask(proj, task)}, Set[ProjectAndTask]())
     }
 
-    Log.info("About to do " + task + " for projects " + projects.toList.mkString(","))
+    Log.debug("About to do " + task + " for projects " + projects.toList.mkString(","))
     apply(projectTasks, originalProjectAndTask)
   }
 
@@ -112,7 +112,7 @@ object QueueManager{
 
 
     val workers = (1 to nWorkers).map{i => actorOf(new Worker()).start}
-    Log.info("Running with " + nWorkers + " workers")
+    Log.debug("Running with " + nWorkers + " workers")
     val router = Routing.loadBalancerActor(CyclicIterator(workers)).start()
     val qm = actorOf(new QueueManager(projectTasks, router, originalProjectAndTask)).start
     
@@ -123,7 +123,7 @@ object QueueManager{
     workers.foreach(_.stop)
     router.stop
     EventHandler.shutdown()
-    Log.info("Stats: \n" + projectTasks.map(_.runStats).mkString("\n"))
+    Log.debug("Stats: \n" + projectTasks.map(_.runStats).mkString("\n"))
     Log.info("Completed, took" + sw + ", result " + result)
     result
   }

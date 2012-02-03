@@ -49,10 +49,9 @@ case class Project(
   def jars = findJars(jarDirs: _*).toList.sortWith(_.getPath < _.getPath)
 
   def classpathDirectoriesAndJars : List[File] = ((outputDir :: javaOutputDir :: testOutputDir :: jars) ::: resourceDirs ::: children.flatMap(_.classpathDirectoriesAndJars)).distinct
-  def nonTestClasspathDirectoriesAndJars : List[File] = classpathDirectoriesAndJars.filterNot(_ == testOutputDir)
   def compilationClasspath = classpathDirectoriesAndJars.map(_.getAbsolutePath).mkString(":")
   def runClasspath = classpathDirectoriesAndJars.map(_.getAbsolutePath).mkString(":")
-  def scalatestRunpath = (testOutputDir :: nonTestClasspathDirectoriesAndJars).mkString(" ")
+  def scalatestRunpath = classpathDirectoriesAndJars.mkString(" ")
   def printClasspath = compilationClasspath.split(":").foreach(println)
 
   def classLoader = {

@@ -26,11 +26,11 @@ abstract class CompileTask extends Task{
     
     val modifiedSrcFiles = changedSrcFiles(proj)
     val deletedSrcFiles_ = deletedSrcFiles(proj)
-    Log.info("Compiling " + proj)
 
     if (modifiedSrcFiles.isEmpty && deletedSrcFiles_.isEmpty) {
       Right((Set[File](), Set[File]()))
     } else {
+      Log.info("Compiling " + proj)
       proj.state.sourceToClassFiles.classFilesFor(deletedSrcFiles_).filter(_.exists) |> {
         classFiles =>
           if (classFiles.size > 0){

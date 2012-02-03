@@ -8,20 +8,20 @@ object ProjectAndTask{
   var runningTasks = List[ProjectAndTask]()
   private def reportTasks{
     lock.synchronized{
-      println("There are " + runningTasks.size + " task(s) currently running")
-      println(runningTasks.mkString("\t", "\n\t", "\n"))
+      //println("There are " + runningTasks.size + " task(s) currently running")
+      //println(runningTasks.mkString("\t", "\n\t", "\n"))
     }
   }
   def addTask(pt : ProjectAndTask){
     lock.synchronized{
-      println("Adding task " + pt)
+      //println("Adding task " + pt)
       runningTasks = pt :: runningTasks
       reportTasks
     }
   }
   def removeTask(pt : ProjectAndTask){
     lock.synchronized{
-      println("Removing task " + pt)
+      //println("Removing task " + pt)
       runningTasks = runningTasks.filterNot(_ == pt)
       reportTasks
     }
@@ -71,7 +71,8 @@ case class ProjectAndTask(project : Project, task : Task) {
     }
     val totalTime = sw.ms()
     lastRunTimeMs_ = totalTime
-    Log.info("%s completed in %dms".format(this, totalTime))
+    if (totalTime > 100)
+      Log.info("%s completed in %dms".format(this, totalTime))
     taskResult
   }
 
