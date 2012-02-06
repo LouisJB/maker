@@ -3,8 +3,6 @@ package maker.project
 import tools.nsc.{Settings, Global}
 import tools.nsc.reporters.ConsoleReporter
 import tools.nsc.io.{Directory, PlainDirectory}
-import java.io.File
-import maker.task._
 import plugin._
 
 case class ProjectCompilers(project : Project){
@@ -24,8 +22,7 @@ case class ProjectCompilers(project : Project){
       self =>
       override protected def computeInternalPhases() {
         super.computeInternalPhases
-        phasesSet += new WriteDependencies(self, project.state.classFileDependencies).Component
-        phasesSet += new GenerateSigs(self, project.state.signatures).Component
+        phasesSet += new GenerateCompilationMetadata(self, project.state.signatures, project.state.classFileDependencies).Component
         phasesSet += new DetermineClassFiles(self, compilerOutputDir, project.state.sourceToClassFiles).Component
       }
     }
@@ -44,4 +41,3 @@ case class ProjectCompilers(project : Project){
     testCompiler_
   }
 }
-

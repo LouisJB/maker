@@ -1,4 +1,4 @@
-package plugin
+package plugin.utils
 
 import maker.utils.FileUtils._
 import java.io.File
@@ -6,9 +6,9 @@ import java.io.BufferedReader
 import scala.collection.mutable.Map
 
 
-case class ClassFileDependencies(persistFile : File, var deps: Map[File, Set[File]] = Map[File, Set[File]]()) {
+case class ClassFileDependencies(persistFile: File, var deps: Map[File, Set[File]] = Map[File, Set[File]]()) {
 
-  if (deps.isEmpty && persistFile.exists){
+  if (deps.isEmpty && persistFile.exists) {
     withFileReader(persistFile) {
       in: BufferedReader =>
         var line = in.readLine
@@ -16,7 +16,9 @@ case class ClassFileDependencies(persistFile : File, var deps: Map[File, Set[Fil
           line.split(":").toList match {
             case sourceFile :: Nil => deps = deps.updated(new File(sourceFile), Set[File]())
             case sourceFile :: itsDependenciesAsString :: Nil =>
-              val itsDependencies : Set[File] = itsDependenciesAsString.toString.split(",").toSet.map {s : String => new File(s)}
+              val itsDependencies: Set[File] = itsDependenciesAsString.toString.split(",").toSet.map {
+                s: String => new File(s)
+              }
               deps = deps.updated(new File(sourceFile), itsDependencies)
             case _ => throw new Exception("Unexpected line in deps file " + persistFile)
           }
@@ -28,7 +30,7 @@ case class ClassFileDependencies(persistFile : File, var deps: Map[File, Set[Fil
   def persist() {
     writeMapToFile(
       persistFile, deps,
-      (f : File, s : Set[File]) => f.getPath + ":" + s.map(_.getPath).mkString("", ",", "")
+      (f: File, s: Set[File]) => f.getPath + ":" + s.map(_.getPath).mkString("", ",", "")
     )
   }
 
@@ -36,7 +38,7 @@ case class ClassFileDependencies(persistFile : File, var deps: Map[File, Set[Fil
     deps = deps.updated(classFile, sourceFiles)
   }
 
-  def dependentFiles(files : scala.collection.Set[File]): Set[File] = Set[File]() ++ deps.filter {
+  def dependentFiles(files: scala.collection.Set[File]): Set[File] = Set[File]() ++ deps.filter {
     case (source, dependencies) => files.exists(dependencies.contains)
   }.keySet
 
