@@ -2,6 +2,7 @@ package maker.project
 
 import maker.utils.FileUtils._
 import java.io.File
+import maker.utils.FileUtils
 
 object IDEAProjectGenerator {
   def generateTopLevelModule(rootDir:File, name:String) {
@@ -105,6 +106,21 @@ object IDEAProjectGenerator {
   }
 
   def generateModule(project:Project) {
+    val sources = if (project.srcDirs.isEmpty && project.resourceDirs.isEmpty && project.testDirs.isEmpty) {
+        """    <content url="file://$MODULE_DIR$" />"""
+    } else {
+      def sourceFolder(dir:File, test:Boolean=false) = {
+        val relDir = FileUtils.relativise(project.root, dir)
+        """      <sourceFolder url="file://$MODULE_DIR$/%s" isTestSource="%s" />""".format(relDir, test.toString)
+      }
+      val sourcesAndResources = (project.srcDirs ::: project.resourceDirs).map(sourceFolder(_, false))
+      val testSources = project.testDirs.map(sourceFolder(_, true))
+      val allSources = (sourcesAndResources ::: testSources).mkString("\n")
+      """    <content url="file://$MODULE_DIR$">
+%s
+    </content>""".format(allSources)
+    }
+
     def libraryEntry(jarEntry:String) = """    <orderEntry type="module-library" exported="">
       <library>
         <CLASSES>
@@ -126,6 +142,13 @@ object IDEAProjectGenerator {
 
     val dependencies = moduleDependencies + libraryDependencies
 
+    val output = {
+      val relativeOutputDir = FileUtils.relativise(project.root, project.outputDir)
+      val relativeTestOutputDir = FileUtils.relativise(project.root, project.testOutputDir)
+      """    <output url="file://$MODULE_DIR$/%s" />
+    <output-test url="file://$MODULE_DIR$/%s" />""".format(relativeOutputDir, relativeTestOutputDir)
+    }
+
     val moduleContent = """<?xml version="1.0" encoding="UTF-8"?>
 <module type="JAVA_MODULE" version="4">
   <component name="FacetManager">
@@ -138,19 +161,16 @@ object IDEAProjectGenerator {
     </facet>
   </component>
   <component name="NewModuleRootManager" inherit-compiler-output="false">
-    <output url="file://$MODULE_DIR$/classes" />
-    <output-test url="file://$MODULE_DIR$/test-classes" />
+%s
     <exclude-output />
-    <content url="file://$MODULE_DIR$">
-      <sourceFolder url="file://$MODULE_DIR$/src" isTestSource="false" />
-    </content>
+%s
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="scala-library-2.9.1" level="project" />
 %s
   </component>
 </module>
-""".format(dependencies)
+""".format(output, sources, dependencies)
     writeToFile(file(project.root, project.name + ".iml"), moduleContent)
   }
 

@@ -155,9 +155,9 @@ class TopLevelProject(name:String,
 
     IDEAProjectGenerator.generateTopLevelModule(root, name)
     IDEAProjectGenerator.generateIDEAProjectDir(root, name)
-    allModules.filterNot(_ == this) foreach IDEAProjectGenerator.generateModule
+    allModules foreach IDEAProjectGenerator.generateModule
 
-    IDEAProjectGenerator.generateModulesFile(file(root, ".idea"), allModules.map(_.name))
+    IDEAProjectGenerator.generateModulesFile(file(root, ".idea"), (this :: allModules).map(_.name))
   }
 }
 
