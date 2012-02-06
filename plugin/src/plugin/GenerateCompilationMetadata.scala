@@ -16,7 +16,7 @@ class CompilerPhaseResults(
 class GenerateCompilationMetadata(
     val global: Global,
     signatures : ProjectSignatures,
-    deps : ClassFileDependencies) extends Plugin {
+    dependencies : ClassFileDependencies) extends Plugin {
 
   import global._
 
@@ -40,6 +40,7 @@ class GenerateCompilationMetadata(
         val compilerResults = new CompilerPhaseResults()
         newTraverser(compilerResults).traverse(unit.body)
         signatures += (unit.source.file.file, Set[String]() ++ compilerResults.sigs)
+        dependencies += (unit.source.file.file, Set() ++ compilerResults.deps.map(new java.io.File(_)))
       }
 
       def newTraverser(collector : CompilerPhaseResults): Traverser = new ForeachTreeTraverser(check(collector))
