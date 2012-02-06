@@ -8,3 +8,8 @@ out
 tests/projects/simple-project/out-jar/
 *.class
 
+GPATH
+GRTAGS
+GSYMS
+GTAGS
+*.png
