@@ -3,11 +3,8 @@ set-maker-classpath.sh
 .idea/workspace.xml
 tags
 .maker
-target
 out
-tests/projects/simple-project/out-jar/
 *.class
-
 GPATH
 GRTAGS
 GSYMS
