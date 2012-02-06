@@ -11,7 +11,7 @@ lib_dirs.each do |lib_dir|
     end
   end
 end
-project_resource_dir="lib/resources/"
+project_resource_dir="resources/"
 module_class_dirs = modules.collect do |m| ["#{m}/classes/", "#{m}/test-classes", "#{m}/resources/"] end
 files_for_maker_classpath=[File.expand_path("out")] + [project_resource_dir] + jars
 files_for_classpath=[project_resource_dir] + jars + module_class_dirs.flatten
