@@ -22,8 +22,8 @@ case class ProjectCompilers(project : Project){
       self =>
       override protected def computeInternalPhases() {
         super.computeInternalPhases
-        phasesSet += new GenerateCompilationMetadata(self, project.state.signatures, project.state.classFileDependencies).Component
-        phasesSet += new DetermineClassFiles(self, compilerOutputDir, project.state.sourceToClassFiles).Component
+        phasesSet += new GenerateCompilationMetadata(self, project.state.signatures, project.state.classFileDependencies, compilerOutputDir, project.state.sourceToClassFiles).Component
+        //phasesSet += new DetermineClassFiles(self, compilerOutputDir, project.state.sourceToClassFiles).Component
       }
     }
     comp
