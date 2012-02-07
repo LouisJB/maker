@@ -158,6 +158,8 @@ class TopLevelProject(name:String,
     allModules foreach IDEAProjectGenerator.generateModule
 
     IDEAProjectGenerator.generateModulesFile(file(root, ".idea"), (this :: allModules).map(_.name))
+
+    IDEAProjectGenerator.updateGitIgnoreIfRequired(this)
   }
 }
 
