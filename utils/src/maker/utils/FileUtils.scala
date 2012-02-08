@@ -6,7 +6,7 @@ import java.io.BufferedWriter
 import java.io.BufferedReader
 import java.io.FileReader
 
-object FileUtils{
+object FileUtils {
 
   def file(f : String) : File = new File(f)
   def file(f : File, d : String) : File = new File(f, d)

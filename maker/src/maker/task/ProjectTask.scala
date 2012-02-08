@@ -44,9 +44,12 @@ case class ProjectAndTask(project : Project, task : Task) {
 
   private var lastRunTimeMs_ = 0L
   private var lastError_ : Option[TaskError] = None
+  private var completed_ = false
 
   def lastRunTimeMs = lastRunTimeMs_
   def lastError = lastError_
+  def completed = completed_
+
   val immediateDependencies : Set[ProjectAndTask] = {
     project.dependencies.childProjectTasks(task)
   }
@@ -60,7 +63,10 @@ case class ProjectAndTask(project : Project, task : Task) {
         case res @ Left(err) =>
           lastError_ = Some(TaskError(err.reason, None))
           res
-        case res => res
+        case res => {
+          completed_ = true
+          res
+        }
       }
     } catch {
       case e =>
