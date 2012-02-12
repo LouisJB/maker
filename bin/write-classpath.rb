@@ -3,7 +3,7 @@
 require 'find'
 jars = []
 modules=["maker", "plugin", "utils"]
-lib_dirs = modules.collect{|m| "#{m}/lib"}.unshift("lib")
+lib_dirs = ["maker-lib"]
 lib_dirs.each do |lib_dir|
   Find.find(lib_dir) do |f|
     if f =~ /\.jar$/ then

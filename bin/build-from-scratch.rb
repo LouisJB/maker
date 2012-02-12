@@ -24,7 +24,7 @@ Find.find(".") do |f|
 end
 
 
-jars = Dir.glob("lib/*.jar")
+jars = Dir.glob("maker-lib/*.jar")
 raise "fsc not found - set SCALA_HOME" unless File.exist?("#{ENV["SCALA_HOME"]}/bin/fsc")
 cmd = "$SCALA_HOME/bin/fsc -classpath #{jars.join(":")} -d out/ #{source_files.join(" ")}"
 puts cmd
