@@ -7,14 +7,22 @@ mkdir -p $MAKER_LIB_DIR
 MAKER_IVY_SETTINGS_FILE=ivysettings.xml
 main() {
   process_options $*
-  if [ -z $MAKER_SKIP_IVY_UPDATE ];
+  if [ $MAKER_IVY_UPDATE ];
   then
     ivy_update
   fi
+  if [ $MAKER_BOOTSTRAP ];
+  then
+    bootstrap
+  fi
   export JAVA_OPTS="-Xmx$(($MAKER_HEAP_SPACE))m -Xms$(($MAKER_HEAP_SPACE / 10))m $JREBEL_OPTS"
-  CLASSPATH="$MAKER_CLASSPATH:$(ls .maker/lib/*.jar | xargs | sed 's/ /:/g')"
+  export CLASSPATH="$MAKER_CLASSPATH:$(ls .maker/lib/*.jar | xargs | sed 's/ /:/g')"
   echo $CLASSPATH
   $SCALA_HOME/bin/scala -Yrepl-sync -nc -i $MAKER_PROJECT_FILE
+}
+
+bootstrap() {
+
 }
 
 process_options() {
@@ -27,7 +35,8 @@ process_options() {
       -c | --maker-classpath ) MAKER_CLASSPATH=$2; shift 2;;
       -j | --use-jrebel ) set_jrebel_options; shift;;
       -m | --mem-heap-space ) MAKER_HEAP_SPACE=$2; shift 2;;
-      -s | --skip-ivy-update ) MAKER_SKIP_IVY_UPDATE=true; shift;;
+      -y | --do-ivy-update ) MAKER_IVY_UPDATE=true; shift;;
+      -b | --boostrap ) MAKER_BOOTSTRAP=true; shift;;
       --ivy-proxy-host ) MAKER_IVY_PROXY_HOST=$2; shift 2;;
       --ivy-proxy-port ) MAKER_IVY_PROXY_PORT=$2; shift 2;;
       --ivy-non-proxy-hosts ) MAKER_IVY_NON_PROXY_HOSTS=$2; shift 2;; 
@@ -120,7 +129,6 @@ set_default_options() {
 
 
 set_jrebel_options() {
-  echo "SETTING JREBEL OPTIONS"
   if [ ! -f $JREBEL_HOME/jrebel.jar ];
   then
     echo "Can't find jrebel.jar, set JREBEL_HOME"

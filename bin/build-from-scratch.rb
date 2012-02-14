@@ -1,4 +1,4 @@
-#!/usr/bin/ruby -w
+#ke!/usr/bin/ruby -w
 
 require 'find'
 puts `rm -rf out; mkdir out`
