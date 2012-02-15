@@ -1,10 +1,12 @@
-#!/bin/sh
+#!/bin/bash
 
 MAKER_LIB_DIR=.maker/lib
 
 mkdir -p $MAKER_LIB_DIR
+MAKER_BOOTSTRAP=true
+#MAKER_IVY_UPDATE=true
+JAVA_HOME=/usr/local/jdk/
 
-MAKER_IVY_SETTINGS_FILE=ivysettings.xml
 main() {
   process_options $*
   if [ $MAKER_IVY_UPDATE ];
@@ -13,15 +15,56 @@ main() {
   fi
   if [ $MAKER_BOOTSTRAP ];
   then
+    echo hi
+    foo=12345
+    variable_safely foo
     bootstrap
   fi
-  export JAVA_OPTS="-Xmx$(($MAKER_HEAP_SPACE))m -Xms$(($MAKER_HEAP_SPACE / 10))m $JREBEL_OPTS"
-  export CLASSPATH="$MAKER_CLASSPATH:$(ls .maker/lib/*.jar | xargs | sed 's/ /:/g')"
-  echo $CLASSPATH
-  $SCALA_HOME/bin/scala -Yrepl-sync -nc -i $MAKER_PROJECT_FILE
+  if [ $MAKER_LAUNCH ];
+  then
+    export JAVA_OPTS="-Xmx$(($MAKER_HEAP_SPACE))m -Xms$(($MAKER_HEAP_SPACE / 10))m $JREBEL_OPTS"
+    export CLASSPATH="$MAKER_CLASSPATH:$(external_jars)"
+    echo $CLASSPATH
+    #$(scala_home)/bin/scala -Yrepl-sync -nc -i $MAKER_PROJECT_FILE
+  fi
 }
 
+external_jars() {
+  echo `ls .maker/lib/*.jar | xargs | sed 's/ /:/g'`
+}
+
+scala_home(){
+  if [ -z $SCALA_HOME ];
+  then
+    echo "SCALA_HOME not defined"
+    exit -1
+  else
+    echo $SCALA_HOME
+  fi
+}
+
+java_home(){
+  if [ -z $JAVA_HOME ];
+  then
+    echo "JAVA_HOME not defined"
+    exit -1
+  else
+    echo $JAVA_HOME
+  fi
+}
 bootstrap() {
+
+  for module in utils plugin maker; do
+    for src_dir in src tests; do
+      SRC_FILES="$SRC_FILES $(find $module/$src_dir -name '*.scala' | xargs)"
+    done
+  done
+
+
+  echo "$(scala_home)/bin/fsc -classpath $(external_jars) -d out $SRC_FILES"
+  $(scala_home)/bin/fsc -classpath $(external_jars) -d out $SRC_FILES || Error "Failed to compile"
+  echo "$(java_home)/bin/jar cf maker.jar out/"
+  $(java_home)/bin/jar cf maker.jar out/
 
 }
 
@@ -74,6 +117,16 @@ ivy_jar(){
   fi
 }
 
+ivy_settings(){
+  if [ ! -z $MAKER_IVY_SETTINGS_FILE ];
+  then
+    echo " -settings $MAKER_IVY_SETTINGS_FILE "
+  elif [ -e "ivysettings.xml" ]
+  then
+    echo " -settings ivysettings.xml "
+  fi
+}
+
 ivy_command(){
   command="java "
   if [ ! -z $MAKER_IVY_PROXY_HOST ];
@@ -89,10 +142,7 @@ ivy_command(){
     command="$command -Dhttp.nonProxyHosts=$MAKER_IVY_NON_PROXY_HOSTS"
   fi
   command="$command -jar $(ivy_jar) -ivy $MAKER_IVY_FILE "
-  if [ ! -z $MAKER_IVY_SETTINGS_FILE ];
-  then
-    command="$command -settings $MAKER_IVY_SETTINGS_FILE "
-  fi
+  command="$command $(ivy_settings) "
   command="$command -retrieve $MAKER_LIB_DIR/[artifact]-[revision](-[classifier]).[ext] "
   echo $command
 }
