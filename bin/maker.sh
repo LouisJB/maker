@@ -1,10 +1,10 @@
 #!/bin/bash
 
+set -e
+
 MAKER_LIB_DIR=.maker/lib
 
 mkdir -p $MAKER_LIB_DIR
-MAKER_BOOTSTRAP=true
-#MAKER_IVY_UPDATE=true
 JAVA_HOME=/usr/local/jdk/
 
 main() {
@@ -13,19 +13,15 @@ main() {
   then
     ivy_update
   fi
-  if [ $MAKER_BOOTSTRAP ];
+  if [ $MAKER_BOOTSTRAP ] || [ ! -e maker.jar ];
   then
-    echo hi
-    foo=12345
-    variable_safely foo
     bootstrap
   fi
-  if [ $MAKER_LAUNCH ];
+  if [ -z $MAKER_SKIP_LAUNCH ];
   then
     export JAVA_OPTS="-Xmx$(($MAKER_HEAP_SPACE))m -Xms$(($MAKER_HEAP_SPACE / 10))m $JREBEL_OPTS"
-    export CLASSPATH="$MAKER_CLASSPATH:$(external_jars)"
-    echo $CLASSPATH
-    #$(scala_home)/bin/scala -Yrepl-sync -nc -i $MAKER_PROJECT_FILE
+    export CLASSPATH="maker.jar:$(external_jars)"
+    $(scala_home)/bin/scala -Yrepl-sync -nc -i $MAKER_PROJECT_FILE
   fi
 }
 
@@ -52,19 +48,21 @@ java_home(){
     echo $JAVA_HOME
   fi
 }
+
 bootstrap() {
 
+  rm -rf out
+  mkdir out
   for module in utils plugin maker; do
     for src_dir in src tests; do
       SRC_FILES="$SRC_FILES $(find $module/$src_dir -name '*.scala' | xargs)"
     done
   done
 
-
   echo "$(scala_home)/bin/fsc -classpath $(external_jars) -d out $SRC_FILES"
   $(scala_home)/bin/fsc -classpath $(external_jars) -d out $SRC_FILES || Error "Failed to compile"
   echo "$(java_home)/bin/jar cf maker.jar out/"
-  $(java_home)/bin/jar cf maker.jar out/
+  $(java_home)/bin/jar cf maker.jar -C out/ .
 
 }
 
