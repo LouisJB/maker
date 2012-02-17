@@ -6,7 +6,7 @@ import java.io.BufferedWriter
 import java.io.BufferedReader
 import java.io.FileReader
 
-object FileUtils{
+object FileUtils {
 
   def file(f : String) : File = new File(f)
   def file(f : File, d : String) : File = new File(f, d)
@@ -21,6 +21,17 @@ object FileUtils{
         else recurse(f.getParentFile)
       }
       recurse(file)
+    }
+
+    def read : Iterator[String] = io.Source.fromFile(file).getLines()
+    def append(s:String) {
+      val stringToWrite = {
+        read.toList.lastOption match {
+          case Some(l) if l.endsWith("\n") => "\n" + s + "\n"
+          case _ => s + "\n"
+        }
+      }
+      appendToFile(file, stringToWrite)
     }
   }
   def findFiles(pred : File => Boolean, dirs : File*) : Set[File] = {
@@ -58,7 +69,14 @@ object FileUtils{
     val fstream = new FileWriter(file)
     val out = new BufferedWriter(fstream)
     f(out)
-    out.close
+    out.close()
+  }
+
+  def withFileAppender(file : File)(f : BufferedWriter => _){
+    val fstream = new FileWriter(file, true)
+    val out = new BufferedWriter(fstream)
+    f(out)
+    out.close()
   }
 
   def withFileReader(file : File)(f : BufferedReader => _){
@@ -66,7 +84,7 @@ object FileUtils{
       val fstream = new FileReader(file)
       val in = new BufferedReader(fstream)
       f(in)
-      in.close
+      in.close()
     }
   }
   
@@ -87,6 +105,13 @@ object FileUtils{
 
   def writeToFile(file : File, text : String){
     withFileWriter(file){
+      out : BufferedWriter =>
+        out.write(text)
+    }
+  }
+
+  def appendToFile(file : File, text : String){
+    withFileAppender(file){
       out : BufferedWriter =>
         out.write(text)
     }

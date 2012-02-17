@@ -3,6 +3,7 @@ package maker.project
 import maker.utils.FileUtils._
 import java.io.File
 import maker.utils.FileUtils
+import collection.mutable.ListBuffer
 
 object IDEAProjectGenerator {
   def generateTopLevelModule(rootDir:File, name:String) {
@@ -168,5 +169,22 @@ object IDEAProjectGenerator {
 </project>
 """.format(moduleEntries)
     writeToFile(file(ideaProjectRoot, "modules.xml"), modulesContent)
+  }
+
+  def updateGitIgnoreIfRequired(project:Project) {
+    val gitIgnoreFile = file(project.root, ".gitignore")
+    if (gitIgnoreFile.exists()) {
+      val gitIgnoreLines = gitIgnoreFile.read.map(_.replaceAll("\n", "").trim).toList
+      val linesToWrite = new ListBuffer[String]()
+      val ideaProjectFolder = ".idea"
+      if (!gitIgnoreLines.contains(ideaProjectFolder)) {
+        linesToWrite += ideaProjectFolder
+      }
+      val moduleFiles = "*.iml"
+      if (!gitIgnoreLines.contains(moduleFiles)) {
+        linesToWrite += moduleFiles
+      }
+      linesToWrite.foreach(line => gitIgnoreFile.append(line))
+    }
   }
 }

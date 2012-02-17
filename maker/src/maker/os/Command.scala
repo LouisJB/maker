@@ -28,4 +28,3 @@ case class Command(args : String*) {
 
   override def toString = "Command: " + args.mkString(" ")
 }
-

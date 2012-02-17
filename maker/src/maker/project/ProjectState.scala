@@ -2,11 +2,12 @@ package maker.project
 
 import java.io.File
 import maker.utils.FileUtils._
+import plugin.utils.{ProjectSignatures, SourceClassFileMapping, ClassFileDependencies}
 
 case class ProjectState(project : Project){
-  lazy val classFileDependencies = plugin.ClassFileDependencies(new File(project.makerDirectory, "dependencies"))
-  lazy val signatures = plugin.ProjectSignatures(new File(project.makerDirectory, "signatures"))
-  lazy val sourceToClassFiles = plugin.SourceClassFileMapping(new File(project.makerDirectory, "sourceToClassFiles"))
+  lazy val classFileDependencies = ClassFileDependencies(new File(project.makerDirectory, "dependencies"))
+  lazy val signatures = ProjectSignatures(new File(project.makerDirectory, "signatures"))
+  lazy val sourceToClassFiles = SourceClassFileMapping(new File(project.makerDirectory, "sourceToClassFiles"))
 
   def lastModificationTime(files : Set[File]) = files.toList.map(_.lastModified).sortWith(_ > _).headOption
 
