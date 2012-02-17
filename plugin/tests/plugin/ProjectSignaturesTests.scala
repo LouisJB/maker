@@ -3,6 +3,7 @@ package plugin
 import org.scalatest.FunSuite
 import maker.utils.FileUtils._
 import java.io.File
+import utils.ProjectSignatures
 
 class ProjectSignaturesTests extends FunSuite {
 

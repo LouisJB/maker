@@ -45,7 +45,7 @@ object GraphVizDiGrapher {
     val avgTime = allTimes.sum / numberOfTasks
     def ptLabel(pt : ProjectAndTask) = {
       val size = pt.lastRunTimeMs.toDouble / avgTime
-      val nodeAttrs = if (pt.task == CompileJavaSourceTask) " style=filled fillcolor=lightskyblue" else ""
+      def nodeAttrs = if (!pt.completed) " style=filled fillcolor=red" else if (pt.task == CompileJavaSourceTask) " style=filled fillcolor=lightskyblue" else ""
       "{ \\\"<%s> %s Took %dms\\\" [width=%f height=%f %s] }".format(pt.task, pt.project.name, pt.lastRunTimeMs, size*2.0, size, nodeAttrs)
     }
     val g = ps.distinct.flatMap(pt => pt._2.map(p => {

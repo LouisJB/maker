@@ -3,6 +3,7 @@ package plugin
 import org.scalatest.FunSuite
 import maker.utils.FileUtils
 import java.io.File
+import utils.SourceClassFileMapping
 
 class SourceClassFileMappingTests extends FunSuite{
   test("persisting can round trip"){
