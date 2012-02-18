@@ -45,7 +45,6 @@ case class Project(
   def javaClassFiles = findClasses(javaOutputDir) 
   def testClassFiles = findClasses(testOutputDir)
 
-
   def jars = findJars(jarDirs: _*).toList.sortWith(_.getPath < _.getPath)
 
   def classpathDirectoriesAndJars : List[File] = ((outputDir :: javaOutputDir :: testOutputDir :: jars) ::: resourceDirs ::: children.flatMap(_.classpathDirectoriesAndJars)).distinct
@@ -60,7 +59,6 @@ case class Project(
   }
 
   def outputJar = new File(packageDir.getAbsolutePath, name + ".jar")
-
 
   val state = ProjectState(this)
   val compilers = ProjectCompilers(this)
@@ -137,13 +135,9 @@ case class Project(
     showGraph(makeDotFromString(dependentLibs))
   }
 
-
-
   def delete = recursiveDelete(root)
 
   override def toString = "Project " + name
-
-
 }
 
 class TopLevelProject(name:String,

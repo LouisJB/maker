@@ -38,24 +38,34 @@ object GraphVizDiGrapher {
     val dot = mkGraph(graphName, g.distinct.mkString(" "))
     dot
   }
-  
+
+  /**
+   * makes simple graphviz digraph definition string from a
+   *   ProjectAndTask tree (list of (parent -> list of children))
+   */
   def makeDotFromProjectAndTask(ps : List[(ProjectAndTask, List[ProjectAndTask])]) : String = {
-    val allTimes = ps.distinct.flatMap(pt => pt._2.map(p => pt._1.lastRunTimeMs))
+    val pts = ps.distinct
+    val allTimes = pts.flatMap(pt => pt._2.map(p => pt._1.runTimeMs))
     val numberOfTasks = allTimes.size
     val avgTime = allTimes.sum / numberOfTasks
-    def ptLabel(pt : ProjectAndTask) = {
-      val size = pt.lastRunTimeMs.toDouble / avgTime
-      def nodeAttrs = if (!pt.completed) " style=filled fillcolor=red" else if (pt.task == CompileJavaSourceTask) " style=filled fillcolor=lightskyblue" else ""
-      "{ \\\"<%s> %s Took %dms\\\" [width=%f height=%f %s] }".format(pt.task, pt.project.name, pt.lastRunTimeMs, size*2.0, size, nodeAttrs)
+    def mkLabel(pt : ProjectAndTask) = {
+      val size = pt.runTimeMs.toDouble / avgTime
+      val nodeAttrs = if (!pt.completed) " style=filled fillcolor=red" else if (pt.task == CompileJavaSourceTask) " style=filled fillcolor=lightskyblue" else ""
+      "{ \\\"<%s> %s Took %dms\\\" [width=%f height=%f %s] }".format(pt.task, pt.project.name, pt.runTimeMs, size*2.0, size, nodeAttrs)
     }
-    val g = ps.distinct.flatMap(pt => pt._2.map(p => {
-      "%s->%s".format(ptLabel(pt._1), ptLabel(p))
-    }))
+    val g = pts.flatMap(pt => {
+      import math._
+      val criticalPathFinishingTime = (0L /: pt._2.map(_.finishingTime))(max)
+      def mkArrowAttrs(pt : ProjectAndTask) = if (pt.finishingTime >= criticalPathFinishingTime) "[color=red]" else ""
+      pt._2.map(pdt =>
+        "%s->%s %s".format(mkLabel(pt._1), mkLabel(pdt), mkArrowAttrs(pdt))
+      )
+    })
     val dot = mkGraph(graphName, g.distinct.mkString(" "))
     println("dot = " + dot)
     dot
   }
-  
+
   def makeDotFromString(graph : List[(Project, List[String])]) : String = {
     val g = graph.distinct.flatMap(pd => pd._2.map(p =>
           "\\\"-Project-%s\\\"->\\\"%s\\\"".format(pd._1.name, p))).mkString(" ")
@@ -67,19 +77,23 @@ object GraphVizDiGrapher {
 
 object GraphVizUtils {
   val DEFAULT_IMAGE_FORMAT = "png"
-  val DEFAULT_TMP_FILE = new File("maker-gv-tmp." + DEFAULT_IMAGE_FORMAT)
-  def removeGraphFile(file : File = DEFAULT_TMP_FILE) = {
-    Command("rm", file.getAbsolutePath).exec()
+  def imageBaseName = "maker-gv-tmp"
+  def defaultImageFile = new File(imageBaseName + "." + DEFAULT_IMAGE_FORMAT)
+
+  def removeGraphFile(file : File = defaultImageFile) = {
+    file.delete()
     file
   }
-  def createGraphFile(graphDef : String, file : File = DEFAULT_TMP_FILE) = {
+
+  def createGraphFile(graphDef : String, file : File = defaultImageFile) = {
     Command("/bin/sh", "-c", "echo \"" + graphDef + "\" | dot -T" + DEFAULT_IMAGE_FORMAT + " > " + file.getAbsolutePath).exec()
     file
   }
 
-  def showGraph(graphDef : String, file : File = DEFAULT_TMP_FILE) {
-    removeGraphFile(file)
-    val f = createGraphFile(graphDef, file)
+  def showGraph(graphDef : String, file : File = defaultImageFile) =
+    showImage(createGraphFile(graphDef, removeGraphFile(file)))
+
+  def showImage(f : File) {
     if (isLinux)
       Command("xdg-open", f.getAbsolutePath).exec(true)
     else // assume OSX until we want to support other OSes such as windows
