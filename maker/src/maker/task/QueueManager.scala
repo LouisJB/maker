@@ -46,6 +46,7 @@ class QueueManager(projectTasks : Set[ProjectAndTask], router : ActorRef, origin
   var remainingProjectTasks = projectTasks
   var completedProjectTasks : Set[ProjectAndTask] = Set()
   var originalCaller : UntypedChannel = _
+  var roundNo = 0
   private def execNextLevel{
     Log.debug("Remaining tasks are " + remainingProjectTasks)
     Log.debug("Completed tasks are " + completedProjectTasks)
@@ -57,9 +58,11 @@ class QueueManager(projectTasks : Set[ProjectAndTask], router : ActorRef, origin
     remainingProjectTasks = mustWait
     canBeProcessed.foreach{
       pt =>
+        pt.roundNo = roundNo
         Log.debug("Launching " + pt)
         router ! ExecTaskMessage(pt, accumuland)
     }
+    roundNo += 1
   }
   def receive = {
     case TaskResultMessage(projectTask, Left(taskFailure)) => {

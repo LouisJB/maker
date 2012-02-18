@@ -51,7 +51,8 @@ object GraphVizDiGrapher {
     def mkLabel(pt : ProjectAndTask) = {
       val size = pt.runTimeMs.toDouble / avgTime
       val nodeAttrs = if (!pt.completed) " style=filled fillcolor=red" else if (pt.task == CompileJavaSourceTask) " style=filled fillcolor=lightskyblue" else ""
-      "{ \\\"<%s> %s Took %dms\\\" [width=%f height=%f %s] }".format(pt.task, pt.project.name, pt.runTimeMs, size*2.0, size, nodeAttrs)
+      "{ \\\"<%s> %s (%d) Took %dms\\\" [width=%f height=%f %s] }"
+        .format(pt.task, pt.project.name, pt.roundNo, pt.runTimeMs, size*2.0, size, nodeAttrs)
     }
     val g = pts.flatMap(pt => {
       import math._

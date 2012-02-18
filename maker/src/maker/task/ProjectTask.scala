@@ -46,6 +46,7 @@ case class ProjectAndTask(project : Project, task : Task) {
   private var lastError_ : Option[TaskError] = None
   private var completed_ = false
   private var finishingTime_ = 0L
+  var roundNo = 0
   
   def runTimeMs = lastRunTimeMs_
   def lastError = lastError_
