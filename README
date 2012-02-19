@@ -1,36 +1,13 @@
 How hard is it to replace SBT?
 
-Building Maker
---------------
-
-To bootstrap
-$ ./bin/bootstrap.sh
-
-This builds Maker twice, once using a brute command line. The second time using the first Maker to build itself. 
-
-These Makers live in separate classpaths. For the former's classpath execute
-  $ . set-maker-classpath.sh
-for the latter run
-  $ . set-classpath.sh
-
-Which classpath should be used depends on how Maker is to be used.
-
-a) For managing another project - either
-b) For developing Maker while testing against another project - use the latter.
-c) For developing Maker while tesing against itself - use the former
-
-
 Running Maker
 -------------
 
-Maker uses a number of Akka workers to execute any task. Currently that number is (Number of cores) / 2. Allow 2G for each worker when setting the Java heap space. Only the heap size option is actually required, the others permit the use of JRebel for Maker developers.
-
-$ export JAVA_OPTS="-Xmx2000m -javaagent:"<path to jrebel.jar> -noverify"
-
-The project needs a scala file to desribe the modules and their dependencies. See Maker.scala in the Maker code for an example. Starling's Maker config file is in maker/Maker.scala
+./<maker-dir>/bin/maker.sh -p <project-file>
 
 
-$ scala -nc -Yrepl-sync -i Maker.scala
+Maker will download the required jars, compile itself, and then load the project file.
+
 
 You should see the list of projects loaded into the repl. Each project can run the usual set of Tasks, these are currently compile, testCompile, clean, test, update, pack. These will run across the project and its dependencies. most of these tasks have a 'just this project' equivalent. E.g. compileOnly, testOnly.
 
