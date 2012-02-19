@@ -26,6 +26,7 @@ object ProjectAndTask{
       reportTasks
     }
   }
+
   def getTaskTree(p : Project, task : Task) : List[(ProjectAndTask, List[ProjectAndTask])] = {
     def recurse(acc : Set[(ProjectAndTask, List[ProjectAndTask])]) : Set[(ProjectAndTask, List[ProjectAndTask])] = {
       val newElements : Set[ProjectAndTask] = acc.flatMap(_._2).filterNot(acc.map(_._1))
@@ -37,7 +38,6 @@ object ProjectAndTask{
     recurse(Set(ProjectAndTask(p, task) → p.dependencies.childProjectTasks(task).toList)).toList
     //(ProjectAndTask(p, task) -> p.dependencies.descendents.map{proj => proj.dependencies.childTasksInChildProjects(task).toList.map(ProjectAndTask(proj, _)) :: p.children.flatMap(d => getTaskTree(d, task))
   }
-
 }
 
 case class ProjectAndTask(project : Project, task : Task) {
@@ -45,10 +45,13 @@ case class ProjectAndTask(project : Project, task : Task) {
   private var lastRunTimeMs_ = 0L
   private var lastError_ : Option[TaskError] = None
   private var completed_ = false
-
-  def lastRunTimeMs = lastRunTimeMs_
+  private var finishingTime_ = 0L
+  var roundNo = 0
+  
+  def runTimeMs = lastRunTimeMs_
   def lastError = lastError_
   def completed = completed_
+  def finishingTime = finishingTime_
 
   val immediateDependencies : Set[ProjectAndTask] = {
     project.dependencies.childProjectTasks(task)
@@ -77,6 +80,7 @@ case class ProjectAndTask(project : Project, task : Task) {
     }
     val totalTime = sw.ms()
     lastRunTimeMs_ = totalTime
+    finishingTime_ = System.nanoTime
     if (totalTime > 100)
       Log.info("%s completed in %dms".format(this, totalTime))
     taskResult
@@ -84,11 +88,10 @@ case class ProjectAndTask(project : Project, task : Task) {
 
   override def toString = "Task[" + project.name + ":" + task + "]"
 
-  def runStats =
-    toString + " took " + lastRunTimeMs + "ms"
+  def runStats = toString + " took " + runTimeMs + "ms"
   
   def allStats = "%s took %d, status %s".format(
-    toString, lastRunTimeMs, lastError.map(_.toString).getOrElse("OK"))
+    toString, runTimeMs, lastError.map(_.toString).getOrElse("OK"))
+  
   def getTaskTree : List[(ProjectAndTask, List[ProjectAndTask])] = ProjectAndTask.getTaskTree(project, task)
 }
-

@@ -31,7 +31,7 @@ case class BuildResult(res : Either[TaskFailed, AnyRef], projectAndTasks : Set[P
   def stats = projectAndTasks.map(_.allStats).mkString("\n")
   
   def resultTree(pt : ProjectAndTask = originalProjectAndTask) = {
-    pt.getTaskTree.map(p => (projectAndTasks.find(_ == p._1).get, p._2.map(x => projectAndTasks.find(_ == x).get)))
+    pt.getTaskTree.map(p => (projectAndTasks.find(_ == p._1).get, p._2.map(pt => projectAndTasks.find(_ == pt).get)))
   }
   
   def showBuildGraph() = 
@@ -46,6 +46,7 @@ class QueueManager(projectTasks : Set[ProjectAndTask], router : ActorRef, origin
   var remainingProjectTasks = projectTasks
   var completedProjectTasks : Set[ProjectAndTask] = Set()
   var originalCaller : UntypedChannel = _
+  var roundNo = 0
   private def execNextLevel{
     Log.debug("Remaining tasks are " + remainingProjectTasks)
     Log.debug("Completed tasks are " + completedProjectTasks)
@@ -57,9 +58,11 @@ class QueueManager(projectTasks : Set[ProjectAndTask], router : ActorRef, origin
     remainingProjectTasks = mustWait
     canBeProcessed.foreach{
       pt =>
+        pt.roundNo = roundNo
         Log.debug("Launching " + pt)
         router ! ExecTaskMessage(pt, accumuland)
     }
+    roundNo += 1
   }
   def receive = {
     case TaskResultMessage(projectTask, Left(taskFailure)) => {
