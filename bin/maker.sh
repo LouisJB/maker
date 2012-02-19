@@ -1,32 +1,38 @@
 #!/bin/bash
 
+MAKER_DIR="$( cd "$(dirname $( dirname "${BASH_SOURCE[0]}" ))" && pwd )"
+SAVED_DIR=`pwd`
+echo $MAKER_DIR
+
 set -e
 
-MAKER_LIB_DIR=.maker/lib
-
-mkdir -p $MAKER_LIB_DIR
-JAVA_HOME=/usr/local/jdk/
+MAKER_LIB_DIR=$MAKER_DIR/.maker/lib
 
 main() {
   process_options $*
-  if [ $MAKER_IVY_UPDATE ];
+  if [ $MAKER_IVY_UPDATE ] || [ ! -e $MAKER_LIB_DIR ];
   then
     ivy_update
   fi
-  if [ $MAKER_BOOTSTRAP ] || [ ! -e maker.jar ];
+  if [ $MAKER_BOOTSTRAP ] || [ ! -e $MAKER_DIR/maker.jar ];
   then
     bootstrap
   fi
   if [ -z $MAKER_SKIP_LAUNCH ];
   then
     export JAVA_OPTS="-Xmx$(($MAKER_HEAP_SPACE))m -Xms$(($MAKER_HEAP_SPACE / 10))m $JREBEL_OPTS"
-    export CLASSPATH="maker.jar:$(external_jars)"
-    $(scala_home)/bin/scala -Yrepl-sync -nc -i $MAKER_PROJECT_FILE
+    export CLASSPATH="$MAKER_DIR/maker.jar:$(external_jars)"
+    #$(scala_home)/bin/scala -Yrepl-sync -nc -i $MAKER_PROJECT_FILE
   fi
 }
 
+run_command(){
+  command=$1
+  $command || (echo "failed to run $command " && exit -1)
+}
+
 external_jars() {
-  echo `ls .maker/lib/*.jar | xargs | sed 's/ /:/g'`
+  echo `ls $MAKER_DIR/.maker/lib/*.jar | xargs | sed 's/ /:/g'`
 }
 
 scala_home(){
@@ -51,18 +57,20 @@ java_home(){
 
 bootstrap() {
 
+  pushd $MAKER_DIR  # Shouldn't be necessary to change dir, but get weird compilation errors otherwise
   rm -rf out
   mkdir out
   for module in utils plugin maker; do
     for src_dir in src tests; do
-      SRC_FILES="$SRC_FILES $(find $module/$src_dir -name '*.scala' | xargs)"
+      SRC_FILES="$SRC_FILES $(find $MAKER_DIR/$module/$src_dir -name '*.scala' | xargs)"
     done
   done
 
-  echo "$(scala_home)/bin/fsc -classpath $(external_jars) -d out $SRC_FILES"
-  $(scala_home)/bin/fsc -classpath $(external_jars) -d out $SRC_FILES || Error "Failed to compile"
-  echo "$(java_home)/bin/jar cf maker.jar out/"
-  $(java_home)/bin/jar cf maker.jar -C out/ .
+  echo "Compiling"
+  run_command "$(scala_home)/bin/fsc -classpath $(external_jars) -d out $SRC_FILES"
+  echo "Building jar"
+  run_command "$(java_home)/bin/jar cf maker.jar -C out/ ."
+  popd
 
 }
 
@@ -115,13 +123,19 @@ ivy_jar(){
   fi
 }
 
+error(){
+  echo $1
+  cd $SAVED_DIR
+  exit -1
+}
+
 ivy_settings(){
   if [ ! -z $MAKER_IVY_SETTINGS_FILE ];
   then
     echo " -settings $MAKER_IVY_SETTINGS_FILE "
-  elif [ -e "ivysettings.xml" ]
+  elif [ -e "$MAKER_DIR/ivysettings.xml" ]
   then
-    echo " -settings ivysettings.xml "
+    echo " -settings $MAKER_DIR/ivysettings.xml "
   fi
 }
 
@@ -147,19 +161,18 @@ ivy_command(){
 
 ivy_update() {
   echo "Updating ivy"
+  mkdir -p $MAKER_LIB_DIR
   result="$(ivy_command) -types jar -sync"
   echo $result
-  echo `$result`
+  run_command "$result"
   result="$(ivy_command) -types bundle"
-  echo $result
-  echo `$result`
-  echo "done"
+  run_command "$result"
 }
 
 set_default_options() {
-  MAKER_PROJECT_FILE="Maker.scala"
+  MAKER_PROJECT_FILE="$MAKER_DIR/Maker.scala"
   JREBEL_OPTS=""
-  MAKER_IVY_FILE="ivy.xml"
+  MAKER_IVY_FILE="$MAKER_DIR/ivy.xml"
 
   # Set java heap size to something nice and big
   if [ -z $MAKER_HEAP_SPACE ];
