@@ -2,7 +2,6 @@
 
 MAKER_DIR="$( cd "$(dirname $( dirname "${BASH_SOURCE[0]}" ))" && pwd )"
 SAVED_DIR=`pwd`
-echo $MAKER_DIR
 
 set -e
 
@@ -79,7 +78,7 @@ process_options() {
 
   while true; do
     case "$1" in
-      -h | --help ) display_usage; shift;;
+      -h | --help ) display_usage; exit 0;;
       -p | --project-file ) MAKER_PROJECT_FILE=$2; shift 2;;
       -j | --use-jrebel ) set_jrebel_options; shift;;
       -m | --mem-heap-space ) MAKER_HEAP_SPACE=$2; shift 2;;
@@ -101,18 +100,30 @@ process_options() {
 
 display_usage() {
 cat << EOF
-  -h, --help
-  -p, --project-file <project-file>
-  -j, --use-jrebel (requires JREBEL_HOME to be set)
-  -m, --mem-heap-space <heap space in MB> (default is one quarter of available RAM)
-  -y, --do-ivy-update (update will always be done if .maker/lib doesn't exist)
-  -b, --boostrap (build maker.jar from scratch)
-  --ivy-proxy-host 
-  --ivy-proxy-port 
-  --ivy-non-proxy-hosts 
-  --ivy-jar (defaults to /usr/share/java/ivy.jar)
-  --ivy-file (defaults to <maker-dir>/ivy.xml)
-  --ivy-settings  (defaults to <maker-dir>/ivysettings.xml)
+
+  usage
+    maker.sh <option>*
+
+  options
+    -h, --help
+    -p, --project-file <project-file>
+    -j, --use-jrebel (requires JREBEL_HOME to be set)
+    -m, --mem-heap-space <heap space in MB> 
+      (default is one quarter of available RAM)
+    -y, --do-ivy-update 
+      (update will always be done if .maker/lib doesn't exist)
+    -b, --boostrap 
+      (builds maker.jar from scratch)
+    --ivy-proxy-host <host>
+    --ivy-proxy-port <port>
+    --ivy-non-proxy-hosts <host,host,...>
+    --ivy-jar <file>        
+      (defaults to /usr/share/java/ivy.jar)
+    --ivy-file <file>       
+      (defaults to <maker-dir>/ivy.xml)
+    --ivy-settings  <file>  
+      (defaults to <maker-dir>/ivysettings.xml)
+
 EOF
 }
 
