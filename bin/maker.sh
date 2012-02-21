@@ -6,23 +6,33 @@ SAVED_DIR=`pwd`
 set -e
 
 MAKER_LIB_DIR=$MAKER_DIR/.maker/lib
+MAKER_PROJECT_SCALA_LIB_DIR=.maker/scala-lib
 
 main() {
   process_options $*
+
+  if [ $MAKER_DOWNLOAD_PROJECT_LIB ] || [ ! -e $MAKER_PROJECT_SCALA_LIB_DIR ];
+  then
+    download_scala_library_and_compiler
+  fi
+
   if [ $MAKER_IVY_UPDATE ] || [ ! -e $MAKER_LIB_DIR ];
   then
     ivy_update
   fi
+  
   if [ $MAKER_BOOTSTRAP ] || [ ! -e $MAKER_DIR/maker.jar ];
   then
     bootstrap
   fi
+
   if [ -z $MAKER_SKIP_LAUNCH ];
   then
     export JAVA_OPTS="-Xmx$(($MAKER_HEAP_SPACE))m -Xms$(($MAKER_HEAP_SPACE / 10))m $JREBEL_OPTS"
     export CLASSPATH="$MAKER_DIR/maker.jar:$(external_jars)"
-    $(scala_home)/bin/scala -Yrepl-sync -nc -i $MAKER_PROJECT_FILE
+    $(scala_home)/bin/scala -Yrepl-sync -nc -i $(project_file)
   fi
+
 }
 
 run_command(){
@@ -42,6 +52,24 @@ scala_home(){
   else
     echo $SCALA_HOME
   fi
+}
+
+project_file(){
+  if [ -z $MAKER_PROJECT_FILE ];
+  then
+    declare -a arr
+    i=0
+    for file in `ls *.scala`; do
+      arr[$i]=$file
+      ((i++))
+    done
+    if [ ${#arr[@]} != 1 ];
+    then
+      error "No project file found"
+    fi
+    MAKER_PROJECT_FILE="${arr[0]}"
+  fi
+  echo $MAKER_PROJECT_FILE
 }
 
 java_home(){
@@ -84,6 +112,7 @@ process_options() {
       -m | --mem-heap-space ) MAKER_HEAP_SPACE=$2; shift 2;;
       -y | --do-ivy-update ) MAKER_IVY_UPDATE=true; shift;;
       -b | --boostrap ) MAKER_BOOTSTRAP=true; shift;;
+      -d | --download-project-scala-lib ) $MAKER_DOWNLOAD_PROJECT_LIB=true; shift;;
       --ivy-proxy-host ) MAKER_IVY_PROXY_HOST=$2; shift 2;;
       --ivy-proxy-port ) MAKER_IVY_PROXY_PORT=$2; shift 2;;
       --ivy-non-proxy-hosts ) MAKER_IVY_NON_PROXY_HOSTS=$2; shift 2;; 
@@ -109,20 +138,23 @@ cat << EOF
     -p, --project-file <project-file>
     -j, --use-jrebel (requires JREBEL_HOME to be set)
     -m, --mem-heap-space <heap space in MB> 
-      (default is one quarter of available RAM)
+      default is one quarter of available RAM
     -y, --do-ivy-update 
-      (update will always be done if .maker/lib doesn't exist)
+      update will always be done if <maker-dir>/.maker/lib doesn't exist
     -b, --boostrap 
-      (builds maker.jar from scratch)
+      builds maker.jar from scratch
+    -d, --download-project-scala-lib 
+      downloads scala compiler and library to <project-dir>/.maker/scala-lib
+      download is automatic if this directory does not exist
     --ivy-proxy-host <host>
     --ivy-proxy-port <port>
     --ivy-non-proxy-hosts <host,host,...>
     --ivy-jar <file>        
-      (defaults to /usr/share/java/ivy.jar)
+      defaults to /usr/share/java/ivy.jar
     --ivy-file <file>       
-      (defaults to <maker-dir>/ivy.xml)
+      defaults to <maker-dir>/ivy.xml
     --ivy-settings  <file>  
-      (defaults to <maker-dir>/ivysettings.xml)
+      defaults to <maker-dir>/ivysettings.xml
 
 EOF
 }
@@ -135,8 +167,7 @@ ivy_jar(){
   then
     echo "/usr/share/java/ivy.jar"
   else
-    echo "Ivy jar not found"
-    exit -1
+    error "Ivy jar not found"
   fi
 }
 
@@ -157,6 +188,12 @@ ivy_settings(){
 }
 
 ivy_command(){
+  ivy_file=$1
+  lib_dir=$2
+  if [ ! -e $lib_dir ];
+  then
+    mkdir -p $lib_dir
+  fi
   command="java "
   if [ ! -z $MAKER_IVY_PROXY_HOST ];
   then
@@ -170,22 +207,42 @@ ivy_command(){
   then
     command="$command -Dhttp.nonProxyHosts=$MAKER_IVY_NON_PROXY_HOSTS"
   fi
-  command="$command -jar $(ivy_jar) -ivy $MAKER_IVY_FILE "
+  command="$command -jar $(ivy_jar) -ivy $ivy_file"
   command="$command $(ivy_settings) "
-  command="$command -retrieve $MAKER_LIB_DIR/[artifact]-[revision](-[classifier]).[ext] "
+  command="$command -retrieve $lib_dir/[artifact]-[revision](-[classifier]).[ext] "
   echo $command
 }
 
 
 ivy_update() {
   echo "Updating ivy"
-  mkdir -p $MAKER_LIB_DIR
-  result="$(ivy_command) -types jar -sync"
-  run_command "$result"
-  result="$(ivy_command) -types bundle"
-  run_command "$result"
-  result="$(ivy_command) -types source "
-  run_command "$result"
+  run_command "$(ivy_command $MAKER_IVY_FILE $MAKER_LIB_DIR) -types jar -sync"
+  run_command "$(ivy_command $MAKER_IVY_FILE $MAKER_LIB_DIR) -types bundle"
+  run_command "$(ivy_command $MAKER_IVY_FILE $MAKER_LIB_DIR) -types source "
+}
+
+download_scala_library_and_compiler(){
+  ivy_file=.maker/scala-lib-ivy.xml
+  rm -f $ivy_file
+  if [ ! -e $ivy_file ];
+  then
+cat > $ivy_file << EOF
+<ivy-module version="1.0" xmlns:e="http://ant.apache.org/ivy/extra">
+  <info organisation="maker" module="maker"/>
+  <configurations>
+    <conf name="default" transitive="false"/>
+  </configurations>
+  <dependencies defaultconfmapping="*->default,sources">
+    <dependency org="org.scala-lang" name="scala-compiler" rev="2.9.1"/>
+    <dependency org="org.scala-lang" name="scala-library" rev="2.9.1"/>
+  </dependencies>
+</ivy-module>
+EOF
+  command="$(ivy_command $ivy_file $MAKER_PROJECT_SCALA_LIB_DIR ) -types jar -sync"
+  run_command "$command"
+  command="$(ivy_command $ivy_file $MAKER_PROJECT_SCALA_LIB_DIR ) -types source"
+  run_command "$command"
+  fi
 }
 
 set_default_options() {
@@ -216,5 +273,6 @@ set_jrebel_options() {
   fi
   JREBEL_OPTS=" -javaagent:$JREBEL_HOME/jrebel.jar -noverify"
 }
+
 
 main $*
