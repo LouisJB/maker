@@ -11,11 +11,6 @@ MAKER_PROJECT_SCALA_LIB_DIR=.maker/scala-lib
 main() {
   process_options $*
 
-  if [ $MAKER_DOWNLOAD_PROJECT_LIB ] || [ ! -e $MAKER_PROJECT_SCALA_LIB_DIR ];
-  then
-    download_scala_library_and_compiler
-  fi
-
   if [ $MAKER_IVY_UPDATE ] || [ ! -e $MAKER_LIB_DIR ];
   then
     ivy_update
@@ -25,6 +20,12 @@ main() {
   then
     bootstrap
   fi
+
+  if [ $MAKER_DOWNLOAD_PROJECT_LIB ] || [ ! -e $MAKER_PROJECT_SCALA_LIB_DIR ];
+  then
+    download_scala_library_and_compiler
+  fi
+
 
   if [ -z $MAKER_SKIP_LAUNCH ];
   then
