@@ -250,6 +250,9 @@ set_default_options() {
   JREBEL_OPTS=""
   MAKER_IVY_FILE="$MAKER_DIR/ivy.xml"
 
+  os=${OSTYPE//[0-9.]/}
+  echo "OS type = $os"
+
   # Set java heap size to something nice and big
   if [ -z $MAKER_HEAP_SPACE ];
   then
