@@ -1,60 +1,85 @@
 #!/bin/bash
 
-MAKER_DIR="$( cd "$(dirname $( dirname "${BASH_SOURCE[0]}" ))" && pwd )"
-SAVED_DIR=`pwd`
+# This script is designed to be run from the root of a project. 
+# i.e.
+# $ cd <project-root-dir>
+# $ <maker-root-dir>/bin/maker.sh
+# 
+# This project may or may not be maker itself. To avoid further confusion, the
+# following convention is used to distinguish maker and project variables.
+#
+# MAKER_OWN_...         refer to maker itself
+# MAKER_PROJECT_...     refer to the project
+#
+# The script does the following
+# 1. Download via ivy the jars required by maker itself 
+# 2. Build maker.jar
+# 3. Set classpath and heap space
+# 4. :aunch the repl, loading the project
+# 
+# Steps 1 and 2 are omitted if they have been done earlier - unless overridden in
+# in the options.
+# 
+
+MAKER_OWN_ROOT_DIR="$( cd "$(dirname $( dirname "${BASH_SOURCE[0]}" ))" && pwd )"
+MAKER_PROJECT_ROOT_DIR=`pwd`
 
 set -e
 
-MAKER_LIB_DIR=$MAKER_DIR/.maker/lib
+MAKER_OWN_LIB_DIR=$MAKER_OWN_ROOT_DIR/.maker/lib
 MAKER_PROJECT_SCALA_LIB_DIR=.maker/scala-lib
 
 main() {
   process_options $*
+  check_setup_sane || exit -1
 
   if [ $MAKER_DOWNLOAD_PROJECT_LIB ] || [ ! -e $MAKER_PROJECT_SCALA_LIB_DIR ];
   then
     download_scala_library_and_compiler
   fi
 
-  if [ $MAKER_IVY_UPDATE ] || [ ! -e $MAKER_LIB_DIR ];
+  if [ $MAKER_IVY_UPDATE ] || [ ! -e $MAKER_OWN_LIB_DIR ];
   then
     ivy_update
+  else
+    echo "Omitting ivy update as $MAKER_OWN_LIB_DIR exists"
   fi
   
-  if [ $MAKER_BOOTSTRAP ] || [ ! -e $MAKER_DIR/maker.jar ];
+  if [ $MAKER_BOOTSTRAP ] || [ ! -e $MAKER_OWN_ROOT_DIR/maker.jar ];
   then
     bootstrap
+  else
+    echo "Omitting bootstrap as $MAKER_OWN_ROOT_DIR/maker.jar exists"
   fi
 
   if [ -z $MAKER_SKIP_LAUNCH ];
   then
     export JAVA_OPTS="-Xmx$(($MAKER_HEAP_SPACE))m -Xms$(($MAKER_HEAP_SPACE / 10))m $JREBEL_OPTS"
-    export CLASSPATH="$MAKER_DIR/maker.jar:$(external_jars)"
-    $(scala_home)/bin/scala -Yrepl-sync -nc -i $(project_file)
+    export CLASSPATH="$MAKER_OWN_ROOT_DIR/maker.jar:$(external_jars)"
+    $SCALA_HOME/bin/scala -Yrepl-sync -nc -i $MAKER_PROJECT_FILE
   fi
-
 }
 
-run_command(){
-  command=$1
-  $command || (echo "failed to run $command " && exit -1)
-}
-
-external_jars() {
-  echo `ls $MAKER_DIR/.maker/lib/*.jar | xargs | sed 's/ /:/g'`
-}
-
-scala_home(){
+check_setup_sane(){
   if [ -z $SCALA_HOME ];
   then
     echo "SCALA_HOME not defined"
     exit -1
-  else
-    echo $SCALA_HOME
   fi
-}
 
-project_file(){
+  if [ -z $JAVA_HOME ];
+  then
+    echo "JAVA_HOME not defined"
+    exit -1
+  fi
+
+  MAKER_IVY_JAR=${MAKER_IVY_JAR-/usr/share/java/ivy.jar} 
+  if [ ! -e $MAKER_IVY_JAR ];
+  then
+    echo "Ivy jar not found"
+    exit -1
+  fi
+
   if [ -z $MAKER_PROJECT_FILE ];
   then
     declare -a arr
@@ -65,47 +90,60 @@ project_file(){
     done
     if [ ${#arr[@]} != 1 ];
     then
-      error "No project file found"
+      echo "Either specify project file or have a single Scala file in the top level"
+      exit -1
     fi
     MAKER_PROJECT_FILE="${arr[0]}"
   fi
-  echo $MAKER_PROJECT_FILE
+
+
+  MAKER_HEAP_SPACE=${MAKER_HEAP_SPACE-$(calc_heap_space)}
 }
 
-java_home(){
-  if [ -z $JAVA_HOME ];
+calc_heap_space(){
+  os=${OSTYPE//[0-9.]/}
+  if [ "$os" = "darwin" ];
   then
-    echo "JAVA_HOME not defined"
-    exit -1
+    totalMem=$(sysctl hw.memsize | awk '/[:s]/ {print $2}')
+    totalMem=$(($totalMem/1024))
   else
-    echo $JAVA_HOME
+    totalMem=$(cat /proc/meminfo | head -n 1 | awk '/[0-9]/ {print $2}')
   fi
+  echo "$(($totalMem/1024/4))"
+}
+
+run_command(){
+  command=$1
+  $command || (echo "failed to run $command " && exit -1)
+}
+
+external_jars() {
+  echo `ls $MAKER_OWN_ROOT_DIR/.maker/lib/*.jar | xargs | sed 's/ /:/g'`
 }
 
 bootstrap() {
 
-  pushd $MAKER_DIR  # Shouldn't be necessary to change dir, but get weird compilation errors otherwise
+  pushd $MAKER_OWN_ROOT_DIR  # Shouldn't be necessary to change dir, but get weird compilation errors otherwise
   rm -rf out
   mkdir out
   for module in utils plugin maker; do
     for src_dir in src tests; do
-      SRC_FILES="$SRC_FILES $(find $MAKER_DIR/$module/$src_dir -name '*.scala' | xargs)"
+      SRC_FILES="$SRC_FILES $(find $MAKER_OWN_ROOT_DIR/$module/$src_dir -name '*.scala' | xargs)"
     done
   done
 
   echo "Compiling"
-  run_command "$(scala_home)/bin/fsc -classpath $(external_jars) -d out $SRC_FILES"
+  run_command "$SCALA_HOME/bin/fsc -classpath $(external_jars) -d out $SRC_FILES"
   echo "Building jar"
-  run_command "$(java_home)/bin/jar cf maker.jar -C out/ ."
+  run_command "$JAVA_HOME/bin/jar cf maker.jar -C out/ ."
   popd
 
 }
 
 process_options() {
-  set_default_options
 
   while true; do
-    case "$1" in
+    case "${1-""}" in
       -h | --help ) display_usage; exit 0;;
       -p | --project-file ) MAKER_PROJECT_FILE=$2; shift 2;;
       -j | --use-jrebel ) set_jrebel_options; shift;;
@@ -117,8 +155,6 @@ process_options() {
       --ivy-proxy-port ) MAKER_IVY_PROXY_PORT=$2; shift 2;;
       --ivy-non-proxy-hosts ) MAKER_IVY_NON_PROXY_HOSTS=$2; shift 2;; 
       --ivy-jar ) MAKER_IVY_JAR=$2; shift 2;; 
-      --ivy-file ) MAKER_IVY_FILE=$2; shift 2;; 
-      --ivy-settings ) MAKER_IVY_SETTINGS_FILE=$2; shift 2;; 
       -- ) shift; break;;
       *  ) break;;
     esac
@@ -151,41 +187,10 @@ cat << EOF
     --ivy-non-proxy-hosts <host,host,...>
     --ivy-jar <file>        
       defaults to /usr/share/java/ivy.jar
-    --ivy-file <file>       
-      defaults to <maker-dir>/ivy.xml
-    --ivy-settings  <file>  
-      defaults to <maker-dir>/ivysettings.xml
 
 EOF
 }
 
-ivy_jar(){
-  if [ ! -z $MAKER_IVY_JAR ];
-  then
-    echo $MAKER_IVY_JAR
-  elif [ -e /usr/share/java/ivy.jar ];
-  then
-    echo "/usr/share/java/ivy.jar"
-  else
-    error "Ivy jar not found"
-  fi
-}
-
-error(){
-  echo $1
-  cd $SAVED_DIR
-  exit -1
-}
-
-ivy_settings(){
-  if [ ! -z $MAKER_IVY_SETTINGS_FILE ];
-  then
-    echo " -settings $MAKER_IVY_SETTINGS_FILE "
-  elif [ -e "$MAKER_DIR/ivysettings.xml" ]
-  then
-    echo " -settings $MAKER_DIR/ivysettings.xml "
-  fi
-}
 
 ivy_command(){
   ivy_file=$1
@@ -207,8 +212,8 @@ ivy_command(){
   then
     command="$command -Dhttp.nonProxyHosts=$MAKER_IVY_NON_PROXY_HOSTS"
   fi
-  command="$command -jar $(ivy_jar) -ivy $ivy_file"
-  command="$command $(ivy_settings) "
+  command="$command -jar $MAKER_IVY_JAR -ivy $ivy_file"
+  command="$command =$MAKER_OWN_ROOT_DIR/ivysettings.xml "
   command="$command -retrieve $lib_dir/[artifact]-[revision](-[classifier]).[ext] "
   echo $command
 }
@@ -216,9 +221,10 @@ ivy_command(){
 
 ivy_update() {
   echo "Updating ivy"
-  run_command "$(ivy_command $MAKER_IVY_FILE $MAKER_LIB_DIR) -types jar -sync"
-  run_command "$(ivy_command $MAKER_IVY_FILE $MAKER_LIB_DIR) -types bundle"
-  run_command "$(ivy_command $MAKER_IVY_FILE $MAKER_LIB_DIR) -types source "
+  MAKER_IVY_FILE="$MAKER_OWN_ROOT_DIR/ivy.xml"
+  run_command "$(ivy_command $MAKER_IVY_FILE $MAKER_OWN_LIB_DIR) -types jar -sync"
+  run_command "$(ivy_command $MAKER_IVY_FILE $MAKER_OWN_LIB_DIR) -types bundle"
+  run_command "$(ivy_command $MAKER_IVY_FILE $MAKER_OWN_LIB_DIR) -types source "
 }
 
 download_scala_library_and_compiler(){
@@ -242,28 +248,6 @@ EOF
   run_command "$command"
   command="$(ivy_command $ivy_file $MAKER_PROJECT_SCALA_LIB_DIR ) -types source"
   run_command "$command"
-  fi
-}
-
-set_default_options() {
-  MAKER_PROJECT_FILE="$MAKER_DIR/Maker.scala"
-  JREBEL_OPTS=""
-  MAKER_IVY_FILE="$MAKER_DIR/ivy.xml"
-
-  os=${OSTYPE//[0-9.]/}
-  echo "OS type = $os"
-
-  # Set java heap size to something nice and big
-  if [ -z $MAKER_HEAP_SPACE ];
-  then
-    if [ "$os" = "darwin" ];
-    then
-      totalMem=$(sysctl hw.memsize | awk '/[:s]/ {print $2}')
-      totalMem=$(($totalMem/1024))
-    else
-      totalMem=$(cat /proc/meminfo | head -n 1 | awk '/[0-9]/ {print $2}')
-    fi
-    MAKER_HEAP_SPACE=$(($totalMem/1024/4))
   fi
 }
 
