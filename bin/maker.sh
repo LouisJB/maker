@@ -33,11 +33,6 @@ main() {
   process_options $*
   check_setup_sane || exit -1
 
-  if [ $MAKER_DOWNLOAD_PROJECT_LIB ] || [ ! -e $MAKER_PROJECT_SCALA_LIB_DIR ];
-  then
-    download_scala_library_and_compiler
-  fi
-
   if [ $MAKER_IVY_UPDATE ] || [ ! -e $MAKER_OWN_LIB_DIR ];
   then
     ivy_update
@@ -51,6 +46,12 @@ main() {
   else
     echo "Omitting bootstrap as $MAKER_OWN_ROOT_DIR/maker.jar exists"
   fi
+
+  if [ $MAKER_DOWNLOAD_PROJECT_LIB ] || [ ! -e $MAKER_PROJECT_SCALA_LIB_DIR ];
+  then
+    download_scala_library_and_compiler
+  fi
+
 
   if [ -z $MAKER_SKIP_LAUNCH ];
   then
