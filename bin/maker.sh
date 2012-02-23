@@ -32,6 +32,7 @@ MAKER_PROJECT_SCALA_LIB_DIR=.maker/scala-lib
 main() {
   process_options $*
   check_setup_sane || exit -1
+  MAKER_IVY_UPDATE=true
 
   if [ $MAKER_IVY_UPDATE ] || [ ! -e $MAKER_OWN_LIB_DIR ];
   then
@@ -115,6 +116,7 @@ calc_heap_space(){
 
 run_command(){
   command=$1
+  echo "$command"
   $command || (echo "failed to run $command " && exit -1)
 }
 
@@ -134,6 +136,7 @@ bootstrap() {
   done
 
   echo "Compiling"
+  echo "ext jars $(external_jars)"
   run_command "$SCALA_HOME/bin/fsc -classpath $(external_jars) -d out $SRC_FILES"
   echo "Building jar"
   run_command "$JAVA_HOME/bin/jar cf maker.jar -C out/ ."
@@ -214,7 +217,7 @@ ivy_command(){
     command="$command -Dhttp.nonProxyHosts=$MAKER_IVY_NON_PROXY_HOSTS"
   fi
   command="$command -jar $MAKER_IVY_JAR -ivy $ivy_file"
-  command="$command =$MAKER_OWN_ROOT_DIR/ivysettings.xml "
+  command="$command -settings $MAKER_OWN_ROOT_DIR/ivysettings.xml "
   command="$command -retrieve $lib_dir/[artifact]-[revision](-[classifier]).[ext] "
   echo $command
 }
