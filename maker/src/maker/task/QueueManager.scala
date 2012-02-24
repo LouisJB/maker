@@ -82,7 +82,7 @@ class QueueManager(projectTasks : Set[ProjectAndTask], router : ActorRef, origin
       ProjectAndTask.removeTask(projectTask)
       accumuland = accumuland + (projectTask.task -> (result :: accumuland.getOrElse(projectTask.task, Nil)))
       completedProjectTasks += projectTask
-      if (completedProjectTasks  == projectTasks)
+      if (completedProjectTasks == projectTasks)
         originalCaller ! BuildResult(Right(TaskSuccess), projectTasks, originalProjectAndTask)
       else {
         remainingProjectTasks = remainingProjectTasks.filterNot(_ == projectTask)

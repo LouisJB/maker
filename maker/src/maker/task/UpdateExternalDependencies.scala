@@ -52,6 +52,4 @@ case object UpdateExternalDependencies extends Task{
       Right("OK")
     }
   }
-
 }
-

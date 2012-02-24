@@ -19,7 +19,8 @@ case class Project(
   libDirs: List[File] = Nil,
   resourceDirs : List[File] = Nil,
   children: List[Project] = Nil,
-  props : Props = Props()
+  props : Props = Props(),
+  description : Option[String] = None
 ) {
 
   def outputDir = file(root, "classes")
@@ -78,6 +79,7 @@ case class Project(
   def pack = QueueManager(projectAndDescendents, PackageTask)
   def update = QueueManager(projectAndDescendents, UpdateExternalDependencies)
   def updateOnly = QueueManager(List(this), UpdateExternalDependencies)
+  def publishLocal = QueueManager(List(this), PublishLocalTask)
 
   def ~ (task : () => BuildResult){
     var lastTaskTime : Option[Long] = None
@@ -146,6 +148,15 @@ case class Project(
   }
 
   def delete = recursiveDelete(root)
+
+  import maker.utils.maven._
+  def moduleDef : ModuleDef = {
+    val deps : List[DependencyLib] = readIvyDependencies()
+    val repos : List[MavenRepository] = Nil
+    val moduleLibDef = DependencyLib(name, props.Version(), props.Organisation(), None)
+    val projectDef = ProjectDef(description.getOrElse(""), moduleLibDef, repos)
+    ModuleDef(projectDef, deps, repos)
+  }
 
   override def toString = "Project " + name
 }

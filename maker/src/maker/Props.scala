@@ -54,6 +54,8 @@ case class Props(private val overrides : Map[String, String] = Map()){
       assert(propertyMethods.map(_.getName).toSet.contains(o), "Overiding non existant property " + o)
   }
 
+  object Organisation extends StringProperty(() => "Acme Org")
+  object Version extends StringProperty(() => "1.0-SNAPSHOT")
 }
 
 object Props{
