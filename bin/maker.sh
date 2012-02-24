@@ -32,10 +32,13 @@ MAKER_PROJECT_SCALA_LIB_DIR=.maker/scala-lib
 main() {
   process_options $*
   check_setup_sane || exit -1
-  MAKER_IVY_UPDATE=true
 
   if [ $MAKER_IVY_UPDATE ] || [ ! -e $MAKER_OWN_LIB_DIR ];
   then
+
+
+	  echo $MAKER_IVY_UPDATE
+	  exit -1
     ivy_update
   else
     echo "Omitting ivy update as $MAKER_OWN_LIB_DIR exists"
@@ -43,7 +46,7 @@ main() {
   
   if [ $MAKER_BOOTSTRAP ] || [ ! -e $MAKER_OWN_ROOT_DIR/maker.jar ];
   then
-    bootstrap
+    bootstrap || exit -1
   else
     echo "Omitting bootstrap as $MAKER_OWN_ROOT_DIR/maker.jar exists"
   fi
@@ -128,6 +131,7 @@ bootstrap() {
 
   pushd $MAKER_OWN_ROOT_DIR  # Shouldn't be necessary to change dir, but get weird compilation errors otherwise
   rm -rf out
+  rm -f maker.jar
   mkdir out
   for module in utils plugin maker; do
     for src_dir in src tests; do
@@ -137,9 +141,15 @@ bootstrap() {
 
   echo "Compiling"
   echo "ext jars $(external_jars)"
-  run_command "$SCALA_HOME/bin/fsc -classpath $(external_jars) -d out $SRC_FILES"
+  run_command "$SCALA_HOME/bin/fsc -classpath $(external_jars) -d out $SRC_FILES" || exit -1
   echo "Building jar"
-  run_command "$JAVA_HOME/bin/jar cf maker.jar -C out/ ."
+  run_command "$JAVA_HOME/bin/jar cf maker.jar -C out/ ." || exit -1
+  if [ ! -e maker.jar ];
+  then
+	  echo "Maker jar failed to be created"
+	  exit -1
+  fi
+
   popd
 
 }
