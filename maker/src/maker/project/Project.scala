@@ -2,7 +2,6 @@ package maker.project
 
 import java.io.File
 import java.lang.System
-import maker.utils.Log
 import maker.task._
 import maker.utils.FileUtils._
 import maker.Props
@@ -10,6 +9,7 @@ import java.net.URLClassLoader
 import maker.os.Command
 import maker.graphviz.GraphVizUtils._
 import maker.graphviz.GraphVizDiGrapher._
+import maker.utils.{DependencyLib, Log}
 
 case class Project(
   name: String,
@@ -133,6 +133,16 @@ case class Project(
     }
     
     showGraph(makeDotFromString(dependentLibs))
+  }
+
+  def readIvyDependencies() : List[DependencyLib] = {
+    import maker.utils.ivy.IvyReader
+    if (ivyFile.exists())
+      IvyReader.readIvyDependenciesFromFile(ivyFile)
+    else {
+      Log.info("No Ivy config for this module")
+      Nil
+    }
   }
 
   def delete = recursiveDelete(root)

@@ -9,7 +9,7 @@ import maker.utils._
  * Read in raw ivy xml files for module dependencies
  */
 object IvyReader {
-  def readIvyFile(file : File) : List[DependencyLib] = {
+  def readIvyDependenciesFromFile(file : File) : List[DependencyLib] = {
     try {
       val ivyXml = XML.loadFile(file)
       val deps = (ivyXml \\ "dependency")

@@ -1,15 +1,15 @@
 <component name="libraryTable">
   <library name="lib">
     <CLASSES>
-      <root url="jar://$PROJECT_DIR$/lib/log4j-1.2.16.jar!/" />
-      <root url="jar://$PROJECT_DIR$/lib/akka-stm-1.2-RC6.jar!/" />
-      <root url="jar://$PROJECT_DIR$/lib/slf4j-api-1.6.1.jar!/" />
-      <root url="jar://$PROJECT_DIR$/lib/scalaz-core_2.9.0-1-6.0.1.jar!/" />
-      <root url="jar://$PROJECT_DIR$/lib/akka-actor-1.2-RC6.jar!/" />
-      <root url="jar://$PROJECT_DIR$/lib/slf4j-log4j12-1.6.1.jar!/" />
-      <root url="file://$PROJECT_DIR$/lib/resources" />
-      <root url="jar://$PROJECT_DIR$/lib/commons-io-2.1.jar!/" />
-      <root url="jar://$PROJECT_DIR$/lib/scalatest_2.9.1-1.6.1.jar!/" />
+      <root url="jar://$PROJECT_DIR$/.maker/lib/log4j-1.2.16.jar!/" />
+      <root url="jar://$PROJECT_DIR$/.maker/lib/akka-stm-1.2-RC6.jar!/" />
+      <root url="jar://$PROJECT_DIR$/.maker/lib/slf4j-api-1.6.1.jar!/" />
+      <root url="jar://$PROJECT_DIR$/.maker/lib/scalaz-core_2.9.1-6.0.3.jar!/" />
+      <root url="jar://$PROJECT_DIR$/.maker/lib/akka-actor-1.2.jar!/" />
+      <root url="jar://$PROJECT_DIR$/.maker/lib/slf4j-log4j12-1.6.1.jar!/" />
+      <root url="file://$PROJECT_DIR$/resources" />
+      <root url="jar://$PROJECT_DIR$/.maker/lib/commons-io-2.1.jar!/" />
+      <root url="jar://$PROJECT_DIR$/.maker/lib/scalatest_2.9.1-1.7.1.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES>
