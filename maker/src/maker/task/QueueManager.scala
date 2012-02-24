@@ -22,7 +22,14 @@ case class TaskResultMessage(projectTask : ProjectAndTask, result : Either[TaskF
 case object StartBuild extends BuildMessage
 class Worker() extends Actor{
   def receive = {
-    case ExecTaskMessage(projectTask : ProjectAndTask, acc : Map[Task, List[AnyRef]]) => self reply TaskResultMessage(projectTask, projectTask.exec(acc))
+    case ExecTaskMessage(projectTask : ProjectAndTask, acc : Map[Task, List[AnyRef]]) => self reply {
+      try {
+        TaskResultMessage(projectTask, projectTask.exec(acc))
+      } catch {
+        case e =>
+          TaskResultMessage(projectTask, Left(TaskFailed(projectTask, e.getMessage)))
+      }
+    }
   }
 }
 case class BuildResult(res : Either[TaskFailed, AnyRef], projectAndTasks : Set[ProjectAndTask], originalProjectAndTask : ProjectAndTask) extends BuildMessage {
