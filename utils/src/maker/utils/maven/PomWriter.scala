@@ -11,11 +11,10 @@ case class ModuleDef(projectDef : ProjectDef, dependencies : List[DependencyLib]
 
 object PomWriter {
 
-/*
-  def writePom(file : File, moduleDef, ModuleDef) {
+  def writePom(file : File, moduleDef : ModuleDef) {
 
     val pomOuter =
-        <?xml version='1.0' encoding='UTF-8'?>
+        <?xml version="1.0" encoding=\'UTF-8\'?>
         <project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.  org/POM/4.0.0">
             <groupId>todo</groupId>
             <artifactId>todo</artifactId>
@@ -28,11 +27,10 @@ object PomWriter {
             </organization>
             mkDependencies(moduleDef.dependencies)
             mkRepostitories(moduleDef.repositories)
-        </repositories>
-       </project>
+        </project>
   }
 
-  private def mkDependencies(dependencies : List[Dependencies]) : NodeSeq =
+  private def mkDependencies(dependencies : List[DependencyLib]) : NodeSeq = {
     <dependencies>
       dependencies.map(d =>
         <dependency>
@@ -41,10 +39,10 @@ object PomWriter {
           <version>d.version</version>
           <scope>comple (todo)</scope>
         </dependency>)
-    </dependendencies>
+    </dependencies>
   }
 
-  private def mkRepositories(repositories : List[MavenRepositories]) : NodeSeq = {
+  private def mkRepositories(repositories : List[MavenRepository]) : NodeSeq = {
     <repositories>
     repositories.map(r =>
       <repository>
@@ -55,5 +53,4 @@ object PomWriter {
       </repository>)
     </repositories>
   }
-  */
 }
