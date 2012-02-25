@@ -57,7 +57,7 @@ main() {
   then
     export JAVA_OPTS="-Xmx$(($MAKER_HEAP_SPACE))m -Xms$(($MAKER_HEAP_SPACE / 10))m $JREBEL_OPTS"
     export CLASSPATH="$MAKER_OWN_ROOT_DIR/maker.jar:$(external_jars)"
-    $SCALA_HOME/bin/scala -Yrepl-sync -nc -i $MAKER_PROJECT_FILE
+    $SCALA_HOME/bin/scala -Yrepl-sync -nc -i $MAKER_PROJECT_FILE 
   fi
 }
 

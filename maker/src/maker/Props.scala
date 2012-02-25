@@ -6,6 +6,7 @@ import java.io.BufferedReader
 import java.util.Properties
 import java.io.FileInputStream
 import scala.collection.JavaConversions
+import java.io.OutputStream
 
 
 case class Props(private val overrides : Map[String, String] = Map()){
@@ -41,6 +42,37 @@ case class Props(private val overrides : Map[String, String] = Map()){
   private val propertyMethods = this.getClass.getMethods.filter{
     m =>
       classOf[Property].isAssignableFrom(m.getReturnType) && m.getParameterTypes.isEmpty
+  }
+
+  /**
+   * Compilation output is tee'd here from the repl, so we can 
+   * quickfix error in Vim
+   * The file is emptied before each compilation
+   */
+  object VimErrorFile extends FileProperty(() => "vim-compile-output")
+
+  object CompilationOutputStream extends OutputStream{
+    import java.io.FileOutputStream
+    import java.io.PrintStream
+    import org.apache.commons.io.output.TeeOutputStream
+
+    private def makeTeeStream = {
+      new PrintStream(
+        new TeeOutputStream(
+          Console.err, 
+          new PrintStream(new FileOutputStream(VimErrorFile()))
+        )
+      )
+    }
+    var teeErr = makeTeeStream
+
+    def emptyVimErrorFile{
+      VimErrorFile().delete
+      teeErr = makeTeeStream
+    }
+    def write(b : Int){
+      teeErr.write(b)
+    }
   }
 
   lazy val properties = {

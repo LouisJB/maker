@@ -4,11 +4,12 @@ import tools.nsc.{Settings, Global}
 import tools.nsc.reporters.ConsoleReporter
 import tools.nsc.io.{Directory, PlainDirectory}
 import plugin._
+import java.io.PrintWriter
 
 case class ProjectCompilers(project : Project){
   private def makeCompiler(isTestCompiler : Boolean) = {
     val settings = new Settings
-    val reporter = new ConsoleReporter(settings)
+    val reporter = new ConsoleReporter(settings, Console.in, new PrintWriter(project.props.CompilationOutputStream, true))
     val scalaAndJavaLibs = System.getProperty("sun.boot.class.path")
 
     settings.usejavacp.value = false

@@ -112,6 +112,7 @@ object QueueManager{
     }
 
     Log.debug("About to do " + task + " for projects " + projects.toList.mkString(","))
+    projects.head.props.CompilationOutputStream.emptyVimErrorFile
     apply(projectTasks, originalProjectAndTask)
   }
 
