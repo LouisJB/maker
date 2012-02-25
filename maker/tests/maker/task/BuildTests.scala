@@ -67,7 +67,7 @@ class BuildTests extends FunSuite {
       root, 
       List(new File(root, "src")), 
       List(new File(root, "tests")), 
-      List(new File("lib"))
+      List(new File(".maker/lib"))
     )
   }
   test("Build of single project"){
