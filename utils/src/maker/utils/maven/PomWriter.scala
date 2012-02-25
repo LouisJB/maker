@@ -15,6 +15,7 @@ object PomWriter {
     val pomOuter =
         //<?xml version="1.0" encoding=\'UTF-8\'?>
         <project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.  org/POM/4.0.0">
+            <modelVersion>4.0.0</modelVersion>
             <groupId>{moduleDef.projectDef.moduleLibDef.name}</groupId>
             <artifactId>todo</artifactId>
             <packaging>jar</packaging>
@@ -24,8 +25,8 @@ object PomWriter {
             <organization>
                 <name>{moduleDef.projectDef.moduleLibDef.org}</name>
             </organization>
-            mkDependencies(moduleDef.dependencies)
-            mkRepostitories(moduleDef.repositories)
+            {mkDependencies(moduleDef.dependencies)}
+            {mkRepositories(moduleDef.repositories)}
         </project>
 
      println("xml= \n" + pomOuter)
@@ -34,19 +35,19 @@ object PomWriter {
 
   private def mkDependencies(dependencies : List[DependencyLib]) : NodeSeq = {
     <dependencies>{
-      dependencies.map(d =>
-        <dependency>
-          <groupId>{d.name}</groupId>
-          <artifactId>{d.name}</artifactId>
-          <version>{d.version}</version>
-          <scope>comple (todo)</scope>
-        </dependency>)}
+    dependencies.map(d =>
+      <dependency>
+        <groupId>{d.name}</groupId>
+        <artifactId>{d.name}</artifactId>
+        <version>{d.version}</version>
+        <scope>comple (todo)</scope>
+      </dependency>)}
     </dependencies>
   }
 
   private def mkRepositories(repositories : List[MavenRepository]) : NodeSeq = {
     <repositories>{
-    repositories.map(r =>
+   repositories.map(r =>
       <repository>
         <id>{r.id}</id>
         <name>{r.name}</name>
@@ -56,3 +57,4 @@ object PomWriter {
     </repositories>
   }
 }
+
