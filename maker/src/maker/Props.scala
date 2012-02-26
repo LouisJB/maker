@@ -25,7 +25,7 @@ case class Props(private val overrides : Map[String, String] = Map()){
   class FileProperty(val default : () => String) extends Property{
     def apply() = file(value)
   }
-  class OptionalProperty extends Property{
+  trait OptionalProperty extends Property{
     val default = () => ""
     def apply() = value match {
       case "" => None
@@ -36,9 +36,16 @@ case class Props(private val overrides : Map[String, String] = Map()){
   object HttpProxyPort extends OptionalProperty
   object HttpNonProxyHosts extends OptionalProperty
 
+  val httpProperties : List[(String, String)]= List(HttpProxyHost, HttpProxyPort, HttpNonProxyHosts).flatMap{
+    case prop => List(prop.name).zip(prop())
+  }
+  
+
   object ScalaHome extends FileProperty(() => "/usr/local/scala/")
   object JavaHome extends FileProperty(() => "/usr/local/jdk/")
   object IvyJar extends FileProperty(() => "/usr/share/java/ivy.jar")
+  object ScalaVersion extends StringProperty(() => "2.9.1")
+
   private val propertyMethods = this.getClass.getMethods.filter{
     m =>
       classOf[Property].isAssignableFrom(m.getReturnType) && m.getParameterTypes.isEmpty
