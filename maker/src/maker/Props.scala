@@ -38,7 +38,7 @@ case class Props(private val overrides : Map[String, String] = Map()){
 
   object ScalaHome extends FileProperty(() => "/usr/local/scala/")
   object JavaHome extends FileProperty(() => "/usr/local/jdk/")
-  object IvyJar extends FileProperty(() => "/usr/share/java/ivy.jar")
+  object IvyJar extends FileProperty(() => "libs/ivy-2.2.0.jar")
   private val propertyMethods = this.getClass.getMethods.filter{
     m =>
       classOf[Property].isAssignableFrom(m.getReturnType) && m.getParameterTypes.isEmpty
@@ -102,5 +102,5 @@ object Props{
 
     Map() ++ JavaConversions.mapAsScalaMap(p.asInstanceOf[java.util.Map[String,String]])
   }
-
 }
+
