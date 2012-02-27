@@ -3,6 +3,7 @@ package maker.utils.maven
 import maker.utils._
 import java.io.File
 import scala.xml._
+import java.io._
 
 case class MavenRepository(id : String, name : String, url : String, layout : String)
 case class ProjectDef(description : String, moduleLibDef : DependencyLib, repos : List[MavenRepository])
@@ -29,7 +30,12 @@ object PomWriter {
             {mkRepositories(moduleDef.repositories)}
         </project>
 
-     println("xml= \n" + pomOuter)
+     println("file " + file.getAbsolutePath  + "\n xml= \n" + pomOuter)
+
+     val pr = new PrintWriter(file)
+     pr.println("<?xml version='1.0' encoding='UTF-8'?>")
+     pr.println(pomOuter)
+     pr.close()
      pomOuter
   }
 

@@ -8,7 +8,6 @@ import java.io.FileInputStream
 import scala.collection.JavaConversions
 import java.io.OutputStream
 
-
 case class Props(private val overrides : Map[String, String] = Map()){
   trait Property{
     def default : () => String
@@ -51,6 +50,8 @@ case class Props(private val overrides : Map[String, String] = Map()){
     MakerHome() + "/libs/ivy-2.2.0.jar"
   )
   object ScalaVersion extends StringProperty(() => "2.9.1")
+
+  object HomeDir extends FileProperty(() => System.getProperty("user.home"))
 
   private val propertyMethods = this.getClass.getMethods.filter{
     m =>
