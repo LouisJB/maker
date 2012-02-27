@@ -71,7 +71,6 @@ case class Project(
   /**********************
     Tasks
   **********************/
-
   def projectAndDescendents = this::dependencies.descendents.toList
   def clean = QueueManager(projectAndDescendents, CleanTask)
   def compile = QueueManager(projectAndDescendents, CompileSourceTask)
@@ -82,7 +81,10 @@ case class Project(
   def pack = QueueManager(projectAndDescendents, PackageTask)
   def update = QueueManager(projectAndDescendents, UpdateExternalDependencies)
   def updateOnly = QueueManager(List(this), UpdateExternalDependencies)
-  def publishLocal = QueueManager(List(this), PublishLocalTask)
+  // incomplete tasks
+  def publishLocal = QueueManager(projectAndDescendents, PublishLocalTask)
+  def publishLocalOnly = QueueManager(List(this), PublishLocalTask)
+
 
   def ~ (task : () => BuildResult){
     var lastTaskTime : Option[Long] = None
