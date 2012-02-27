@@ -115,7 +115,6 @@ calc_heap_space(){
 
 run_command(){
   command=$1
-  echo "$command"
   $command || (echo "failed to run $command " && exit -1)
 }
 
@@ -141,7 +140,6 @@ bootstrap() {
   done
 
   echo "Compiling"
-  echo "ext jars $(external_jars)"
   run_command "$SCALA_HOME/bin/fsc -classpath $(external_jars) -d $MAKER_OWN_CLASS_OUTPUT_DIR $SRC_FILES" || exit -1
   echo "Building jar"
   run_command "$JAVA_HOME/bin/jar cf $MAKER_OWN_JAR -C $MAKER_OWN_CLASS_OUTPUT_DIR ." || exit -1

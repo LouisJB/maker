@@ -60,25 +60,30 @@ case object UpdateExternalDependencies extends Task{
 
   def exec(project : Project, acc : List[AnyRef]) = {
     try {
-      val confs = Array[String]("default")
-      val artifactFilter = FilterHelper.getArtifactTypeFilter(Array[String]("jar", "bundle", "source"))
+      if (project.ivyFile.exists){
+        val confs = Array[String]("default")
+        val artifactFilter = FilterHelper.getArtifactTypeFilter(Array[String]("jar", "bundle", "source"))
 
-      val resolveOptions = new ResolveOptions().setConfs(confs)
-                    .setValidate(true)
-                    .setArtifactFilter(artifactFilter)
-      val ivy = Ivy.newInstance
-      val settings = ivy.getSettings
-      settings.addAllVariables(System.getProperties)
-      ivy.configure(project.ivySettingsFile)
-      val report = ivy.resolve(project.ivyFile.toURI().toURL(), resolveOptions)
-      val md = report.getModuleDescriptor
-      ivy.retrieve(
-        md.getModuleRevisionId(), 
-        project.managedLibDir.getPath + "/[artifact]-[revision](-[classifier]).[ext]", 
-        new RetrieveOptions()
-          .setConfs(confs).setSync(true)
-          .setArtifactFilter(artifactFilter))
-      Right("OK")
+        val resolveOptions = new ResolveOptions().setConfs(confs)
+                      .setValidate(true)
+                      .setArtifactFilter(artifactFilter)
+        val ivy = Ivy.newInstance
+        val settings = ivy.getSettings
+        settings.addAllVariables(System.getProperties)
+        ivy.configure(project.ivySettingsFile)
+        val report = ivy.resolve(project.ivyFile.toURI().toURL(), resolveOptions)
+        val md = report.getModuleDescriptor
+        ivy.retrieve(
+          md.getModuleRevisionId(), 
+          project.managedLibDir.getPath + "/[artifact]-[revision](-[classifier]).[ext]", 
+          new RetrieveOptions()
+            .setConfs(confs).setSync(true)
+            .setArtifactFilter(artifactFilter))
+        Right("OK")
+      } else {
+        Log.info("Nothing to update")
+        Right("OK")
+      }
     } catch {
       case e => 
         e.printStackTrace
