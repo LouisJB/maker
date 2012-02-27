@@ -24,15 +24,26 @@ case object PackageTask extends Task{
           //}
     val jar = project.props.JavaHome().getAbsolutePath + "/bin/jar"
     val dirsToPack = (project :: project.children).flatMap{p => 
-      p.outputDir::p.javaOutputDir::p.testOutputDir::p.resourceDirs
+      p.outputDir :: p.javaOutputDir :: p.resourceDirs // :: p.testOutputDir:
     }.filter(_.exists)
+
     dirsToPack.foreach(println)
-    val cmds = List(jar, "cf", project.outputJar.getAbsolutePath) ::: dirsToPack.flatMap{dir => List("-C", dir.getAbsolutePath, ".")}
-    println(cmds.mkString(" "))
-    val cmd = Command(cmds : _*)
-    cmd.exec() match {
-      case (0, _) => Right(Unit)
-      case (errNo, errMessage) => Left(TaskFailed(ProjectAndTask(project, this), errMessage))
+    val createCmd = Command(List(jar, "cf", project.outputJar.getAbsolutePath, "-C", dirsToPack.head.getAbsolutePath, ".") : _*)
+    val updateCmds = dirsToPack.tail.map(dir => List(jar, "uf", project.outputJar.getAbsolutePath, "-C", dir.getAbsolutePath, "."))
+
+    println(createCmd)
+    val cmds = createCmd :: updateCmds.map(args => Command(args : _*))
+
+    def exec(cs : List[Command]) : Either[TaskFailed, AnyRef] = {
+      cs match {
+        case cmd :: rs => cmd.exec() match {
+          case (0, _) => exec(rs)
+          case (errNo, errMessage) => Left(TaskFailed(ProjectAndTask(project, this), errMessage))
+        }
+        case Nil => Right(Unit)
+      }
     }
+    exec(cmds)
   }
 }
+

@@ -22,6 +22,12 @@ case object PublishLocalTask extends Task{
     val pomFile = file(moduleLocalPomDir, "pom.xml")
     pomFile.createNewFile
     PomWriter.writePom(pomFile, moduleDef)
+
+    val moduleJarDir = file(moduleLocal, "/jars/")
+    moduleJarDir.mkdirs
+
+    ApacheFileUtils.copyFileToDirectory(project.outputJar, moduleJarDir)
+    
     Right("OK")
   }
 }
