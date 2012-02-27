@@ -57,13 +57,24 @@ main() {
   if [ -z $MAKER_SKIP_LAUNCH ];
   then
     export JAVA_OPTS="-Xmx$(($MAKER_HEAP_SPACE))m -Xms$(($MAKER_HEAP_SPACE / 10))m $JREBEL_OPTS"
-    export CLASSPATH="$MAKER_OWN_ROOT_DIR/maker.jar:$(external_jars):resources/"
+    export CLASSPATH="$(maker_internal_classpath):$(external_jars):$MAKER_OWN_ROOT_DIR/resources/"
     export JAVA_OPTS="$JAVA_OPTS $MAKER_DEBUG_PARAMETERS "
     echo $CLASSPATH
     $SCALA_HOME/bin/scala -Yrepl-sync -nc -i $MAKER_PROJECT_FILE -Dmaker.home="$MAKER_OWN_ROOT_DIR"
   fi
 }
 
+maker_internal_classpath(){
+  if [ $MAKER_DEVELOPER_MODE ];
+  then
+    for module in utils plugin maker; do
+      cp="$cp:$MAKER_OWN_ROOT_DIR/$module/classes:$MAKER_OWN_ROOT_DIR/$module/test-classes/"
+    done
+  else
+    cp=$MAKER_OWN_ROOT_DIR/maker.jar
+  fi
+  echo $cp
+}
 check_setup_sane(){
   if [ -z $SCALA_HOME ];
   then
@@ -117,7 +128,7 @@ calc_heap_space(){
 }
 
 run_command(){
-  command=$1
+  command="$1"
   $command || (echo "failed to run $command " && exit -1)
 }
 
@@ -143,7 +154,8 @@ bootstrap() {
   done
 
   echo "Compiling"
-  run_command "$SCALA_HOME/bin/fsc -classpath $(external_jars) -d $MAKER_OWN_CLASS_OUTPUT_DIR $SRC_FILES" || exit -1
+  echo $SRC_FILES
+  $SCALA_HOME/bin/fsc -classpath $(external_jars) -d $MAKER_OWN_CLASS_OUTPUT_DIR $SRC_FILES | tee $MAKER_OWN_ROOT_DIR/vim-compile-output ; test ${PIPESTATUS[0]} -eq 0 || exit -1
   echo "Building jar"
   run_command "$JAVA_HOME/bin/jar cf $MAKER_OWN_JAR -C $MAKER_OWN_CLASS_OUTPUT_DIR ." || exit -1
   if [ ! -e $MAKER_OWN_ROOT_DIR/maker.jar ];
@@ -168,6 +180,7 @@ process_options() {
       -b | --boostrap ) MAKER_BOOTSTRAP=true; shift;;
       -d | --download-project-scala-lib ) $MAKER_DOWNLOAD_PROJECT_LIB=true; shift;;
       -x | --allow-remote-debugging ) MAKER_DEBUG_PARAMETERS="-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005"; shift;;
+      -i | --developer-mode ) MAKER_DEVELOPER_MODE=true; shift;;
       --ivy-proxy-host ) MAKER_IVY_PROXY_HOST=$2; shift 2;;
       --ivy-proxy-port ) MAKER_IVY_PROXY_PORT=$2; shift 2;;
       --ivy-non-proxy-hosts ) MAKER_IVY_NON_PROXY_HOSTS=$2; shift 2;; 
@@ -201,6 +214,10 @@ cat << EOF
       download is automatic if this directory does not exist
     -x, --allow-remote-debugging
       runs a remote JVM
+    -i, --developer-mode
+      For maker developers.
+      Sets the maker classpath to maker/classes:utils/classes etc rather than 
+      maker.jar. Allows work on maker and another project to be done simultaneously.
     --ivy-proxy-host <host>
     --ivy-proxy-port <port>
     --ivy-non-proxy-hosts <host,host,...>

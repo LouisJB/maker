@@ -40,6 +40,10 @@ case object RunUnitTestsTask extends Task{
   
   private def runnerClassAndMethod(project : Project) = {
     val runnerClass = project.classLoader.loadClass("org.scalatest.tools.Runner$")
+    val fileClass = project.classLoader.loadClass("java.io.File")
+    println("file class " + fileClass)
+    val testListenerClass = project.classLoader.loadClass("org.testng.ITestListener")
+    Log.info("Test listener " + testListenerClass)
     val cons = runnerClass.getDeclaredConstructors
     cons(0).setAccessible(true)
     val runner = cons(0).newInstance()

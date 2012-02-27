@@ -27,7 +27,7 @@ case class Project(
 
   def outputDir = file(root, "classes")
   def javaOutputDir = file(root, "java-classes")
-  def testOutputDir = file(root, "test-classes")
+  def testO utputDir = file(root, "test-classes")
   def packageDir = file(root, "package")
   def managedLibDir = file(root, "maker-lib")
   def ivySettingsFile = file("maker-ivysettings.xml")
@@ -58,6 +58,7 @@ case class Project(
 
   def classLoader = {
     val urls = classpathDirectoriesAndJars.map(_.toURI.toURL).toArray
+    urls.foreach(println)
     new URLClassLoader(urls)
   }
 
