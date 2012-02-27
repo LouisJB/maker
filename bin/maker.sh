@@ -28,7 +28,7 @@ set -e
 
 MAKER_OWN_LIB_DIR=$MAKER_OWN_ROOT_DIR/.maker/lib
 MAKER_PROJECT_SCALA_LIB_DIR=.maker/scala-lib
-
+MAKER_BOOTSTRAP=true
 main() {
   process_options $*
   check_setup_sane || exit -1
@@ -120,7 +120,9 @@ run_command(){
 }
 
 external_jars() {
-  echo `ls $MAKER_OWN_ROOT_DIR/.maker/lib/*.jar | xargs | sed 's/ /:/g'`
+  cp=`ls $MAKER_OWN_ROOT_DIR/.maker/lib/*.jar | xargs | sed 's/ /:/g'`
+  cp=$cp:`ls $MAKER_OWN_ROOT_DIR/libs/*.jar | xargs | sed 's/ /:/g'`
+  echo $cp
 }
 
 bootstrap() {
