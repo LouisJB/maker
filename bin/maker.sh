@@ -15,7 +15,7 @@
 # 1. Download via ivy the jars required by maker itself 
 # 2. Build maker.jar
 # 3. Set classpath and heap space
-# 4. :aunch the repl, loading the project
+# 4. Launch the repl, loading the project
 # 
 # Steps 1 and 2 are omitted if they have been done earlier - unless overridden in
 # in the options.
@@ -28,6 +28,8 @@ set -e
 
 MAKER_OWN_LIB_DIR=$MAKER_OWN_ROOT_DIR/.maker/lib
 MAKER_PROJECT_SCALA_LIB_DIR=.maker/scala-lib
+
+mkdir -p .maker
 
 main() {
   process_options $*
@@ -55,8 +57,10 @@ main() {
   if [ -z $MAKER_SKIP_LAUNCH ];
   then
     export JAVA_OPTS="-Xmx$(($MAKER_HEAP_SPACE))m -Xms$(($MAKER_HEAP_SPACE / 10))m $JREBEL_OPTS"
-    export CLASSPATH="$MAKER_OWN_ROOT_DIR/maker.jar:$(external_jars)"
-    $SCALA_HOME/bin/scala -Yrepl-sync -nc -i $MAKER_PROJECT_FILE 
+    export CLASSPATH="$MAKER_OWN_ROOT_DIR/maker.jar:$(external_jars):resources/"
+    export JAVA_OPTS="$JAVA_OPTS $MAKER_DEBUG_PARAMETERS "
+    echo $CLASSPATH
+    $SCALA_HOME/bin/scala -Yrepl-sync -nc -i $MAKER_PROJECT_FILE -Dmaker.home="$MAKER_OWN_ROOT_DIR"
   fi
 }
 
@@ -73,13 +77,7 @@ check_setup_sane(){
     exit -1
   fi
 
-  if [ -z $MAKER_HOME ];
-  then
-    # don't necessarily need to stop here as most things will work
-    echo "WARNING: MAKER_HOME not defined, some default libraries may not be found when running this script from outside maker's home dir"
-  fi
-
-  MAKER_IVY_JAR=${MAKER_IVY_JAR-${MAKER_HOME}/libs/ivy-2.2.0.jar}
+  MAKER_IVY_JAR=${MAKER_IVY_JAR-${MAKER_OWN_ROOT_DIR}/libs/ivy-2.2.0.jar}
   if [ ! -e $MAKER_IVY_JAR ];
   then
     echo "Ivy jar not found"
@@ -120,12 +118,13 @@ calc_heap_space(){
 
 run_command(){
   command=$1
-  echo "$command"
   $command || (echo "failed to run $command " && exit -1)
 }
 
 external_jars() {
-  echo `ls $MAKER_OWN_ROOT_DIR/.maker/lib/*.jar | xargs | sed 's/ /:/g'`
+  cp=`ls $MAKER_OWN_ROOT_DIR/.maker/lib/*.jar | xargs | sed 's/ /:/g'`
+  cp=$cp:`ls $MAKER_OWN_ROOT_DIR/libs/*.jar | xargs | sed 's/ /:/g'`
+  echo $cp
 }
 
 bootstrap() {
@@ -144,7 +143,6 @@ bootstrap() {
   done
 
   echo "Compiling"
-  echo "ext jars $(external_jars)"
   run_command "$SCALA_HOME/bin/fsc -classpath $(external_jars) -d $MAKER_OWN_CLASS_OUTPUT_DIR $SRC_FILES" || exit -1
   echo "Building jar"
   run_command "$JAVA_HOME/bin/jar cf $MAKER_OWN_JAR -C $MAKER_OWN_CLASS_OUTPUT_DIR ." || exit -1
@@ -169,6 +167,7 @@ process_options() {
       -y | --do-ivy-update ) MAKER_IVY_UPDATE=true; shift;;
       -b | --boostrap ) MAKER_BOOTSTRAP=true; shift;;
       -d | --download-project-scala-lib ) $MAKER_DOWNLOAD_PROJECT_LIB=true; shift;;
+      -x | --allow-remote-debugging ) MAKER_DEBUG_PARAMETERS="-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005"; shift;;
       --ivy-proxy-host ) MAKER_IVY_PROXY_HOST=$2; shift 2;;
       --ivy-proxy-port ) MAKER_IVY_PROXY_PORT=$2; shift 2;;
       --ivy-non-proxy-hosts ) MAKER_IVY_NON_PROXY_HOSTS=$2; shift 2;; 
@@ -200,6 +199,8 @@ cat << EOF
     -d, --download-project-scala-lib 
       downloads scala compiler and library to <project-dir>/.maker/scala-lib
       download is automatic if this directory does not exist
+    -x, --allow-remote-debugging
+      runs a remote JVM
     --ivy-proxy-host <host>
     --ivy-proxy-port <port>
     --ivy-non-proxy-hosts <host,host,...>

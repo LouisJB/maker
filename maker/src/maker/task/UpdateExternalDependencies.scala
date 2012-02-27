@@ -3,10 +3,15 @@ package maker.task
 import maker.project.Project
 import maker.os.Command
 import maker.utils.Log
+import java.io.File
+import org.apache.ivy.core.resolve.ResolveOptions
+import org.apache.ivy.util.filter.FilterHelper
+import org.apache.ivy.Ivy
+import org.apache.ivy.core.retrieve.RetrieveOptions
 
 case object UpdateExternalDependencies extends Task{
 
-  def exec(project : Project, acc : List[AnyRef]) = {
+  def execOld(project : Project, acc : List[AnyRef]) = {
     import project._
     managedLibDir.mkdirs
     Log.info("Updating " + name)
@@ -52,4 +57,39 @@ case object UpdateExternalDependencies extends Task{
       Right("OK")
     }
   }
+
+  def exec(project : Project, acc : List[AnyRef]) = {
+    try {
+      if (project.ivyFile.exists){
+        val confs = Array[String]("default")
+        val artifactFilter = FilterHelper.getArtifactTypeFilter(Array[String]("jar", "bundle", "source"))
+
+        val resolveOptions = new ResolveOptions().setConfs(confs)
+                      .setValidate(true)
+                      .setArtifactFilter(artifactFilter)
+        val ivy = Ivy.newInstance
+        val settings = ivy.getSettings
+        settings.addAllVariables(System.getProperties)
+        ivy.configure(project.ivySettingsFile)
+        val report = ivy.resolve(project.ivyFile.toURI().toURL(), resolveOptions)
+        val md = report.getModuleDescriptor
+        ivy.retrieve(
+          md.getModuleRevisionId(), 
+          project.managedLibDir.getPath + "/[artifact]-[revision](-[classifier]).[ext]", 
+          new RetrieveOptions()
+            .setConfs(confs).setSync(true)
+            .setArtifactFilter(artifactFilter))
+        Right("OK")
+      } else {
+        Log.info("Nothing to update")
+        Right("OK")
+      }
+    } catch {
+      case e => 
+        e.printStackTrace
+        Left(TaskFailed(ProjectAndTask(project, this), e.getMessage))
+    }
+
+  }
+
 }

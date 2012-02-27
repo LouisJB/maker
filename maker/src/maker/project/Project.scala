@@ -10,6 +10,8 @@ import maker.os.Command
 import maker.graphviz.GraphVizUtils._
 import maker.graphviz.GraphVizDiGrapher._
 import maker.utils.{DependencyLib, Log}
+import maker.utils.RichString._
+import maker.utils.FileUtils
 
 case class Project(
   name: String,
@@ -185,6 +187,30 @@ class TopLevelProject(name:String,
     IDEAProjectGenerator.generateModulesFile(file(root, ".idea"), (this :: allModules).map(_.name))
 
     IDEAProjectGenerator.updateGitIgnoreIfRequired(this)
+  }
+  def downloadScalaCompilerAndLibrary{
+    val ivyText="""
+<ivy-module version="1.0" xmlns:e="http://ant.apache.org/ivy/extra">
+  <info organisation="maker" module="maker"/>
+  <configurations>
+    <conf name="default" transitive="false"/>
+  </configurations>
+  <dependencies defaultconfmapping="*->default,sources">
+    <dependency org="org.scala-lang" name="scala-compiler" rev="%s"/>
+    <dependency org="org.scala-lang" name="scala-library" rev="%s"/>
+  </dependencies>
+</ivy-module>
+    """ % (props.ScalaVersion(), props.ScalaVersion())
+    val ivyFile = new File(".maker/scala-library-ivy.xml") 
+    FileUtils.writeToFile(
+      ivyFile,
+      ivyText
+    )
+
+
+
+
+    null
   }
 }
 

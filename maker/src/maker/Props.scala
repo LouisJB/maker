@@ -25,7 +25,7 @@ case class Props(private val overrides : Map[String, String] = Map()){
   class FileProperty(val default : () => String) extends Property{
     def apply() = file(value)
   }
-  class OptionalProperty extends Property{
+  trait OptionalProperty extends Property{
     val default = () => ""
     def apply() = value match {
       case "" => None
@@ -36,16 +36,21 @@ case class Props(private val overrides : Map[String, String] = Map()){
   object HttpProxyPort extends OptionalProperty
   object HttpNonProxyHosts extends OptionalProperty
 
-  val MAKER_HOME_ENV_VAR = "MAKER_HOME"
   object MakerHome extends StringProperty(() =>
-    Option(System.getenv(MAKER_HOME_ENV_VAR)).getOrElse("")
+    Option(System.getProperty("maker.home")).getOrElse{throw new Exception("maker.home System property most be set")}
   )
+
+  val httpProperties : List[(String, String)]= List(HttpProxyHost, HttpProxyPort, HttpNonProxyHosts).flatMap{
+    case prop => List(prop.name).zip(prop())
+  }
+  
 
   object ScalaHome extends FileProperty(() => "/usr/local/scala/")
   object JavaHome extends FileProperty(() => "/usr/local/jdk/")
   object IvyJar extends FileProperty(() =>
-    Option(System.getProperty(MAKER_HOME_ENV_VAR)).map(_ + "/libs/ivy-2.2.0.jar").getOrElse("/usr/share/java/ivy.jar")
+    MakerHome() + "/libs/ivy-2.2.0.jar"
   )
+  object ScalaVersion extends StringProperty(() => "2.9.1")
 
   private val propertyMethods = this.getClass.getMethods.filter{
     m =>
