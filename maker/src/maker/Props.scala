@@ -36,9 +36,17 @@ case class Props(private val overrides : Map[String, String] = Map()){
   object HttpProxyPort extends OptionalProperty
   object HttpNonProxyHosts extends OptionalProperty
 
+  val MAKER_HOME_ENV_VAR = "MAKER_HOME"
+  object MakerHome extends StringProperty(() =>
+    Option(System.getenv(MAKER_HOME_ENV_VAR)).getOrElse("")
+  )
+
   object ScalaHome extends FileProperty(() => "/usr/local/scala/")
   object JavaHome extends FileProperty(() => "/usr/local/jdk/")
-  object IvyJar extends FileProperty(() => "libs/ivy-2.2.0.jar")
+  object IvyJar extends FileProperty(() =>
+    Option(System.getProperty(MAKER_HOME_ENV_VAR)).map(_ + "/libs/ivy-2.2.0.jar").getOrElse("/usr/share/java/ivy.jar")
+  )
+
   private val propertyMethods = this.getClass.getMethods.filter{
     m =>
       classOf[Property].isAssignableFrom(m.getReturnType) && m.getParameterTypes.isEmpty

@@ -74,7 +74,7 @@ check_setup_sane(){
     exit -1
   fi
 
-  MAKER_IVY_JAR=${MAKER_IVY_JAR-./libs/ivy-2.2.0.jar} 
+  MAKER_IVY_JAR=${MAKER_IVY_JAR-${MAKER_HOME}/libs/ivy-2.2.0.jar}
   if [ ! -e $MAKER_IVY_JAR ];
   then
     echo "Ivy jar not found"
