@@ -15,7 +15,7 @@
 # 1. Download via ivy the jars required by maker itself 
 # 2. Build maker.jar
 # 3. Set classpath and heap space
-# 4. :aunch the repl, loading the project
+# 4. Launch the repl, loading the project
 # 
 # Steps 1 and 2 are omitted if they have been done earlier - unless overridden in
 # in the options.
@@ -28,7 +28,9 @@ set -e
 
 MAKER_OWN_LIB_DIR=$MAKER_OWN_ROOT_DIR/.maker/lib
 MAKER_PROJECT_SCALA_LIB_DIR=.maker/scala-lib
-MAKER_BOOTSTRAP=true
+
+mkdir -p .maker
+
 main() {
   process_options $*
   check_setup_sane || exit -1
@@ -56,7 +58,9 @@ main() {
   if [ -z $MAKER_SKIP_LAUNCH ];
   then
     export JAVA_OPTS="-Xmx$(($MAKER_HEAP_SPACE))m -Xms$(($MAKER_HEAP_SPACE / 10))m $JREBEL_OPTS"
-    export CLASSPATH="$MAKER_OWN_ROOT_DIR/maker.jar:$(external_jars)"
+    export CLASSPATH="$MAKER_OWN_ROOT_DIR/maker.jar:$(external_jars):resources/"
+    export JAVA_OPTS="$JAVA_OPTS $MAKER_DEBUG_PARAMETERS "
+    echo $CLASSPATH
     $SCALA_HOME/bin/scala -Yrepl-sync -nc -i $MAKER_PROJECT_FILE 
   fi
 }
@@ -164,6 +168,7 @@ process_options() {
       -y | --do-ivy-update ) MAKER_IVY_UPDATE=true; shift;;
       -b | --boostrap ) MAKER_BOOTSTRAP=true; shift;;
       -d | --download-project-scala-lib ) $MAKER_DOWNLOAD_PROJECT_LIB=true; shift;;
+      -x | --allow-remote-debugging ) MAKER_DEBUG_PARAMETERS="-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005"; shift;;
       --ivy-proxy-host ) MAKER_IVY_PROXY_HOST=$2; shift 2;;
       --ivy-proxy-port ) MAKER_IVY_PROXY_PORT=$2; shift 2;;
       --ivy-non-proxy-hosts ) MAKER_IVY_NON_PROXY_HOSTS=$2; shift 2;; 
@@ -195,6 +200,8 @@ cat << EOF
     -d, --download-project-scala-lib 
       downloads scala compiler and library to <project-dir>/.maker/scala-lib
       download is automatic if this directory does not exist
+    -x, --allow-remote-debugging
+      runs a remote JVM
     --ivy-proxy-host <host>
     --ivy-proxy-port <port>
     --ivy-non-proxy-hosts <host,host,...>
