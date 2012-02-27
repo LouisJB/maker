@@ -28,8 +28,9 @@ case object UpdateExternalDependencies extends Task{
 
       List(
         Command(parameters ::: ((managedLibDir.getPath + "/[artifact]-[revision](-[classifier]).[ext]")::"-sync"::"-types"::"jar"::Nil) : _*),
-        Command(parameters ::: ((managedLibDir.getPath + "/[artifact]-[revision](-[classifier]).[ext]")::"-types"::"bundle"::Nil) : _*),
-        Command(parameters ::: ((managedLibDir.getPath + "/[artifact]-[revision]-source(-[classifier]).[ext]")::"-types"::"source"::Nil) : _*)
+        Command(parameters ::: ((managedLibDir.getPath + "/[artifact]-[revision](-[classifier]).[ext]")::"-types"::"bundle"::Nil) : _*)
+        // removed, this is to be replaced by using Ivy direction not via bash
+        //Command(parameters ::: ((managedLibDir.getPath + "/[artifact]-[revision]-source(-[classifier]).[ext]")::"-types"::"source"::Nil) : _*)
       )
     }
     if (ivyFile.exists){
