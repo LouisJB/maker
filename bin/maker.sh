@@ -52,7 +52,6 @@ main() {
     download_scala_library_and_compiler
   fi
 
-
   if [ -z $MAKER_SKIP_LAUNCH ];
   then
     export JAVA_OPTS="-Xmx$(($MAKER_HEAP_SPACE))m -Xms$(($MAKER_HEAP_SPACE / 10))m $JREBEL_OPTS"
@@ -72,6 +71,12 @@ check_setup_sane(){
   then
     echo "JAVA_HOME not defined"
     exit -1
+  fi
+
+  if [ -z $MAKER_HOME ];
+  then
+    # don't necessarily need to stop here as most things will work
+    echo "WARNING: MAKER_HOME not defined, some default libraries may not be found when running this script from outside maker's home dir"
   fi
 
   MAKER_IVY_JAR=${MAKER_IVY_JAR-${MAKER_HOME}/libs/ivy-2.2.0.jar}
