@@ -59,7 +59,7 @@ case class Project(
   def classLoader = {
     val urls = classpathDirectoriesAndJars.map(_.toURI.toURL).toArray
     //urls.foreach(println)
-    new URLClassLoader(urls)
+    new URLClassLoader(urls, null)
   }
 
   def outputJar = new File(packageDir.getAbsolutePath, name + ".jar")
