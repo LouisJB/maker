@@ -53,11 +53,11 @@ case object RunUnitTestsTask extends Task{
 
   def exec(project : Project, acc : List[AnyRef]) = {
     Log.info("Testing " + project)
-    val (runner, method) = runnerClassAndMethod(project)
     val suiteParameters = suiteClassNames(project).map(List("-s", _)).flatten
     if (suiteParameters.isEmpty){
       Right(Unit)
     } else {
+      val (runner, method) = runnerClassAndMethod(project)
       val pars = List("-c", "-o", "-p", project.scalatestRunpath) ::: suiteParameters
       val result = method.invoke(runner, pars.toArray).asInstanceOf[Boolean]
       if (result)
