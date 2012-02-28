@@ -56,7 +56,7 @@ main() {
 
   if [ -z $MAKER_SKIP_LAUNCH ];
   then
-    export JAVA_OPTS="-Xmx$(($MAKER_HEAP_SPACE))m -Xms$(($MAKER_HEAP_SPACE / 10))m $JREBEL_OPTS"
+    export JAVA_OPTS="-Xmx$(($MAKER_HEAP_SPACE))m -XX:MaxPermSize=$(($MAKER_HEAP_SPACE / 10))m $JREBEL_OPTS"
     export CLASSPATH="$(maker_internal_classpath):$(external_jars):$MAKER_OWN_ROOT_DIR/resources/"
     export JAVA_OPTS="$JAVA_OPTS $MAKER_DEBUG_PARAMETERS "
     echo $CLASSPATH
