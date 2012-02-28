@@ -31,10 +31,11 @@ case object PackageTask extends Task{
     val createCmd = Command(List(jar, "cf", project.outputJar.getAbsolutePath, "-C", dirsToPack.head.getAbsolutePath, ".") : _*)
     val updateCmds = dirsToPack.tail.map(dir => List(jar, "uf", project.outputJar.getAbsolutePath, "-C", dir.getAbsolutePath, "."))
 
-    println(createCmd)
     val cmds = createCmd :: updateCmds.map(args => Command(args : _*))
 
-    def exec(cs : List[Command]) : Either[TaskFailed, AnyRef] = {
+    def fix[A,B](f: (A=>B)=>(A=>B)): A=>B = f(fix(f))(_)
+
+    fix[List[Command], Either[TaskFailed, AnyRef]](exec => cs => {
       cs match {
         case cmd :: rs => cmd.exec() match {
           case (0, _) => exec(rs)
@@ -42,8 +43,6 @@ case object PackageTask extends Task{
         }
         case Nil => Right(Unit)
       }
-    }
-    exec(cmds)
+    })(cmds)
   }
 }
-

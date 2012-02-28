@@ -90,7 +90,5 @@ case object UpdateExternalDependencies extends Task{
         e.printStackTrace
         Left(TaskFailed(ProjectAndTask(project, this), e.getMessage))
     }
-
   }
-
 }
