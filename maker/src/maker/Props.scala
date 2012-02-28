@@ -17,7 +17,6 @@ case class Props(private val overrides : Map[String, String] = Map()){
       objectName.substring(objectName.indexOf("$")+1, objectName.length()-1)
     }
   }
-
   class StringProperty(val default : () => String) extends Property{
     def apply() = value
   }
@@ -31,6 +30,13 @@ case class Props(private val overrides : Map[String, String] = Map()){
       case v => Some(v)
     }
   }
+
+  override def toString = 
+    "Properties:\n" + properties.mkString("\n")
+  
+  /**
+   * Actual properties start here
+   */
   object HttpProxyHost extends OptionalProperty
   object HttpProxyPort extends OptionalProperty
   object HttpNonProxyHosts extends OptionalProperty
@@ -43,9 +49,9 @@ case class Props(private val overrides : Map[String, String] = Map()){
     case prop => List(prop.name).zip(prop())
   }
   
-
+  val javaHomeEnv = Option(System.getenv("JAVA_HOME")).orElse(Option(System.getenv("JDK_HOME")))
   object ScalaHome extends FileProperty(() => "/usr/local/scala/")
-  object JavaHome extends FileProperty(() => "/usr/local/jdk/")
+  object JavaHome extends FileProperty(() => javaHomeEnv.getOrElse("/usr/local/jdk/"))
   object IvyJar extends FileProperty(() =>
     MakerHome() + "/libs/ivy-2.2.0.jar"
   )
@@ -89,6 +95,9 @@ case class Props(private val overrides : Map[String, String] = Map()){
     }
   }
 
+  object Organisation extends StringProperty(() => "Acme Org")
+  object Version extends StringProperty(() => "1.0-SNAPSHOT")
+  
   lazy val properties = {
     Map() ++ propertyMethods.map{
       m =>
@@ -99,9 +108,6 @@ case class Props(private val overrides : Map[String, String] = Map()){
     case (o, _) => 
       assert(propertyMethods.map(_.getName).toSet.contains(o), "Overiding non existant property " + o)
   }
-
-  object Organisation extends StringProperty(() => "Acme Org")
-  object Version extends StringProperty(() => "1.0-SNAPSHOT")
 }
 
 object Props{
