@@ -75,7 +75,7 @@ class QueueManager(projectTasks : Set[ProjectAndTask], router : ActorRef, origin
     case TaskResultMessage(projectTask, Left(taskFailure)) => {
       ProjectAndTask.removeTask(projectTask)
       Log.debug("Task failed " + taskFailure)
-      router.stop
+      //router.stop
       originalCaller ! BuildResult(Left(taskFailure), projectTasks, originalProjectAndTask)
     }
     case TaskResultMessage(projectTask, Right(result)) => {
@@ -130,9 +130,10 @@ object QueueManager{
     val future = qm ? StartBuild
     val result = future.get.asInstanceOf[BuildResult]
 
-    qm.stop
-    workers.foreach(_.stop)
-    router.stop
+import akka.actor.PoisonPill
+    qm ! PoisonPill
+    workers.foreach(_ ! PoisonPill)
+    router ! PoisonPill
     EventHandler.shutdown()
     Log.debug("Stats: \n" + projectTasks.map(_.runStats).mkString("\n"))
     Log.info("Completed, took" + sw + ", result " + result)
