@@ -57,7 +57,7 @@ object GraphVizDiGrapher {
     val g = pts.flatMap(pt => {
       import math._
       val criticalPathFinishingTime = (0L /: pt._2.map(_.finishingTime))(max)
-      def mkArrowAttrs(pt : ProjectAndTask) = if (pt.finishingTime >= criticalPathFinishingTime) "[color=red]" else ""
+      def mkArrowAttrs(pt : ProjectAndTask) = if (pt.finishingTime >= criticalPathFinishingTime) "[color=red]" else "[fontsize=8 label=\\\"float=%sms\\\"]".format((criticalPathFinishingTime - pt.finishingTime)/1000000)
       pt._2.map(pdt =>
         "%s->%s %s".format(mkLabel(pt._1), mkLabel(pdt), mkArrowAttrs(pdt))
       )
