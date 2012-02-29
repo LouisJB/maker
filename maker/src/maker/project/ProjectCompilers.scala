@@ -30,13 +30,15 @@ case class ProjectCompilers(project : Project){
   }
 
 
-  private val compiler_ : Global = makeCompiler(isTestCompiler = false)
+  //private val compiler_ : Global = makeCompiler(isTestCompiler = false)
   def compiler : Global = {
+    val compiler_ : Global = makeCompiler(isTestCompiler = false)
     compiler_.settings.classpath.value = project.compilationClasspath
     compiler_
   }
-  private val testCompiler_ : Global = makeCompiler(isTestCompiler = true)
+  //private val testCompiler_ : Global = makeCompiler(isTestCompiler = true)
   def testCompiler : Global = {
+    val testCompiler_ : Global = makeCompiler(isTestCompiler = true)
     testCompiler_.settings.classpath.value = project.compilationClasspath
     testCompiler_
   }
