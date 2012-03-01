@@ -14,6 +14,7 @@ object Task {
     CompileTestsTask -> Set(CompileSourceTask),
     PackageTask -> Set(CompileSourceTask),
     PublishLocalTask -> Set(PackageTask),
+    PublishTask -> Set(PublishLocalTask),
     RunUnitTestsTask -> Set(CompileTestsTask)
   )
   lazy val standardDependentProjectDependencies = Map[Task, Set[Task]](
@@ -21,6 +22,7 @@ object Task {
     CompileTestsTask -> Set(CompileTestsTask),
     PackageTask -> Set(PackageTask),
     PublishLocalTask -> Set(PublishLocalTask),
+    PublishTask -> Set(PublishLocalTask),
     CompileJavaSourceTask → Set(CompileSourceTask)
   )
 }

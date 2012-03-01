@@ -16,6 +16,7 @@ case class Props(private val overrides : Map[String, String] = Map()){
       val objectName = getClass.getName
       objectName.substring(objectName.indexOf("$")+1, objectName.length()-1)
     }
+    override def toString = name + "=" + value
   }
   class StringProperty(val default : () => String) extends Property{
     def apply() = value

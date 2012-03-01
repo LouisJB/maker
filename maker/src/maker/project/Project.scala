@@ -84,9 +84,10 @@ case class Project(
   // incomplete tasks
   def publishLocal = QueueManager(projectAndDescendents, PublishLocalTask)
   def publishLocalOnly = QueueManager(List(this), PublishLocalTask)
+  def publish = QueueManager(projectAndDescendents, PublishTask)
+  def publishOnly = QueueManager(List(this), PublishTask)
 
-
-  def ~ (task : () => BuildResult){
+  def ~ (task : () => BuildResult) {
     var lastTaskTime : Option[Long] = None
     def printWaitingMessage = println("\nWaiting for source file changes (press 'enter' to interrupt)")
     def rerunTask{
