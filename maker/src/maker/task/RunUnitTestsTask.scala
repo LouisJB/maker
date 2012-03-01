@@ -7,9 +7,9 @@ import java.lang.reflect.Modifier
 import maker.utils.FileUtils
 
 case object RunUnitTestsTask extends Task{
-  private val emptyClassArray = new Array[java.lang.Class[T] forSome { type T }](0)
 
   private def isAccessibleSuite(suiteClass: java.lang.Class[_], clazz: java.lang.Class[_]): Boolean = {
+    val emptyClassArray = new Array[java.lang.Class[T] forSome { type T }](0)
       try {
         suiteClass.isAssignableFrom(clazz) &&
           Modifier.isPublic(clazz.getModifiers) &&
