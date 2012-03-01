@@ -56,9 +56,9 @@ main() {
 
   if [ -z $MAKER_SKIP_LAUNCH ];
   then
-    export JAVA_OPTS="-Xmx$(($MAKER_HEAP_SPACE))m -XX:MaxPermSize=$(($MAKER_HEAP_SPACE / 10))m $JREBEL_OPTS"
+    export JAVA_OPTS="-Xmx$(($MAKER_HEAP_SPACE))m -XX:MaxPermSize=$(($MAKER_PERM_GEN_SPACE))m $JREBEL_OPTS"
     export CLASSPATH="$(maker_internal_classpath):$(external_jars):$MAKER_OWN_ROOT_DIR/resources/"
-    export JAVA_OPTS="$JAVA_OPTS $MAKER_DEBUG_PARAMETERS "
+    export JAVA_OPTS="$JAVA_OPTS $MAKER_DEBUG_PARAMETERS -XX:+HeapDumpOnOutOfMemoryError "
     echo $CLASSPATH
     $SCALA_HOME/bin/scala -Yrepl-sync -nc -i $MAKER_PROJECT_FILE -Dmaker.home="$MAKER_OWN_ROOT_DIR"
   fi
@@ -113,6 +113,7 @@ check_setup_sane(){
 
 
   MAKER_HEAP_SPACE=${MAKER_HEAP_SPACE-$(calc_heap_space)}
+  MAKER_PERM_GEN_SPACE=${MAKER_PERM_GEN_SPACE-$(($MAKER_HEAP_SPACE / 10))}
 }
 
 calc_heap_space(){
@@ -180,6 +181,7 @@ process_options() {
       -d | --download-project-scala-lib ) $MAKER_DOWNLOAD_PROJECT_LIB=true; shift;;
       -x | --allow-remote-debugging ) MAKER_DEBUG_PARAMETERS="-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005"; shift;;
       -i | --developer-mode ) MAKER_DEVELOPER_MODE=true; shift;;
+      --mem-permgen-space ) MAKER_PERM_GEN_SPACE=$2; shift 2;;
       --ivy-proxy-host ) MAKER_IVY_PROXY_HOST=$2; shift 2;;
       --ivy-proxy-port ) MAKER_IVY_PROXY_PORT=$2; shift 2;;
       --ivy-non-proxy-hosts ) MAKER_IVY_NON_PROXY_HOSTS=$2; shift 2;; 
@@ -217,6 +219,8 @@ cat << EOF
       For maker developers.
       Sets the maker classpath to maker/classes:utils/classes etc rather than 
       maker.jar. Allows work on maker and another project to be done simultaneously.
+    --mem-permgen-space <space in MB>
+      default is 1/10th of heap space
     --ivy-proxy-host <host>
     --ivy-proxy-port <port>
     --ivy-non-proxy-hosts <host,host,...>
