@@ -7,6 +7,7 @@ import akka.actor.ActorRef
 import akka.routing.{CyclicIterator, Routing}
 import akka.actor.{UntypedChannel, Actor}
 import akka.event.EventHandler
+import java.io.File
 
 trait TaskResult
 case object TaskSuccess extends TaskResult { 
@@ -32,17 +33,20 @@ class Worker() extends Actor{
     }
   }
 }
+
 case class BuildResult(res : Either[TaskFailed, AnyRef], projectAndTasks : Set[ProjectAndTask], originalProjectAndTask : ProjectAndTask) extends BuildMessage {
   import maker.graphviz.GraphVizDiGrapher._
   import maker.graphviz.GraphVizUtils._
   def stats = projectAndTasks.map(_.allStats).mkString("\n")
   
-  def resultTree(pt : ProjectAndTask = originalProjectAndTask) = {
+  def resultTree(pt : ProjectAndTask = originalProjectAndTask) =
     pt.getTaskTree.map(p => (projectAndTasks.find(_ == p._1).get, p._2.map(pt => projectAndTasks.find(_ == pt).get)))
-  }
   
-  def showBuildGraph() = 
-    showGraph(makeDotFromProjectAndTask(resultTree()))
+  def showBuildGraph() : Option[File] =
+    resultTree() match {
+      case Nil | null => Log.info("No project results to graph"); None
+      case r => Some(showGraph(makeDotFromProjectAndTask(r)))
+    }
 
   override def toString = res.toString
 }

@@ -8,11 +8,12 @@ import java.io.File
 
 object GraphVizDiGrapher {
   val graphName = "Maker-Project-Graph"
+  val defaultFont = "fontname=Helvetica fontsize=8"
 
   def mkGraph(name : String,  graphDef : String) = {
     val g = "digraph \\\"%s\\\" { graph[size=\\\"100.0, 100.0\\\"]; "
-    (g + "{ node[ratio=compress size = \\\"100.0, 100.0\\\" nodesep=\\\"0.1\\\" ranksep=\\\"0.1\\\" fontname=Helvetica fontsize=8]; %s ;} ;}")
-      .format(name, graphDef)
+    (g + "{ node[ratio=compress size = \\\"100.0, 100.0\\\" nodesep=\\\"0.1\\\" ranksep=\\\"0.1\\\" %s]; %s } ;}")
+      .format(name, defaultFont, graphDef)
   }
 
   def makeDot(graph : List[(Project, List[Project])], showLibDirs : Boolean = false, showLibs : Boolean = false) : String = {
@@ -45,23 +46,33 @@ object GraphVizDiGrapher {
    */
   def makeDotFromProjectAndTask(ps : List[(ProjectAndTask, List[ProjectAndTask])]) : String = {
     val pts = ps.distinct
-    val allTimes = pts.flatMap(pt => pt._2.map(p => pt._1.runTimeMs))
+    val allTimes = pts.head._1.runTimeMs :: pts.flatMap(pt => pt._2.map(p => pt._1.runTimeMs))
+    println("pts = " + pts + " allTimes = " + allTimes)
     val numberOfTasks = allTimes.size
     val avgTime = allTimes.sum / numberOfTasks
     def mkLabel(pt : ProjectAndTask) = {
       val size = pt.runTimeMs.toDouble / avgTime
       val nodeAttrs = if (!pt.completed) " style=filled fillcolor=red" else if (pt.task == CompileJavaSourceTask) " style=filled fillcolor=lightskyblue" else ""
       "{ \\\"<%s> %s (%d) Took %dms\\\" [width=%f height=%f %s] }"
-        .format(pt.task, pt.project.name, pt.roundNo, pt.runTimeMs, size*2.0, size, nodeAttrs)
+        .format(pt.task, pt.project.name, pt.roundNo, pt.runTimeMs, size*1.5, size, nodeAttrs)
     }
-    val g = pts.flatMap(pt => {
-      import math._
-      val criticalPathFinishingTime = (0L /: pt._2.map(_.finishingTime))(max)
-      def mkArrowAttrs(pt : ProjectAndTask) = if (pt.finishingTime >= criticalPathFinishingTime) "[color=red]" else "[fontsize=8 label=\\\"float=%sms\\\"]".format((criticalPathFinishingTime - pt.finishingTime)/1000000)
-      pt._2.map(pdt =>
-        "%s->%s %s".format(mkLabel(pt._1), mkLabel(pdt), mkArrowAttrs(pdt))
-      )
-    })
+    val g = pts match {
+      case singleProjTask :: Nil => {
+        List("%s".format(mkLabel(singleProjTask._1)))
+      }
+      case _ => pts.flatMap(pt => {
+        import math._
+        val criticalPathFinishingTime = (0L /: pt._2.map(_.finishingTime))(max)
+
+        def mkArrowAttrs(pt : ProjectAndTask) =
+          if (pt.finishingTime >= criticalPathFinishingTime) "[color=red]"
+          else "[%s label=\\\"float=%sms\\\"]".format(defaultFont, (criticalPathFinishingTime - pt.finishingTime) / 1000000)
+
+        pt._2.map(pdt =>
+          "%s->%s %s".format(mkLabel(pt._1), mkLabel(pdt), mkArrowAttrs(pdt)))
+      })
+    }
+
     val dot = mkGraph(graphName, g.distinct.mkString(" "))
     println("dot = " + dot)
     dot
@@ -94,10 +105,11 @@ object GraphVizUtils {
   def showGraph(graphDef : String, file : File = defaultImageFile) =
     showImage(createGraphFile(graphDef, removeGraphFile(file)))
 
-  def showImage(f : File) {
+  def showImage(f : File) = {
     if (isLinux)
       Command("xdg-open", f.getAbsolutePath).exec(true)
     else // assume OSX until we want to support other OSes such as windows
       Command("open", f.getAbsolutePath).exec()
+    f
   }
 }
