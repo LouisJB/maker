@@ -130,7 +130,7 @@ object QueueManager{
     val future = qm ? StartBuild
     val result = future.get.asInstanceOf[BuildResult]
 
-import akka.actor.PoisonPill
+    import akka.actor.PoisonPill
     qm ! PoisonPill
     workers.foreach(_ ! PoisonPill)
     router ! PoisonPill
@@ -140,3 +140,4 @@ import akka.actor.PoisonPill
     result
   }
 }
+
