@@ -33,7 +33,7 @@ case class Props(private val overrides : Map[String, String] = Map()){
   }
 
   override def toString = 
-    "Properties:\n" + properties.mkString("\n")
+    "Properties:\n" + properties.map(kv => kv._1 + "=" + kv._2.value).mkString("\n")
   
   /**
    * Actual properties start here
@@ -98,7 +98,8 @@ case class Props(private val overrides : Map[String, String] = Map()){
 
   object Organisation extends StringProperty(() => "Acme Org")
   object Version extends StringProperty(() => "1.0-SNAPSHOT")
-  
+  object DefaultPublishResolver extends OptionalProperty()
+
   lazy val properties = {
     Map() ++ propertyMethods.map{
       m =>

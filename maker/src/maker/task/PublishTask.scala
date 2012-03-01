@@ -34,19 +34,19 @@ case object PublishTask extends Task {
         val report = ivy.resolve(project.ivyFile.toURI().toURL(), resolveOptions)
         val md = report.getModuleDescriptor
 
-        val resolverName = ""
+        val resolverName = project.props.DefaultPublishResolver().getOrElse("default")
         //project.managedLibDir.getPath + "/[artifact]-[revision](-[classifier]).[ext]",
         import scala.collection.JavaConversions._
         val srcArtifactPattern = List(
           moduleLocal.getAbsolutePath + "/jars/" + project.name + ".jar",
-          moduleLocal.getAbsolutePath + "/poms/" + project.name + ".pom")
+          moduleLocal.getAbsolutePath + "/poms/pom.xml")
         ivy.publish(
           md.getModuleRevisionId(),
           srcArtifactPattern,
           resolverName,
           new PublishOptions()
             .setConfs(confs).setOverwrite(true)
-            .setPubrevision(""))
+            .setPubrevision(project.props.Version()))
         Right("OK")
       }
       else {
