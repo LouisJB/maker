@@ -1,21 +1,15 @@
 package maker.task
 
-import maker.project.Project
 import maker.utils.FileUtils._
-import java.io.File
 import org.apache.commons.io.{FileUtils => ApacheFileUtils}
-import maker.os.Command
 import maker.utils.maven._
 import maker.project._
-import maker.utils.ivy.IvyReader
 
 case object PublishLocalTask extends Task{
   def exec(project : Project, acc : List[AnyRef]) = {
-
     val homeDir = project.props.HomeDir()
     val moduleDef = project.moduleDef
-    val baseLocalRepo = file(homeDir, ".ivy2/maker-local/")
-    val moduleLocal = file(baseLocalRepo, project.name)
+    val moduleLocal = file(homeDir, ".ivy2/maker-local/" + project.name)
     val moduleLocalPomDir = file(moduleLocal, "/poms/")
   
     moduleLocalPomDir.mkdirs    
@@ -31,4 +25,3 @@ case object PublishLocalTask extends Task{
     Right("OK")
   }
 }
-
