@@ -9,9 +9,9 @@ import org.apache.ivy.util.filter.FilterHelper
 import org.apache.ivy.Ivy
 import org.apache.ivy.core.retrieve.RetrieveOptions
 
-case object UpdateExternalDependencies extends Task{
+case object UpdateExternalDependencies extends Task {
 
-  def execOld(project : Project, acc : List[AnyRef]) = {
+  def execOld(project : Project, acc : List[AnyRef], parameters : Map[String, String] = Map()) = {
     import project._
     managedLibDir.mkdirs
     Log.info("Updating " + name)
@@ -59,7 +59,7 @@ case object UpdateExternalDependencies extends Task{
     }
   }
 
-  def exec(project : Project, acc : List[AnyRef]) = {
+  def exec(project : Project, acc : List[AnyRef], parameters : Map[String, String] = Map()) = {
     try {
       if (project.ivyFile.exists){
         val confs = Array[String]("default")

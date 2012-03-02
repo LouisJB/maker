@@ -6,7 +6,7 @@ import org.scalatest.Suite
 import java.lang.reflect.Modifier
 import maker.utils.FileUtils
 
-case object RunUnitTestsTask extends Task{
+case object RunUnitTestsTask extends Task {
 
   private def isAccessibleSuite(suiteClass: java.lang.Class[_], clazz: java.lang.Class[_]): Boolean = {
     val emptyClassArray = new Array[java.lang.Class[T] forSome { type T }](0)
@@ -51,7 +51,7 @@ case object RunUnitTestsTask extends Task{
     (runner, method)
   }
 
-  def exec(project : Project, acc : List[AnyRef]) = {
+  def exec(project : Project, acc : List[AnyRef], parameters : Map[String, String] = Map()) = {
     Log.info("Testing " + project)
     val suiteParameters = suiteClassNames(project).map(List("-s", _)).flatten
     if (suiteParameters.isEmpty){

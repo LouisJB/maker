@@ -12,7 +12,7 @@ import maker.os.Command
  */
 case object PackageTask extends Task{
 
-  def exec(project : Project, acc : List[AnyRef]) = {
+  def exec(project : Project, acc : List[AnyRef], parameters : Map[String, String] = Map()) = {
     import project._
     if (!packageDir.exists)
       packageDir.mkdirs

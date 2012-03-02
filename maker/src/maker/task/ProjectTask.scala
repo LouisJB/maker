@@ -57,12 +57,12 @@ case class ProjectAndTask(project : Project, task : Task) {
     project.dependencies.childProjectTasks(task)
   }
 
-  def exec(acc : Map[Task, List[AnyRef]]) = {
+  def exec(acc : Map[Task, List[AnyRef]], parameters : Map[String, String] = Map()) = {
     ProjectAndTask.addTask(this)
     Log.debug("Executing " + this)
     val sw = new Stopwatch()
     val taskResult = try {
-      task.exec(project, acc.getOrElse(task, Nil)) match {
+      task.exec(project, acc.getOrElse(task, Nil), parameters) match {
         case res @ Left(err) =>
           lastError_ = Some(TaskError(err.reason, None))
           res

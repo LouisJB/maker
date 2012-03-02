@@ -5,7 +5,7 @@ import maker.project.Project
 case class TaskFailed(task : ProjectAndTask, reason : String)
 
 trait Task{
-  def exec(project : Project, acc : List[AnyRef] = Nil) : Either[TaskFailed, AnyRef]
+  def exec(project : Project, acc : List[AnyRef] = Nil, parameters : Map[String, String]) : Either[TaskFailed, AnyRef]
 }
 
 object Task {

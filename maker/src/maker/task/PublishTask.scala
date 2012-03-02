@@ -9,7 +9,7 @@ import org.apache.ivy.core.resolve.ResolveOptions
 import org.apache.ivy.Ivy
 
 case object PublishTask extends Task {
-  def exec(project: Project, acc: List[AnyRef]) = {
+  def exec(project: Project, acc: List[AnyRef], parameters : Map[String, String] = Map()) = {
 
     val homeDir = project.props.HomeDir()
     val moduleDef = project.moduleDef
@@ -22,7 +22,7 @@ case object PublishTask extends Task {
     try {
       if (project.ivyFile.exists){
         val confs = Array[String]("default")
-        val artifactFilter = FilterHelper.getArtifactTypeFilter(Array[String]("jar", "bundle", "source"))
+        val artifactFilter = FilterHelper.getArtifactTypeFilter(Array[String]("xml", "jar", "bundle", "source"))
         val resolveOptions = new ResolveOptions().setConfs(confs)
           .setValidate(true)
           .setArtifactFilter(artifactFilter)
@@ -38,8 +38,8 @@ case object PublishTask extends Task {
         //project.managedLibDir.getPath + "/[artifact]-[revision](-[classifier]).[ext]",
         import scala.collection.JavaConversions._
         val srcArtifactPattern = List(
-          moduleLocal.getAbsolutePath + "/jars/" + project.name + ".jar",
-          moduleLocal.getAbsolutePath + "/poms/pom.xml")
+          moduleLocal.getAbsolutePath + "/poms/pom.xml",
+          moduleLocal.getAbsolutePath + "/jars/" + project.name + ".jar")
         ivy.publish(
           md.getModuleRevisionId(),
           srcArtifactPattern,
@@ -61,3 +61,4 @@ case object PublishTask extends Task {
     }
   }
 }
+

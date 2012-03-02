@@ -1,7 +1,6 @@
 package maker.utils.ivy
 
 import java.io.File
-import scala.io._
 import scala.xml._
 import maker.utils._
 import maker.utils.maven._
@@ -18,7 +17,7 @@ object IvyReader {
         val name = (d \\ "@name").toString
         val rev = (d \\ "@rev").toString
         val org = (d \\ "@org").toString
-        DependencyLib(name, rev, org)
+        DependencyLib(name, name, rev, org, "compile")
       }).toList
     }
     catch {
@@ -31,8 +30,6 @@ object IvyReader {
   }
 
   def readIvyResolversFromFile(file : File) : List[MavenRepository] = {
-    //case class MavenRepository(id : String, name : String, url : String, layout : String)
-    // <ibiblio name="scala-tools" m2compatible="true" root="http://repository.jboss.org/nexus/content/repositories/scala-tools-releases"/>
     try {
       val ivyXml = XML.loadFile(file)
       val repos = (ivyXml \\ "ibiblio")

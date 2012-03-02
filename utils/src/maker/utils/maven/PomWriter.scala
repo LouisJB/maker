@@ -1,17 +1,84 @@
 package maker.utils.maven
 
 import maker.utils._
-import java.io.File
 import scala.xml._
 import java.io._
+import org.apache.ivy.core.module.descriptor.ModuleDescriptor
+import org.apache.ivy.plugins.parser.xml.XmlModuleDescriptorParser
+import java.net.MalformedURLException
+import java.text.ParseException
+import org.apache.ivy.plugins.parser.m2.{PomWriterOptions, PomModuleDescriptorWriter}
+import org.apache.ivy.Ivy
+import scala.collection.JavaConversions._
 
 case class MavenRepository(id : String, name : String, url : String, layout : String)
 case class ProjectDef(description : String, moduleLibDef : DependencyLib, repos : List[MavenRepository])
 case class ModuleDef(projectDef : ProjectDef, dependencies : List[DependencyLib], repositories : List[MavenRepository])
 
 object PomWriter {
+  def writePom(ivyFile : File, ivySettingsFile : File, pomFile : File, confs : String, moduleDef : ModuleDef) {
+    val ivy = Ivy.newInstance
+    val settings = ivy.getSettings
+    settings.addAllVariables(System.getProperties)
+    settings.setVariable("ivy.pom.version", moduleDef.projectDef.moduleLibDef.version, true)
+    ivy.configure(ivySettingsFile)
+    ivy.setVariable("ivy.pom.version", moduleDef.projectDef.moduleLibDef.version)
+    Log.debug("In writePom using ivy")
+    val pomWriterOptions : PomWriterOptions = {
+      //val deps : List[IvyMakePom#Dependency] = moduleDef.dependencies.map(_.toIvyMavenDependency)
+      val deps : List[PomWriterOptions.ExtraDependency] = moduleDef.dependencies.map(_.toIvyPomWriterExtraDependencies)
+      var options: PomWriterOptions = new PomWriterOptions
+      options
+        .setConfs(confs.split(",").map(_.trim))
+        .setArtifactName(moduleDef.projectDef.moduleLibDef.name)
+        .setArtifactPackaging("jar")
+        //.setPrintIvyInfo(isPrintIvyInfo)
+        .setDescription(moduleDef.projectDef.description)
+        .setExtraDependencies(deps)
+      options
+    }
+    try {
+      var md: ModuleDescriptor = XmlModuleDescriptorParser.getInstance.parseDescriptor(settings, ivyFile.toURI.toURL, false)
+      Log.debug("about to exec pommoduledescriptorwriter")
+      PomModuleDescriptorWriter.write(md, pomFile, pomWriterOptions)
+    }
+    catch {
+      case e: MalformedURLException => {
+        Log.error("unable to convert given ivy file to url: " + ivyFile + ": " + e, e)
+      }
+      case e: ParseException => {
+        Log.error(e.getMessage, e)
+      }
+      case e: Exception => {
+        Log.error("impossible convert given ivy file to pom file: " + e + " from=" + ivyFile + " to=" + pomFile, e)
+      }
+    }
+  }
 
   def writePom(file : File, moduleDef : ModuleDef) {
+    def mkDependencies(dependencies : List[DependencyLib]) : NodeSeq = {
+      <dependencies>{
+      dependencies.map(d =>
+        <dependency>
+          <groupId>{d.name}</groupId>
+          <artifactId>{d.name}</artifactId>
+          <version>{d.version}</version>
+          <scope>comple (todo)</scope>
+        </dependency>)}
+      </dependencies>
+    }
+
+    def mkRepositories(repositories : List[MavenRepository]) : NodeSeq = {
+      <repositories>{
+     repositories.map(r =>
+        <repository>
+          <id>{r.id}</id>
+          <name>{r.name}</name>
+          <url>{r.url}</url>
+          <layout>{r.layout}</layout>
+        </repository>)}
+      </repositories>
+    }
 
     val pomOuter =
         //<?xml version="1.0" encoding=\'UTF-8\'?>
@@ -35,32 +102,9 @@ object PomWriter {
      val pr = new PrintWriter(file)
      pr.println("<?xml version='1.0' encoding='UTF-8'?>")
      pr.println(pomOuter)
+     pr.flush()
      pr.close()
      pomOuter
-  }
-
-  private def mkDependencies(dependencies : List[DependencyLib]) : NodeSeq = {
-    <dependencies>{
-    dependencies.map(d =>
-      <dependency>
-        <groupId>{d.name}</groupId>
-        <artifactId>{d.name}</artifactId>
-        <version>{d.version}</version>
-        <scope>comple (todo)</scope>
-      </dependency>)}
-    </dependencies>
-  }
-
-  private def mkRepositories(repositories : List[MavenRepository]) : NodeSeq = {
-    <repositories>{
-   repositories.map(r =>
-      <repository>
-        <id>{r.id}</id>
-        <name>{r.name}</name>
-        <url>{r.url}</url>
-        <layout>{r.layout}</layout>
-      </repository>)}
-    </repositories>
   }
 }
 

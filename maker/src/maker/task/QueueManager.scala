@@ -18,14 +18,16 @@ case class TaskError(reason : String, exception : Option[Throwable]) extends Tas
 }
 
 sealed trait BuildMessage
-case class ExecTaskMessage(projectTask : ProjectAndTask, acc : Map[Task, List[AnyRef]]) extends BuildMessage
+case class ExecTaskMessage(projectTask : ProjectAndTask,
+                           acc : Map[Task, List[AnyRef]],
+                           parameters : Map[String, String] = Map()) extends BuildMessage
 case class TaskResultMessage(projectTask : ProjectAndTask, result : Either[TaskFailed, AnyRef]) extends BuildMessage
 case object StartBuild extends BuildMessage
 class Worker() extends Actor{
   def receive = {
-    case ExecTaskMessage(projectTask : ProjectAndTask, acc : Map[Task, List[AnyRef]]) => self reply {
+    case ExecTaskMessage(projectTask : ProjectAndTask, acc : Map[Task, List[AnyRef]], parameters : Map[String, String]) => self reply {
       try {
-        TaskResultMessage(projectTask, projectTask.exec(acc))
+        TaskResultMessage(projectTask, projectTask.exec(acc, parameters))
       } catch {
         case e =>
           TaskResultMessage(projectTask, Left(TaskFailed(projectTask, e.getMessage)))
@@ -51,7 +53,9 @@ case class BuildResult(res : Either[TaskFailed, AnyRef], projectAndTasks : Set[P
   override def toString = res.toString
 }
 
-class QueueManager(projectTasks : Set[ProjectAndTask], router : ActorRef, originalProjectAndTask : ProjectAndTask) extends Actor{
+class QueueManager(projectTasks : Set[ProjectAndTask], router : ActorRef,
+                   originalProjectAndTask : ProjectAndTask,
+                   parameters : Map[String, String] = Map()) extends Actor {
 
   var accumuland : Map[Task, List[AnyRef]] = Map[Task, List[AnyRef]]()
   var remainingProjectTasks = projectTasks
@@ -71,7 +75,7 @@ class QueueManager(projectTasks : Set[ProjectAndTask], router : ActorRef, origin
       pt =>
         pt.roundNo = roundNo
         Log.debug("Launching " + pt)
-        router ! ExecTaskMessage(pt, accumuland)
+        router ! ExecTaskMessage(pt, accumuland, parameters)
     }
     roundNo += 1
   }
@@ -102,7 +106,7 @@ class QueueManager(projectTasks : Set[ProjectAndTask], router : ActorRef, origin
 }
 
 object QueueManager{
-  def apply(projects : List[Project], task : Task) : BuildResult = {
+  def apply(projects : List[Project], task : Task, parameters : Map[String, String] = Map()) : BuildResult = {
     val originalProjectAndTask = ProjectAndTask(projects.head, task)
     val projectTasks = {
       def recurse(moreProjectTasks : Set[ProjectAndTask], acc : Set[ProjectAndTask]) : Set[ProjectAndTask] = {
@@ -117,10 +121,10 @@ object QueueManager{
 
     Log.debug("About to do " + task + " for projects " + projects.toList.mkString(","))
     projects.head.props.CompilationOutputStream.emptyVimErrorFile
-    apply(projectTasks, originalProjectAndTask)
+    apply(projectTasks, originalProjectAndTask, parameters)
   }
 
-  def apply(projectTasks : Set[ProjectAndTask], originalProjectAndTask : ProjectAndTask) : BuildResult = {
+  def apply(projectTasks : Set[ProjectAndTask], originalProjectAndTask : ProjectAndTask, parameters : Map[String, String]) : BuildResult = {
     val sw = Stopwatch()
     implicit val timeout = Timeout(1000000)
     def nWorkers = (Runtime.getRuntime.availableProcessors / 2) max 1
@@ -129,7 +133,7 @@ object QueueManager{
     val workers = (1 to nWorkers).map{i => actorOf(new Worker()).start}
     Log.debug("Running with " + nWorkers + " workers")
     val router = Routing.loadBalancerActor(CyclicIterator(workers)).start()
-    val qm = actorOf(new QueueManager(projectTasks, router, originalProjectAndTask)).start
+    val qm = actorOf(new QueueManager(projectTasks, router, originalProjectAndTask, parameters)).start
     
     val future = qm ? StartBuild
     val result = future.get.asInstanceOf[BuildResult]
