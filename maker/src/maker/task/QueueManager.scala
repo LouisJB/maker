@@ -135,6 +135,7 @@ object QueueManager{
     workers.foreach(_ ! PoisonPill)
     router ! PoisonPill
     EventHandler.shutdown()
+    //Actor.registry.shutdownAll()
     Log.debug("Stats: \n" + projectTasks.map(_.runStats).mkString("\n"))
     Log.info("Completed, took" + sw + ", result " + result)
     result

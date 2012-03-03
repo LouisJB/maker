@@ -9,12 +9,12 @@
       <root url="file://$PROJECT_DIR$/resources" />
       <root url="jar://$PROJECT_DIR$/.maker/lib/commons-io-2.1.jar!/" />
       <root url="jar://$PROJECT_DIR$/libs/ivy-2.2.0.jar!/" />
-      <root url="jar://$PROJECT_DIR$/.maker/lib/ivy-2.2.0.jar!/" />
       <root url="jar://$PROJECT_DIR$/.maker/lib/scalatest_2.9.1-1.7.1.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES>
       <root url="jar://$PROJECT_DIR$/libs/ivy-2.2.0-sources.jar!/" />
+      <root url="jar://$PROJECT_DIR$/maker-lib/scalatest_2.9.1-1.7.1-sources.jar!/" />
     </SOURCES>
     <jarDirectory url="file://$PROJECT_DIR$/lib/resources" recursive="false" />
   </library>

@@ -33,13 +33,15 @@ case object RunUnitTestsTask extends Task{
     }
   }
 
-  private def suiteClassNames(project : Project) : List[String] = {
+  private def suiteClassNames(project : Project, loader : ClassLoader) : List[String] = {
     val classNames = project.testClassFiles.map(FileUtils.classNameFromFile(project.testOutputDir, _))
-    classNames.filter(isAccessibleSuite(_, project.classLoader)).toList
+    val validClasses = classNames.filter(isAccessibleSuite(_, loader)).toList
+    println("valid classes " + validClasses.size)
+    validClasses
   }
   
-  private def runnerClassAndMethod(project : Project) = {
-    val runnerClass = project.classLoader.loadClass("org.scalatest.tools.Runner$")
+  private def runnerClassAndMethod(project : Project, loader : ClassLoader) = {
+    val runnerClass = loader.loadClass("org.scalatest.tools.Runner$")
       //val fileClass = project.classLoader.loadClass("java.io.File")
     //println("file class " + fileClass)
     //val testListenerClass = project.classLoader.loadClass("org.testng.ITestListener")
@@ -51,20 +53,65 @@ case object RunUnitTestsTask extends Task{
     (runner, method)
   }
 
+  def allThreads : Set[Thread] = {
+    import scala.collection.JavaConversions._
+    Set[Thread]() ++ Thread.getAllStackTraces().keySet()
+  }
+
+//  def printThread(thread : Thread){
+//    Log.info("\n\n\nThread " + thread.getId)
+//    Log.info(thread.getStackTrace.toList.mkString("\n"))
+//  }
   def exec(project : Project, acc : List[AnyRef]) = {
+    val loader = project.classLoader
     Log.info("Testing " + project)
-    val suiteParameters = suiteClassNames(project).map(List("-s", _)).flatten
-    if (suiteParameters.isEmpty){
-      Right(Unit)
-    } else {
-      val (runner, method) = runnerClassAndMethod(project)
-      val pars = List("-c", "-o", "-p", project.scalatestRunpath) ::: suiteParameters
-      val result = method.invoke(runner, pars.toArray).asInstanceOf[Boolean]
-      if (result)
-        Right(Unit)
-      else
-        Left(TaskFailed(ProjectAndTask(project, this), "Test failed in " + project))
-    }
+    val suiteParameters = suiteClassNames(project, loader).map(List("-s", _)).flatten
+//    val threadIds = allThreads.map(_.getId)
+
+    var result : Either[TaskFailed, AnyRef] = null
+    val t = new Thread(new Runnable()
+    {
+        def run()
+        {
+          result = if (suiteParameters.isEmpty){
+            Right(Unit)
+          } else {
+            val (runner, method) = runnerClassAndMethod(project, loader)
+              //val pars = List("-c", "-o", "-p", project.scalatestRunpath) ::: suiteParameters
+            val pars = List("-o", "-p", project.scalatestRunpath) ::: suiteParameters
+            val result = method.invoke(runner, pars.toArray).asInstanceOf[Boolean]
+            if (result)
+              Right(Unit)
+            else
+              Left(TaskFailed(ProjectAndTask(project, RunUnitTestsTask.this), "Test failed in " + project))
+          }
+
+        }
+    })
+    t.start()
+    t.join()
+//    Thread.sleep(2000)
+//    val newThreads = allThreads.filterNot{thread => threadIds.contains(thread.getId)}
+////    println("There are " + newThreads.size + ", new threads")
+////    println("There were originally " + threadIds.size + " threads")
+//    newThreads.foreach{
+//      thread =>
+////        printThread(thread)
+//        thread.stop
+//    }
+//    Thread.sleep(2000)
+//    val remainingThreads = allThreads.filterNot{thread => threadIds.contains(thread.getId)}
+//    println("After delete there are " + remainingThreads.size + " threads")
+//    val finalizerThreads = allThreads.filter{
+//      thread =>
+//        thread.getStackTrace.toList.mkString("\n").contains("com.google.common.base.internal.Finalizer")
+//    }
+////    println("Finalizer threads")
+////    finalizerThreads.foreach(printThread)
+    java.util.ResourceBundle.clearCache(loader);
+//    LogFactory.release(loader);
+    java.beans.Introspector.flushCaches();
+    result
   }
 }
 

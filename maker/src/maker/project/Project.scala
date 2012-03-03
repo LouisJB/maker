@@ -1,18 +1,30 @@
 package maker.project 
 
 import java.io.File
-import java.lang.System
 import maker.task._
 import maker.utils.FileUtils._
 import maker.Props
-import java.net.URLClassLoader
 import maker.os.Command
 import maker.graphviz.GraphVizUtils._
 import maker.graphviz.GraphVizDiGrapher._
 import maker.utils.{DependencyLib, Log}
 import maker.utils.RichString._
 import maker.utils.FileUtils
+import java.net.{URL, URLClassLoader}
+import java.lang.{String, System}
 
+case class ProjectClassLoader(urls : Array[URL]) extends URLClassLoader(urls, null){
+  override def findClass(name: String) = {
+    try {
+      super.findClass(name)
+    } catch {
+      case e =>
+        println("Failed to find class " + name)
+//        urls.foreach(println)
+        throw e
+    }
+  }
+}
 case class Project(
   name: String,
   root: File,
@@ -57,9 +69,8 @@ case class Project(
   def printClasspath = compilationClasspath.split(":").foreach(println)
 
   def classLoader = {
-    val urls = classpathDirectoriesAndJars.map(_.toURI.toURL).toArray
-    //urls.foreach(println)
-    new URLClassLoader(urls, null)
+    val urls: Array[URL] = classpathDirectoriesAndJars.map(_.toURI.toURL).toArray
+    new ProjectClassLoader(urls)
   }
 
   def outputJar = new File(packageDir.getAbsolutePath, name + ".jar")
