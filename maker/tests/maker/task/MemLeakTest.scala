@@ -20,6 +20,7 @@ class MemLeakTest extends FunSuite{
       props = properties
     )
 
+    println("hi")
     val manager = project("manager")
     val utils = project("utils") dependsOn manager
     val osgirun = project("osgirun").copy(libDirs = List(new File("osgirun/lib_managed"), new File("osgirun/lib"), new File("osgirun/osgi_jars")))
@@ -66,7 +67,7 @@ class MemLeakTest extends FunSuite{
       for (i <- 0 to 1000){
         println("********************")
         println("i = " + i)
-        instrument.test
+        utils.test
       }
 
     var i = 0
@@ -78,6 +79,7 @@ class MemLeakTest extends FunSuite{
       println("Result = " + result)
       sleepTillFileMade
     }
+sleepTillFileMade
   }
 
   def sleepTillFileMade{
