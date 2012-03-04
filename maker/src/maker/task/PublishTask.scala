@@ -12,7 +12,6 @@ case object PublishTask extends Task {
   def exec(project: Project, acc: List[AnyRef], parameters : Map[String, String] = Map()) = {
 
     val homeDir = project.props.HomeDir()
-    val moduleDef = project.moduleDef
     val moduleLocal = file(homeDir, ".ivy2/maker-local/" + project.name)
 
     // paceholder, todo, implement some automation equivalent to:
@@ -34,7 +33,8 @@ case object PublishTask extends Task {
         val report = ivy.resolve(project.ivyFile.toURI().toURL(), resolveOptions)
         val md = report.getModuleDescriptor
 
-        val resolverName = project.props.DefaultPublishResolver().getOrElse("default")
+        val resolverName = parameters.getOrElse("publishResolver", project.props.DefaultPublishResolver().getOrElse("default"))
+        val version = parameters.getOrElse("version", project.props.Version())
         //project.managedLibDir.getPath + "/[artifact]-[revision](-[classifier]).[ext]",
         import scala.collection.JavaConversions._
         val srcArtifactPattern = List(
@@ -46,7 +46,7 @@ case object PublishTask extends Task {
           resolverName,
           new PublishOptions()
             .setConfs(confs).setOverwrite(true)
-            .setPubrevision(project.props.Version()))
+            .setPubrevision(version))
         Right("OK")
       }
       else {
@@ -61,4 +61,3 @@ case object PublishTask extends Task {
     }
   }
 }
-

@@ -22,7 +22,11 @@ case object PublishLocalTask extends Task{
 
     Log.info("parameters, " + parameters.mkString(", "))
     val confs = parameters.getOrElse("configurations", "default")
-    PomWriter.writePom(project.ivyFile, project.ivySettingsFile, pomFile, confs, moduleDef)
+    val md = parameters.get("version") match {
+      case Some(v) => moduleDef.copy(projectDef = moduleDef.projectDef.copy(moduleLibDef = moduleDef.projectDef.moduleLibDef.copy(version = v)))
+      case None => moduleDef
+    }
+    PomWriter.writePom(project.ivyFile, project.ivySettingsFile, pomFile, confs, md)
     copyFileToDirectory(project.outputJar, moduleJarDir)
 
     Right("OK")

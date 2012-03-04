@@ -3,13 +3,13 @@ package maker.utils.maven
 import maker.utils._
 import scala.xml._
 import java.io._
-import org.apache.ivy.core.module.descriptor.ModuleDescriptor
 import org.apache.ivy.plugins.parser.xml.XmlModuleDescriptorParser
 import java.net.MalformedURLException
 import java.text.ParseException
 import org.apache.ivy.plugins.parser.m2.{PomWriterOptions, PomModuleDescriptorWriter}
 import org.apache.ivy.Ivy
 import scala.collection.JavaConversions._
+import org.apache.ivy.core.module.descriptor.ModuleDescriptor
 
 case class MavenRepository(id : String, name : String, url : String, layout : String)
 case class ProjectDef(description : String, moduleLibDef : DependencyLib, repos : List[MavenRepository])
@@ -20,26 +20,22 @@ object PomWriter {
     val ivy = Ivy.newInstance
     val settings = ivy.getSettings
     settings.addAllVariables(System.getProperties)
-    settings.setVariable("ivy.pom.version", moduleDef.projectDef.moduleLibDef.version, true)
     ivy.configure(ivySettingsFile)
-    ivy.setVariable("ivy.pom.version", moduleDef.projectDef.moduleLibDef.version)
-    Log.debug("In writePom using ivy")
+    ivy.setVariable("maker.module.version", moduleDef.projectDef.moduleLibDef.version)
+    Log.debug("In writePom using ivy " + moduleDef.projectDef.moduleLibDef.version)
     val pomWriterOptions : PomWriterOptions = {
-      //val deps : List[IvyMakePom#Dependency] = moduleDef.dependencies.map(_.toIvyMavenDependency)
-      val deps : List[PomWriterOptions.ExtraDependency] = moduleDef.dependencies.map(_.toIvyPomWriterExtraDependencies)
-      var options: PomWriterOptions = new PomWriterOptions
-      options
+      val deps : List[PomWriterOptions.ExtraDependency] = Nil //moduleDef.dependencies.map(_.toIvyPomWriterExtraDependencies)
+      ((new PomWriterOptions)
         .setConfs(confs.split(",").map(_.trim))
         .setArtifactName(moduleDef.projectDef.moduleLibDef.name)
         .setArtifactPackaging("jar")
-        //.setPrintIvyInfo(isPrintIvyInfo)
         .setDescription(moduleDef.projectDef.description)
         .setExtraDependencies(deps)
-      options
+        .setPrintIvyInfo(true))
     }
     try {
       var md: ModuleDescriptor = XmlModuleDescriptorParser.getInstance.parseDescriptor(settings, ivyFile.toURI.toURL, false)
-      Log.debug("about to exec pommoduledescriptorwriter")
+      Log.debug("about to exec pomModuleDescriptorWriter")
       PomModuleDescriptorWriter.write(md, pomFile, pomWriterOptions)
     }
     catch {
