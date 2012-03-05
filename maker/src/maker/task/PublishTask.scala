@@ -7,6 +7,7 @@ import org.apache.ivy.core.publish.PublishOptions
 import org.apache.ivy.util.filter.FilterHelper
 import org.apache.ivy.core.resolve.ResolveOptions
 import org.apache.ivy.Ivy
+import java.util.Date
 
 case object PublishTask extends Task {
   def exec(project: Project, acc: List[AnyRef], parameters : Map[String, String] = Map()) = {
@@ -40,13 +41,15 @@ case object PublishTask extends Task {
         val srcArtifactPattern = List(
           moduleLocal.getAbsolutePath + "/poms/pom.xml",
           moduleLocal.getAbsolutePath + "/jars/" + project.name + ".jar")
+        Log.info("Publish for project" + project.name)
         ivy.publish(
           md.getModuleRevisionId(),
           srcArtifactPattern,
           resolverName,
           new PublishOptions()
             .setConfs(confs).setOverwrite(true)
-            .setPubrevision(version))
+            .setPubrevision(version)
+            .setPubdate(new Date()))
         Right("OK")
       }
       else {

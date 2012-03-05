@@ -125,6 +125,7 @@ object QueueManager{
   }
 
   def apply(projectTasks : Set[ProjectAndTask], originalProjectAndTask : ProjectAndTask, parameters : Map[String, String]) : BuildResult = {
+    Log.info("Queue manager - tasks = " + projectTasks.mkString(", "))
     val sw = Stopwatch()
     implicit val timeout = Timeout(1000000)
     def nWorkers = (Runtime.getRuntime.availableProcessors / 2) max 1

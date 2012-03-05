@@ -86,7 +86,7 @@ case class Project(
   def publishLocal : BuildResult = publishLocal()
   def publishLocal(configurations : String = "default", version : String = props.Version()) =
     publishLocal_(projectAndDescendents, configurations, version)
-  def publishLocalOnly : BuildResult = publishLocal()
+  def publishLocalOnly : BuildResult = publishLocalOnly()
   def publishLocalOnly(configurations : String = "default", version : String = props.Version()) =
     publishLocal_(List(this), configurations, version)
   private def publishLocal_(projects : List[Project], configurations : String = "default", version : String = props.Version()) =
@@ -94,7 +94,7 @@ case class Project(
 
   def publish : BuildResult = publish()
   def publish(resolver : String = props.DefaultPublishResolver().getOrElse("default"), version : String = props.Version()) =
-      publish_(projectAndDescendents, resolver, version)
+    publish_(projectAndDescendents, resolver, version)
   def publishOnly : BuildResult = publishOnly()
   def publishOnly(resolver : String = props.DefaultPublishResolver().getOrElse("default"), version : String = props.Version()) =
     publish_(List(this), resolver, version)

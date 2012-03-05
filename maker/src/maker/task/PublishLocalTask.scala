@@ -20,7 +20,8 @@ case object PublishLocalTask extends Task{
     //pomFile.createNewFile
     //PomWriter.writePom(pomFile, moduleDef)
 
-    Log.info("parameters, " + parameters.mkString(", "))
+    Log.info("PublishLocal for project " + project.name)
+    Log.debug("parameters, " + parameters.mkString(", "))
     val confs = parameters.getOrElse("configurations", "default")
     val md = parameters.get("version") match {
       case Some(v) => moduleDef.copy(projectDef = moduleDef.projectDef.copy(moduleLibDef = moduleDef.projectDef.moduleLibDef.copy(version = v)))
