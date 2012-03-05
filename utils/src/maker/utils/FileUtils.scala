@@ -10,6 +10,7 @@ object FileUtils {
 
   def file(f : String) : File = new File(f)
   def file(f : File, d : String) : File = new File(f, d)
+  def file(base : String, file : String) : File = new File(base, file)
 
   implicit def toRichFile(f : File) = RichFile(f)
   case class RichFile(file : File){
