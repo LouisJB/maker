@@ -122,22 +122,35 @@ object QueueManager{
     def nWorkers = (Runtime.getRuntime.availableProcessors / 2) max 1
 
 
-    val workers = (1 to nWorkers).map{i => actorOf(new Worker()).start}
-    Log.debug("Running with " + nWorkers + " workers")
-    val router = Routing.loadBalancerActor(CyclicIterator(workers)).start()
-    val qm = actorOf(new QueueManager(projectTasks, router, originalProjectAndTask)).start
-    
-    val future = qm ? StartBuild
-    val result = future.get.asInstanceOf[BuildResult]
 
-    import akka.actor.PoisonPill
-    qm ! PoisonPill
-    workers.foreach(_ ! PoisonPill)
-    router ! PoisonPill
-    EventHandler.shutdown()
-    //Actor.registry.shutdownAll()
-    Log.debug("Stats: \n" + projectTasks.map(_.runStats).mkString("\n"))
-    Log.info("Completed, took" + sw + ", result " + result)
+    var result : BuildResult = null
+    val t = new Thread(
+      new Runnable(){
+        def run() {
+          val workers = (1 to nWorkers).map{i => actorOf(new Worker()).start}
+          Log.debug("Running with " + nWorkers + " workers")
+          val router = Routing.loadBalancerActor(CyclicIterator(workers)).start()
+          val qm = actorOf(new QueueManager(projectTasks, router, originalProjectAndTask)).start
+
+          val future = qm ? StartBuild
+          result = future.get.asInstanceOf[BuildResult]
+
+          import akka.actor.PoisonPill
+          qm ! PoisonPill
+          workers.foreach(_ ! PoisonPill)
+          router ! PoisonPill
+          EventHandler.shutdown()
+          //Actor.registry.shutdownAll()
+          Log.debug("Stats: \n" + projectTasks.map(_.runStats).mkString("\n"))
+          Log.info("Completed, took" + sw + ", result " + result)
+
+        }
+      }
+    )
+
+    t.start()
+    t.join()
+
     result
   }
 }
