@@ -1,6 +1,6 @@
 
     package foo
     class Foo{
-      def fun(l : List[Int]) = l.head
+      def fun(l : List[Int]) = l.tail
     }
   
