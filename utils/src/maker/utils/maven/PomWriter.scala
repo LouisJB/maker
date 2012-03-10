@@ -12,7 +12,7 @@ import scala.collection.JavaConversions._
 import org.apache.ivy.core.module.descriptor.ModuleDescriptor
 
 case class MavenRepository(id : String, name : String, url : String, layout : String)
-case class ProjectDef(description : String, moduleLibDef : DependencyLib, repos : List[MavenRepository])
+case class ProjectDef(description : String, moduleLibDef : DependencyLib, dependencyModules : List[DependencyLib] , repos : List[MavenRepository])
 case class ModuleDef(projectDef : ProjectDef, dependencies : List[DependencyLib], repositories : List[MavenRepository])
 
 object PomWriter {
@@ -24,7 +24,7 @@ object PomWriter {
     ivy.setVariable("maker.module.version", moduleDef.projectDef.moduleLibDef.version)
     Log.debug("In writePom using ivy " + moduleDef.projectDef.moduleLibDef.version)
     val pomWriterOptions : PomWriterOptions = {
-      val deps : List[PomWriterOptions.ExtraDependency] = Nil //moduleDef.dependencies.map(_.toIvyPomWriterExtraDependencies)
+      val deps : List[PomWriterOptions.ExtraDependency] = moduleDef.projectDef.dependencyModules.map(_.toIvyPomWriterExtraDependencies)
       ((new PomWriterOptions)
         .setConfs(confs.split(",").map(_.trim))
         .setArtifactName(moduleDef.projectDef.moduleLibDef.name)
