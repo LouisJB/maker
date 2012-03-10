@@ -2,18 +2,30 @@ package maker.utils.maven
 
 import maker.utils._
 import scala.xml._
+import scala.collection.JavaConversions._
 import java.io._
-import org.apache.ivy.plugins.parser.xml.XmlModuleDescriptorParser
 import java.net.MalformedURLException
 import java.text.ParseException
 import org.apache.ivy.plugins.parser.m2.{PomWriterOptions, PomModuleDescriptorWriter}
 import org.apache.ivy.Ivy
-import scala.collection.JavaConversions._
+import org.apache.ivy.plugins.parser.xml.XmlModuleDescriptorParser
 import org.apache.ivy.core.module.descriptor.ModuleDescriptor
 
+case class ScmDef(url : String, connection : String)
 case class MavenRepository(id : String, name : String, url : String, layout : String)
-case class ProjectDef(description : String, moduleLibDef : DependencyLib, dependencyModules : List[DependencyLib] , repos : List[MavenRepository])
-case class ModuleDef(projectDef : ProjectDef, dependencies : List[DependencyLib], repositories : List[MavenRepository])
+
+// project peer module related dependencies
+case class ProjectDef(description : String,
+                      moduleLibDef : DependencyLib,             // this project modules identity as a library
+                      dependencyModules : List[DependencyLib])  // the peer modules this project module depends on
+
+// top level module definition
+case class ModuleDef(projectDef : ProjectDef,
+                     dependencies : List[DependencyLib],        // actual 3'd party dependency libs
+                     repositories : List[MavenRepository],      // and the repos they come from
+                     scmDef : ScmDef,                           // SCM details
+                     licenses : String,
+                     developers : String)
 
 object PomWriter {
   def writePom(ivyFile : File,
@@ -23,12 +35,17 @@ object PomWriter {
                moduleDef : ModuleDef,
                pomTemplateFile : Option[File]) {
     val ivy = Ivy.newInstance
-    val settings = ivy.getSettings
-    settings.addAllVariables(System.getProperties)
     ivy.configure(ivySettingsFile)
     val moduleVersion = moduleDef.projectDef.moduleLibDef.version
     ivy.setVariable("maker.module.version", moduleVersion)
-    ivy.setVariable("maker.licenses", "")
+    // add necessary 'context' variables for an OSS compliant POM, todo - make all actual properties...
+    val contextSettings = org.apache.ivy.core.IvyContext.getContext().getSettings()
+    contextSettings.setVariable("maker.licenses", moduleDef.licenses, true)
+    contextSettings.setVariable("maker.scm.url", moduleDef.scmDef.url, true)
+    contextSettings.setVariable("maker.scm.connection", moduleDef.scmDef.connection, true)
+    contextSettings.setVariable("maker.developers", moduleDef.developers, true)
+    val settings = ivy.getSettings
+    settings.addAllVariables(System.getProperties)
     Log.debug("In writePom using ivy " + moduleVersion)
     val pomWriterOptions : PomWriterOptions = {
       val deps : List[PomWriterOptions.ExtraDependency] = moduleDef.projectDef.dependencyModules.map(_.toIvyPomWriterExtraDependencies)
@@ -111,4 +128,3 @@ object PomWriter {
      pomOuter
   }
 }
-

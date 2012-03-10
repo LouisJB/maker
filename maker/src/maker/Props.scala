@@ -19,6 +19,10 @@ case class Props(private val overrides : Map[String, String] = Map()) {
     }
     override def toString = name + "=" + value
   }
+  trait TypedOptionalProperty[S] extends Property[Option[S]] {
+    val default = null
+    def apply() : Option[S] = Option(value).get
+  }
   class StringProperty(val default : String) extends PropertyS {
     def toT(s : String) = s
     def apply() = value
@@ -32,10 +36,6 @@ case class Props(private val overrides : Map[String, String] = Map()) {
   }
   class OptionalFileProperty extends TypedOptionalProperty[File] {
     def toT(s : String) = Option(s).map(file)
-  }
-  trait TypedOptionalProperty[S] extends Property[Option[S]] {
-    val default = null
-    def apply() : Option[S] = Option(value).get
   }
   override def toString =
     "Properties:\n" + properties.map(kv => kv._1 + "=" + kv._2.value).mkString("\n")
@@ -77,7 +77,7 @@ case class Props(private val overrides : Map[String, String] = Map()) {
    */
   object VimErrorFile extends FileProperty("vim-compile-output")
 
-  object CompilationOutputStream extends OutputStream{
+  object CompilationOutputStream extends OutputStream {
     import java.io.FileOutputStream
     import java.io.PrintStream
     import org.apache.commons.io.output.TeeOutputStream
@@ -103,8 +103,12 @@ case class Props(private val overrides : Map[String, String] = Map()) {
 
   object Organisation extends StringProperty("Acme Org")
   object Version extends StringProperty("1.0-SNAPSHOT")
-  object DefaultPublishResolver extends OptionalStringProperty()
+  object DefaultPublishResolver extends OptionalStringProperty
   object PomTemplateFile extends OptionalFileProperty
+  object ScmUrl extends StringProperty("")
+  object ScmConnection extends StringProperty("")
+  object Licenses extends StringProperty("")
+  object Developers extends StringProperty("")
 
   lazy val properties = propertyMethods.map(m =>
       m.getName -> m.invoke(this).asInstanceOf[PropertyS]).toMap
