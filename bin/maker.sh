@@ -75,6 +75,7 @@ maker_internal_classpath(){
   fi
   echo $cp
 }
+
 check_setup_sane(){
   if [ -z $SCALA_HOME ];
   then
@@ -114,7 +115,7 @@ check_setup_sane(){
 
 
   MAKER_HEAP_SPACE=${MAKER_HEAP_SPACE-$(calc_heap_space)}
-  MAKER_PERM_GEN_SPACE=${MAKER_PERM_GEN_SPACE-$(($MAKER_HEAP_SPACE / 10))}
+  MAKER_PERM_GEN_SPACE=${MAKER_PERM_GEN_SPACE-$(($MAKER_HEAP_SPACE / 5))}
 }
 
 calc_heap_space(){
@@ -138,6 +139,11 @@ external_jars() {
   cp=`ls $MAKER_OWN_ROOT_DIR/.maker/lib/*.jar | xargs | sed 's/ /:/g'`
   cp=$cp:`ls $MAKER_OWN_ROOT_DIR/libs/*.jar | xargs | sed 's/ /:/g'`
   echo $cp
+}
+
+scala_jars(){
+  jars=`ls $SCALA_HOME/lib/*.jar | xargs | sed 's/ /:/g'`
+  echo $jars
 }
 
 bootstrap() {
@@ -304,4 +310,30 @@ set_jrebel_options() {
 }
 
 
+# restore stty settings (echo in particular)
+function restoreSttySettings() {
+  stty $saved_stty
+  saved_stty=""
+}
+
+function onExit() {
+  if [[ "$saved_stty" != "" ]]; then
+    restoreSttySettings
+  fi
+  exit $scala_exit_status
+}
+
+# to reenable echo if we are interrupted before completing.
+trap onExit INT
+
+# save terminal settings
+saved_stty=$(stty -g 2>/dev/null)
+# clear on error so we don't later try to restore them
+if [[ ! $? ]]; then  
+  saved_stty=""
+fi
+
+scala_exit_status=127
+saved_stty=""
 main $*
+onExit

@@ -5,17 +5,18 @@ import tools.nsc.reporters.ConsoleReporter
 import tools.nsc.io.{Directory, PlainDirectory}
 import plugin._
 import java.io.PrintWriter
+import maker.utils.FileUtils._
 
 case class ProjectCompilers(project : Project){
   private def makeCompiler(isTestCompiler : Boolean) = {
     val settings = new Settings
     val reporter = new ConsoleReporter(settings, Console.in, new PrintWriter(project.props.CompilationOutputStream, true))
-    val scalaAndJavaLibs = System.getProperty("sun.boot.class.path")
 
+    val scalaLibs = findJars(file(project.props.ScalaHome(), "lib")).toList.mkString(":")
     settings.usejavacp.value = false
     val compilerOutputDir = if (isTestCompiler) project.testOutputDir else project.outputDir
     settings.outputDirs.setSingleOutput(new PlainDirectory(new Directory(compilerOutputDir)))
-    settings.javabootclasspath.value = scalaAndJavaLibs
+    settings.bootclasspath.value = scalaLibs
     settings.classpath.value = project.compilationClasspath
 
     new scala.tools.util.PathResolver(settings).result
