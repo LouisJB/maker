@@ -16,22 +16,30 @@ case class ProjectDef(description : String, moduleLibDef : DependencyLib, depend
 case class ModuleDef(projectDef : ProjectDef, dependencies : List[DependencyLib], repositories : List[MavenRepository])
 
 object PomWriter {
-  def writePom(ivyFile : File, ivySettingsFile : File, pomFile : File, confs : String, moduleDef : ModuleDef) {
+  def writePom(ivyFile : File,
+               ivySettingsFile : File,
+               pomFile : File,
+               confs : String,
+               moduleDef : ModuleDef,
+               pomTemplateFile : Option[File]) {
     val ivy = Ivy.newInstance
     val settings = ivy.getSettings
     settings.addAllVariables(System.getProperties)
     ivy.configure(ivySettingsFile)
-    ivy.setVariable("maker.module.version", moduleDef.projectDef.moduleLibDef.version)
-    Log.debug("In writePom using ivy " + moduleDef.projectDef.moduleLibDef.version)
+    val moduleVersion = moduleDef.projectDef.moduleLibDef.version
+    ivy.setVariable("maker.module.version", moduleVersion)
+    ivy.setVariable("maker.licenses", "")
+    Log.debug("In writePom using ivy " + moduleVersion)
     val pomWriterOptions : PomWriterOptions = {
       val deps : List[PomWriterOptions.ExtraDependency] = moduleDef.projectDef.dependencyModules.map(_.toIvyPomWriterExtraDependencies)
-      ((new PomWriterOptions)
+      val pwo = ((new PomWriterOptions)
         .setConfs(confs.split(",").map(_.trim))
         .setArtifactName(moduleDef.projectDef.moduleLibDef.name)
         .setArtifactPackaging("jar")
         .setDescription(moduleDef.projectDef.description)
         .setExtraDependencies(deps)
         .setPrintIvyInfo(true))
+      pomTemplateFile.map(pt => pwo.setTemplate(pt)).getOrElse(pwo)
     }
     try {
       var md: ModuleDescriptor = XmlModuleDescriptorParser.getInstance.parseDescriptor(settings, ivyFile.toURI.toURL, false)

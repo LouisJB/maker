@@ -1,9 +1,20 @@
 <ivysettings>
-  <property name="scala_version" value="2.9.1"/>
+  <property name="scala_version" value="2.9.1" />
+  <property name="maker.licenses" value="abc" />
   <settings>
     <settings name="default" transitive="false"/>
   </settings>
   <settings defaultResolver="default"/>
+
+  <credentials host="oss.sonatype.org" realm="Sonatype Nexus Repository Manager" username="${maker.ivy.publish.username}" passwd="${maker.ivy.publish.password}" />
+
+  <url name="maker-snapshot"> <!-- Sonatype OSS Snapshots -->
+    <artifact pattern="https://oss.sonatype.org/content/repositories/snapshots/maker-test/[artifact]/[revision]/[artifact]/[artifact]-[revision].[ext]" />
+  </url>
+  <url name="maker-staging"> <!-- Sonatype OSS Staging -->
+    <artifact pattern="https://oss.sonatype.org/service/local/staging/deploy/maven2/maker-test/[artifact]/[revision]/[artifact]/pom.xml]" />
+  </url>
+
   <resolvers>
     <ibiblio name="central" m2compatible="true"/>
     <ibiblio name="akka" m2compatible="true" root="http://akka.io/repository/"/>

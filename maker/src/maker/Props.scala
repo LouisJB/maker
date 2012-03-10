@@ -2,47 +2,52 @@ package maker
 
 import maker.utils.FileUtils._
 import java.io.File
-import java.io.BufferedReader
 import java.util.Properties
 import java.io.FileInputStream
 import scala.collection.JavaConversions
 import java.io.OutputStream
 
-case class Props(private val overrides : Map[String, String] = Map()){
-  trait Property{
-    def default : () => String
-    def value : String = overrides.getOrElse(name, default())
+case class Props(private val overrides : Map[String, String] = Map()) {
+  type PropertyS = Property[String]
+  trait Property[T] {
+    def toT(s : String) : T
+    def default : String
+    def value : T = toT(overrides.getOrElse(name, default))
     def name = {
       val objectName = getClass.getName
-      objectName.substring(objectName.indexOf("$")+1, objectName.length()-1)
+      objectName.substring(objectName.indexOf("$") + 1, objectName.length() - 1)
     }
     override def toString = name + "=" + value
   }
-  class StringProperty(val default : () => String) extends Property{
+  class StringProperty(val default : String) extends PropertyS {
+    def toT(s : String) = s
     def apply() = value
   }
-  class FileProperty(val default : () => String) extends Property{
-    def apply() = file(value)
+  class FileProperty(val default : String) extends Property[File] {
+    def toT(s : String) = file(s)
+    def apply() = value
   }
-  trait OptionalProperty extends Property{
-    val default = () => ""
-    def apply() = value match {
-      case "" => None
-      case v => Some(v)
-    }
+  trait OptionalStringProperty extends TypedOptionalProperty[String] {
+    def toT(s : String) = Option(s)
   }
-
-  override def toString = 
+  class OptionalFileProperty extends TypedOptionalProperty[File] {
+    def toT(s : String) = Option(s).map(file)
+  }
+  trait TypedOptionalProperty[S] extends Property[Option[S]] {
+    val default = null
+    def apply() : Option[S] = Option(value).get
+  }
+  override def toString =
     "Properties:\n" + properties.map(kv => kv._1 + "=" + kv._2.value).mkString("\n")
   
   /**
    * Actual properties start here
    */
-  object HttpProxyHost extends OptionalProperty
-  object HttpProxyPort extends OptionalProperty
-  object HttpNonProxyHosts extends OptionalProperty
+  object HttpProxyHost extends OptionalStringProperty
+  object HttpProxyPort extends OptionalStringProperty
+  object HttpNonProxyHosts extends OptionalStringProperty
 
-  object MakerHome extends StringProperty(() =>
+  object MakerHome extends StringProperty(
     Option(System.getProperty("maker.home")).getOrElse{throw new Exception("maker.home System property most be set")}
   )
 
@@ -51,18 +56,18 @@ case class Props(private val overrides : Map[String, String] = Map()){
   }
   
   val javaHomeEnv = Option(System.getenv("JAVA_HOME")).orElse(Option(System.getenv("JDK_HOME")))
-  object ScalaHome extends FileProperty(() => "/usr/local/scala/")
-  object JavaHome extends FileProperty(() => javaHomeEnv.getOrElse("/usr/local/jdk/"))
-  object IvyJar extends FileProperty(() =>
+  object ScalaHome extends FileProperty("/usr/local/scala/")
+  object JavaHome extends FileProperty(javaHomeEnv.getOrElse("/usr/local/jdk/"))
+  object IvyJar extends FileProperty(
     MakerHome() + "/libs/ivy-2.2.0.jar"
   )
-  object ScalaVersion extends StringProperty(() => "2.9.1")
+  object ScalaVersion extends StringProperty("2.9.1")
 
-  object HomeDir extends FileProperty(() => System.getProperty("user.home"))
+  object HomeDir extends FileProperty(System.getProperty("user.home"))
 
   private val propertyMethods = this.getClass.getMethods.filter{
     m =>
-      classOf[Property].isAssignableFrom(m.getReturnType) && m.getParameterTypes.isEmpty
+      classOf[PropertyS].isAssignableFrom(m.getReturnType) && m.getParameterTypes.isEmpty
   }
 
   /**
@@ -70,7 +75,7 @@ case class Props(private val overrides : Map[String, String] = Map()){
    * quickfix error in Vim
    * The file is emptied before each compilation
    */
-  object VimErrorFile extends FileProperty(() => "vim-compile-output")
+  object VimErrorFile extends FileProperty("vim-compile-output")
 
   object CompilationOutputStream extends OutputStream{
     import java.io.FileOutputStream
@@ -96,33 +101,28 @@ case class Props(private val overrides : Map[String, String] = Map()){
     }
   }
 
-  object Organisation extends StringProperty(() => "Acme Org")
-  object Version extends StringProperty(() => "1.0-SNAPSHOT")
-  object DefaultPublishResolver extends OptionalProperty()
+  object Organisation extends StringProperty("Acme Org")
+  object Version extends StringProperty("1.0-SNAPSHOT")
+  object DefaultPublishResolver extends OptionalStringProperty()
+  object PomTemplateFile extends OptionalFileProperty
 
-  lazy val properties = {
-    Map() ++ propertyMethods.map{
-      m =>
-        m.getName -> m.invoke(this).asInstanceOf[Property]
-    }
-  }
+  lazy val properties = propertyMethods.map(m =>
+      m.getName -> m.invoke(this).asInstanceOf[PropertyS]).toMap
+
   overrides.foreach{
     case (o, _) => 
       assert(propertyMethods.map(_.getName).toSet.contains(o), "Overiding non existant property " + o)
   }
 }
 
-object Props{
+object Props {
   def apply(file : File) : Props = Props(propsFromFile(file))
 
   private def propsFromFile(propsFile:File) : Map[String, String] = {
-    val path = propsFile.getAbsolutePath
     val p = new Properties()
-    if(propsFile.exists) {
+    if (propsFile.exists) {
       p.load(new FileInputStream(propsFile))
     }
-
     Map() ++ JavaConversions.mapAsScalaMap(p.asInstanceOf[java.util.Map[String,String]])
   }
 }
-

@@ -21,7 +21,7 @@ case class DependencyLib(
 
   def toIvyMavenDependency : IvyMakePom#Dependency = {
     val ivyMakePom : IvyMakePom = new IvyMakePom
-    val dep = (new ivyMakePom.Dependency())
+    val dep = new ivyMakePom.Dependency()
     dep.setGroup(name)
     dep.setArtifact(artifact)
     dep.setVersion(version)
