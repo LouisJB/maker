@@ -3,11 +3,12 @@ package maker.task
 import maker.utils.FileUtils._
 import maker.project._
 import maker.utils.Log
+import java.util.Date
 import org.apache.ivy.core.publish.PublishOptions
 import org.apache.ivy.util.filter.FilterHelper
 import org.apache.ivy.core.resolve.ResolveOptions
 import org.apache.ivy.Ivy
-import java.util.Date
+import org.apache.ivy.core.IvyContext
 
 case object PublishTask extends Task {
   def exec(project: Project, acc: List[AnyRef], parameters : Map[String, String] = Map()) = {
@@ -30,8 +31,9 @@ case object PublishTask extends Task {
         val settings = ivy.getSettings
         settings.addAllVariables(System.getProperties)
         ivy.configure(project.ivySettingsFile)
-        ivy.setVariable("maker.ivy.publish.username", project.props.Username())
-        ivy.setVariable("maker.ivy.publish.password", project.props.Password())
+        //val contextSettings = IvyContext.getContext().getSettings()
+        settings.setVariable("maker.ivy.publish.username", project.props.Username(), true)
+        settings.setVariable("maker.ivy.publish.password", project.props.Password(), true)
         val report = ivy.resolve(project.ivyFile.toURI().toURL(), resolveOptions)
         val md = report.getModuleDescriptor
 

@@ -17,7 +17,7 @@ object IvyReader {
         val name = (d \\ "@name").toString
         val rev = (d \\ "@rev").toString
         val org = (d \\ "@org").toString
-        DependencyLib(name, name, rev, org, "compile")
+        DependencyLib(name, org, name, rev, org, "compile")
       }).toList
     }
     catch {

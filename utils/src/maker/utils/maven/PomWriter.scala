@@ -10,6 +10,7 @@ import org.apache.ivy.plugins.parser.m2.{PomWriterOptions, PomModuleDescriptorWr
 import org.apache.ivy.Ivy
 import org.apache.ivy.plugins.parser.xml.XmlModuleDescriptorParser
 import org.apache.ivy.core.module.descriptor.ModuleDescriptor
+import org.apache.ivy.core.IvyContext
 
 case class ScmDef(url : String, connection : String)
 case class MavenRepository(id : String, name : String, url : String, layout : String)
@@ -34,12 +35,13 @@ object PomWriter {
                confs : String,
                moduleDef : ModuleDef,
                pomTemplateFile : Option[File]) {
+
     val ivy = Ivy.newInstance
     ivy.configure(ivySettingsFile)
     val moduleVersion = moduleDef.projectDef.moduleLibDef.version
     ivy.setVariable("maker.module.version", moduleVersion)
     // add necessary 'context' variables for an OSS compliant POM, todo - make all actual properties...
-    val contextSettings = org.apache.ivy.core.IvyContext.getContext().getSettings()
+    val contextSettings = IvyContext.getContext().getSettings()
     contextSettings.setVariable("maker.licenses", moduleDef.licenses, true)
     contextSettings.setVariable("maker.scm.url", moduleDef.scmDef.url, true)
     contextSettings.setVariable("maker.scm.connection", moduleDef.scmDef.connection, true)

@@ -9,7 +9,8 @@ import org.apache.ivy.plugins.parser.m2.PomWriterOptions
  */
 case class DependencyLib(
     name : String,
-    artifact : String,
+    groupId : String,
+    artifactId : String,
     version : String,
     org : String,
     scope : String,
@@ -22,8 +23,8 @@ case class DependencyLib(
   def toIvyMavenDependency : IvyMakePom#Dependency = {
     val ivyMakePom : IvyMakePom = new IvyMakePom
     val dep = new ivyMakePom.Dependency()
-    dep.setGroup(name)
-    dep.setArtifact(artifact)
+    dep.setGroup(groupId)
+    dep.setArtifact(artifactId)
     dep.setVersion(version)
     dep.setScope(scope)
     dep.setOptional(false)
@@ -31,7 +32,7 @@ case class DependencyLib(
   }
 
   def toIvyPomWriterExtraDependencies : PomWriterOptions.ExtraDependency =
-    new PomWriterOptions.ExtraDependency(name, artifact, version, scope, false)
+    new PomWriterOptions.ExtraDependency(groupId, artifactId, version, scope, false)
 }
 
 object DependencyLib {

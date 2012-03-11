@@ -1,5 +1,5 @@
 <ivy-module version="1.0" xmlns:e="http://ant.apache.org/ivy/extra">
-  <info organisation="com.google.code.maker" module="maker" revision="${maker.module.version}" />
+  <info organisation="${group_id}" module="maker" revision="${maker.module.version}" />
   <configurations>
     <conf name="default" transitive="false"/>
   </configurations>
