@@ -16,7 +16,6 @@ SKIP_LINE  * KIND, either express or implied.  See the License for the
 SKIP_LINE  * specific language governing permissions and limitations
 SKIP_LINE  * under the License.
 SKIP_LINE  ***************************************************************
-SKIP_LINE           Maker generated POM using Ivy template  
 <?xml version="1.0" encoding="UTF-8"?>
 ${ivy.pom.license}
 ${ivy.pom.header}

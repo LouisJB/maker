@@ -1,5 +1,5 @@
 <ivy-module version="1.0" xmlns:e="http://ant.apache.org/ivy/extra">
-  <info organisation="maker" module="utils" revision="${maker.module.version}" />
+  <info organisation="com.google.code.maker" module="utils" revision="${maker.module.version}" />
   <configurations>
     <conf name="default" transitive="false"/>
   </configurations>
@@ -8,7 +8,7 @@
     <artifact name="utils" type="pom"/>
     <artifact name="utils" type="jar" ext="jar" conf="default" />
     <artifact name="utils-sources" type="jar" ext="jar" conf="default" />
-    <artifact name="utils--docs" type="jar" ext="jar" conf="default" />
+    <artifact name="utils-docs" type="jar" ext="jar" conf="default" />
   </publications>
 
   <dependencies defaultconfmapping="*->default,sources">

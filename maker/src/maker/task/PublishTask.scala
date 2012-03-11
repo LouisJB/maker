@@ -30,7 +30,8 @@ case object PublishTask extends Task {
         val settings = ivy.getSettings
         settings.addAllVariables(System.getProperties)
         ivy.configure(project.ivySettingsFile)
-
+        ivy.setVariable("maker.ivy.publish.username", project.props.Username())
+        ivy.setVariable("maker.ivy.publish.password", project.props.Password())
         val report = ivy.resolve(project.ivyFile.toURI().toURL(), resolveOptions)
         val md = report.getModuleDescriptor
 

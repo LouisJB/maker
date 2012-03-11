@@ -109,6 +109,8 @@ case class Props(private val overrides : Map[String, String] = Map()) {
   object ScmConnection extends StringProperty("")
   object Licenses extends StringProperty("")
   object Developers extends StringProperty("")
+  object Username extends StringProperty("")
+  object Password extends StringProperty("")
 
   lazy val properties = propertyMethods.map(m =>
       m.getName -> m.invoke(this).asInstanceOf[PropertyS]).toMap
