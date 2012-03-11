@@ -56,11 +56,11 @@ main() {
 
   if [ -z $MAKER_SKIP_LAUNCH ];
   then
-    export JAVA_OPTS="-Xmx$(($MAKER_HEAP_SPACE))m -XX:MaxPermSize=$(($MAKER_PERM_GEN_SPACE))m $JREBEL_OPTS"
-    CLASSPATH="$(maker_internal_classpath):$(external_jars):$MAKER_OWN_ROOT_DIR/resources/"
-    export JAVA_OPTS="$JAVA_OPTS $MAKER_DEBUG_PARAMETERS -XX:+HeapDumpOnOutOfMemoryError "
-    echo $CLASSPATH
-    $SCALA_HOME/bin/scala -classpath $CLASSPATH -Yrepl-sync -nc -i $MAKER_PROJECT_FILE -Dmaker.home="$MAKER_OWN_ROOT_DIR"
+    JAVA_OPTS="-Xmx$(($MAKER_HEAP_SPACE))m -XX:MaxPermSize=$(($MAKER_PERM_GEN_SPACE))m $JREBEL_OPTS $MAKER_DEBUG_PARAMETERS -XX:+HeapDumpOnOutOfMemoryError "
+    # TODO - move scala jars from bootclasspath to classpath once permgen fix available
+    CLASSPATH="$(maker_internal_classpath):$(external_jars):$MAKER_OWN_ROOT_DIR/resources/
+    $JAVA_HOME/bin/java -Xbootclasspath/a:${scala_jars} -classpath $CLASSPATH $JAVA_OPTS -Dmaker.home="$MAKER_OWN_ROOT_DIR" -Dscala.usejavacp=true scala.tools.nsc.MainGenericRunner -Yrepl-sync -nc -i $MAKER_PROJECT_FILE 
+    scala_exit_status=$?
   fi
 }
 
