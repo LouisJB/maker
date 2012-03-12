@@ -14,7 +14,8 @@ val propsFile = Props(file("Maker.conf"))
 lazy val libDirs = List(file(".maker/lib"), file("libs"))
 
 def mkProject(name : String, libs : List[File]) = new Project(
-  name, file(name), libs, props = propsFile,
+  name, file(name),
+  libDirs = libs, props = propsFile,
   ivySettingsFile = ivySettingsFile_,
   ivyFileRel = ivyFileName
 )
