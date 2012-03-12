@@ -57,10 +57,10 @@ main() {
   if [ -z $MAKER_SKIP_LAUNCH ];
   then
     export JAVA_OPTS="-Xmx$(($MAKER_HEAP_SPACE))m -XX:MaxPermSize=$(($MAKER_PERM_GEN_SPACE))m $JREBEL_OPTS"
-    export CLASSPATH="$(maker_internal_classpath):$(external_jars):$MAKER_OWN_ROOT_DIR/resources/"
+    CLASSPATH="$(maker_internal_classpath):$(external_jars):$MAKER_OWN_ROOT_DIR/resources/"
     export JAVA_OPTS="$JAVA_OPTS $MAKER_DEBUG_PARAMETERS -XX:+HeapDumpOnOutOfMemoryError "
     echo $CLASSPATH
-    $SCALA_HOME/bin/scala -Yrepl-sync -nc -i $MAKER_PROJECT_FILE -Dmaker.home="$MAKER_OWN_ROOT_DIR"
+    $SCALA_HOME/bin/scala -classpath $CLASSPATH -Yrepl-sync -nc -i $MAKER_PROJECT_FILE -Dmaker.home="$MAKER_OWN_ROOT_DIR"
   fi
 }
 
@@ -163,6 +163,8 @@ bootstrap() {
 	  echo "Maker jar failed to be created"
 	  exit -1
   fi
+
+  rm -rf $MAKER_OWN_CLASS_OUTPUT_DIR
 
   popd
 

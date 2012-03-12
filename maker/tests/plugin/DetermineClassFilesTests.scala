@@ -10,7 +10,10 @@ class DetermineClassFilesTests extends FunSuite{
   def withTestProject(f : Project => Unit){
     withTempDir{
       dir => 
-        val proj = new Project("test", dir, List(file(dir, "src")))
+        val proj = new Project(
+          "test", dir, List(file(dir, "src")), Nil,
+          libDirs=List(file(".maker/lib"))
+      )
         f(proj)
     } 
   }

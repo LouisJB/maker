@@ -38,7 +38,7 @@ class ProjectTests extends FunSuite {
       root, 
       List(new File(root, "src")), 
       Nil,
-      Nil
+      libDirs=List(new File(".maker/lib"))
     ) 
     val files = new {
       val fooSrc = new File(root, "src/foo/Foo.scala")

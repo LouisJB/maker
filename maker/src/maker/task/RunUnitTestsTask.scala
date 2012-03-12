@@ -5,6 +5,7 @@ import maker.utils.Log
 import org.scalatest.Suite
 import java.lang.reflect.Modifier
 import maker.utils.FileUtils
+import maker.os.Command
 
 case object RunUnitTestsTask extends Task {
 
@@ -40,10 +41,6 @@ case object RunUnitTestsTask extends Task {
   
   private def runnerClassAndMethod(project : Project) = {
     val runnerClass = project.classLoader.loadClass("org.scalatest.tools.Runner$")
-      //val fileClass = project.classLoader.loadClass("java.io.File")
-    //println("file class " + fileClass)
-    //val testListenerClass = project.classLoader.loadClass("org.testng.ITestListener")
-    //Log.info("Test listener " + testListenerClass)
     val cons = runnerClass.getDeclaredConstructors
     cons(0).setAccessible(true)
     val runner = cons(0).newInstance()
@@ -52,6 +49,37 @@ case object RunUnitTestsTask extends Task {
   }
 
   def exec(project : Project, acc : List[AnyRef], parameters : Map[String, String] = Map()) = {
+    Log.info("Testing " + project)
+    val suiteParameters = suiteClassNames(project).map(List("-s", _)).flatten
+    if (suiteParameters.isEmpty){
+      Right(Unit)
+    } else {
+      
+      val args = List(
+        project.props.JavaHome() + "/bin/java",
+        "-Dscala.usejavacp=true",
+        "-classpath",
+        project.runClasspath,
+        "scala.tools.nsc.MainGenericRunner",
+        "org.scalatest.tools.Runner") ::: (List("-c", "-o", "-p", project.scalatestRunpath) ::: suiteParameters)
+
+      val cmd = Command(args : _*)
+      val (result, msg) = cmd.exec()
+
+      if (result == 0){
+        Right(Unit)
+      } else {
+        Left(TaskFailed(ProjectAndTask(project, this), "Test failed in " + project))
+      }
+    //val pars = List("-c", "-o", "-p", project.scalatestRunpath) ::: suiteParameters
+    //val result = method.invoke(runner, pars.toArray).asInstanceOf[Boolean]
+    //if (result)
+    //Right(Unit)
+    //else
+    //Left(TaskFailed(ProjectAndTask(project, this), "Test failed in " + project))
+    }
+  }
+  def exec_old(project : Project, acc : List[AnyRef], parameters : Map[String, String] = Map()) = {
     Log.info("Testing " + project)
     val suiteParameters = suiteClassNames(project).map(List("-s", _)).flatten
     if (suiteParameters.isEmpty){

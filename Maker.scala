@@ -11,18 +11,18 @@ System.setProperty("log4j.ignoreTCL", "true")
 val ivyFileName = "ivy.xml"
 val ivySettingsFile_ = file("ivysettings.xml")
 val propsFile = Props(file("Maker.conf"))
-lazy val libDirs = List(file(".maker/lib"), file("libs"))
 
-def mkProject(name : String, libs : List[File]) = new Project(
+def mkProject(name : String, libs : List[File] = Nil) = new Project(
   name, file(name),
-  libDirs = libs, props = propsFile,
+  libDirs=libs,
+  props = propsFile,
   ivySettingsFile = ivySettingsFile_,
   ivyFileRel = ivyFileName
 )
 
-lazy val utils = mkProject("utils", file("utils/maker-lib") :: libDirs)
-lazy val plugin = mkProject("plugin", libDirs) dependsOn utils
-lazy val makerProj = mkProject("maker", libDirs) dependsOn plugin
+lazy val utils = mkProject("utils", List(file("utils/maker-lib"), file("libs/")))
+lazy val plugin = mkProject("plugin") dependsOn utils
+lazy val makerProj = mkProject("maker") dependsOn plugin
 
 lazy val mkr = makerProj
 
