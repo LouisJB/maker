@@ -97,6 +97,7 @@ check_setup_sane(){
 
   if [ -z $MAKER_PROJECT_FILE ];
   then
+    echo "No project file defined, searching for a maker Scala file"
     declare -a arr
     i=0
     for file in `ls *.scala`; do

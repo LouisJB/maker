@@ -19,6 +19,7 @@ case class Project(
   sourceDirs: List[File] = Nil,
   tstDirs: List[File] = Nil,
   libDirs: List[File] = Nil,
+  managedLibDirName : String = "maker-lib",
   resourceDirs : List[File] = Nil,
   children: List[Project] = Nil,
   props : Props = Props(),
@@ -31,7 +32,7 @@ case class Project(
   def javaOutputDir = file(root, "java-classes")
   def testOutputDir = file(root, "test-classes")
   def packageDir = file(root, "package")
-  def managedLibDir = file(root, "maker-lib")
+  def managedLibDir = file(root, managedLibDirName)
   def ivyFile = new File(root, ivyFileRel)
   val makerDirectory = mkdirs(new File(root, ".maker"))
 
@@ -192,7 +193,7 @@ case class Project(
 
 class TopLevelProject(name:String,
                       children:List[Project],
-                      props:Props = Props()) extends Project(name, file("."), Nil, Nil, Nil, Nil, children, props) {
+                      props:Props = Props()) extends Project(name, file("."), Nil, Nil, Nil, resourceDirs = Nil, children = children, props = props) {
 
   def generateIDEAProject() {
     val allModules = children.flatMap(_.projectAndDescendents).distinct
