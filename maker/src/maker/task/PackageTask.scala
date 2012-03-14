@@ -24,7 +24,7 @@ case object PackageTask extends Task{
       p.outputDir :: p.javaOutputDir :: p.resourceDirs // :: p.testOutputDir:
     }.filter(_.exists)
     dirsToPack.foreach(d => Log.debug(d.getAbsolutePath))
-    
+
     val cmds = project.webAppDir match {
       case None => {
         val createCmd = Command(List(jar, "cf", project.outputJar.getAbsolutePath, "-C", dirsToPack.head.getAbsolutePath, ".") : _*)
