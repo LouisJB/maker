@@ -43,14 +43,26 @@ case object PackageTask extends Task{
         }.filter(_.exists)
         val resourceDirsToPack = (project :: project.children).flatMap(_.resourceDirs).filter(_.exists)
 
-        // build up the war structure so we can make an archive from it...
+        // build up the war structure image so we can make a web archive from it...
         val warImage = file("package/webapp")
         Log.info("making war image..." + warImage.getAbsolutePath)
+        if (warImage.exists) recursiveDelete(warImage)
         warImage.mkdirs()
-        copyDirectory(webAppDir, file("package/webapp"))
-        classDirsToPack.foreach(dir => copyDirectory(dir, file(warImage, "WEB-INF/classes")))
-        resourceDirsToPack.foreach(dir => copyDirectory(dir, warImage))
-        project.libDirs.filter(_.exists).foreach(dir => copyDirectory(dir, file(warImage, "WEB-INF/lib")))
+
+        // copy war content to image
+        copyDirectory(webAppDir, warImage)
+        (classDirsToPack ::: resourceDirsToPack).foreach(dir => copyDirectory(dir, file(warImage, "WEB-INF/classes")))
+        val allLibs = project.libDirs.filter(_.exists).flatMap(_.listFiles)
+        Log.debug("allLibs: ")
+        allLibs.foreach(f => Log.debug(f.getAbsolutePath))
+        val unmanagedLibs = allLibs.filter(f => !project.managedLibDir.listFiles.toList.contains(f))
+        Log.debug("unmanaged libs: ")
+        unmanagedLibs.foreach(f => Log.debug(f.getAbsolutePath))
+        val managedButNotUnmanagedLibs = allLibs.filter(f => !unmanagedLibs.exists(uf => uf.getName == f.getName))
+        Log.debug("managedButNotUnmanaged: ")
+        managedButNotUnmanagedLibs.foreach(f => Log.debug(f.getAbsolutePath))
+        managedButNotUnmanagedLibs.foreach(f => copyFileToDirectory(f, file(warImage, "WEB-INF/lib")))
+        //project.libDirs.filter(_.exists).foreach(dir => copyDirectory(dir, file(warImage, "WEB-INF/lib")))
 
         val warName = project.outputJar.getAbsolutePath.replaceAll(".jar", ".war") // quite weak, but just to get things working
         Log.info("packaging war " + warName)
