@@ -26,7 +26,7 @@ case class Project(
   description : Option[String] = None,
   ivySettingsFile : File = file("maker-ivysettings.xml"), // assumption this is typically absolute and module ivy is relative, this might be invalid?
   ivyFileRel : String = "maker-ivy.xml",
-  webApp : Boolean = false
+  webAppDir : Option[File] = None
 ) {
   def outputDir = file(root, "classes")
   def javaOutputDir = file(root, "java-classes")
@@ -81,8 +81,8 @@ case class Project(
   def testCompile = QueueManager(projectAndDescendents, CompileTestsTask)
   def test = QueueManager(projectAndDescendents, RunUnitTestsTask)
   def testOnly = QueueManager(List(this), RunUnitTestsTask)
-  def pack = QueueManager(projectAndDescendents, PackageTask, Map("webApp" -> webApp.toString))
-  def packOnly = QueueManager(List(this), PackageTask, Map("webApp" -> webApp.toString))
+  def pack = QueueManager(projectAndDescendents, PackageTask)
+  def packOnly = QueueManager(List(this), PackageTask)
   def update = QueueManager(projectAndDescendents, UpdateExternalDependencies)
   def updateOnly = QueueManager(List(this), UpdateExternalDependencies)
 
