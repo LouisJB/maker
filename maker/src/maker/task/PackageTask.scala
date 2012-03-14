@@ -52,6 +52,8 @@ case object PackageTask extends Task{
         // copy war content to image
         copyDirectory(webAppDir, warImage)
         (classDirsToPack ::: resourceDirsToPack).foreach(dir => copyDirectory(dir, file(warImage, "WEB-INF/classes")))
+        
+        // until we properly support scopes, treat lib unmanaged as runtime provided scope 
         val allLibs = project.libDirs.filter(_.exists).flatMap(_.listFiles)
         Log.debug("allLibs: ")
         allLibs.foreach(f => Log.debug(f.getAbsolutePath))
@@ -60,9 +62,10 @@ case object PackageTask extends Task{
         unmanagedLibs.foreach(f => Log.debug(f.getAbsolutePath))
         val managedButNotUnmanagedLibs = allLibs.filter(f => !unmanagedLibs.exists(uf => uf.getName == f.getName))
         Log.debug("managedButNotUnmanaged: ")
-        managedButNotUnmanagedLibs.foreach(f => Log.debug(f.getAbsolutePath))
-        managedButNotUnmanagedLibs.foreach(f => copyFileToDirectory(f, file(warImage, "WEB-INF/lib")))
-        //project.libDirs.filter(_.exists).foreach(dir => copyDirectory(dir, file(warImage, "WEB-INF/lib")))
+        managedButNotUnmanagedLibs.foreach(f => {
+            Log.debug(f.getAbsolutePath))
+            copyFileToDirectory(f, file(warImage, "WEB-INF/lib")))
+        }
 
         val warName = project.outputJar.getAbsolutePath.replaceAll(".jar", ".war") // quite weak, but just to get things working
         Log.info("packaging war " + warName)
