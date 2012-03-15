@@ -44,7 +44,7 @@ case object PackageTask extends Task{
         val resourceDirsToPack = (project :: project.children).flatMap(_.resourceDirs).filter(_.exists)
 
         // build up the war structure image so we can make a web archive from it...
-        val warImage = file("package/webapp")
+        val warImage = file(project.root, "package/webapp")
         Log.info("making war image..." + warImage.getAbsolutePath)
         if (warImage.exists) recursiveDelete(warImage)
         warImage.mkdirs()
@@ -63,9 +63,9 @@ case object PackageTask extends Task{
         val managedButNotUnmanagedLibs = allLibs.filter(f => !unmanagedLibs.exists(uf => uf.getName == f.getName))
         Log.debug("managedButNotUnmanaged: ")
         managedButNotUnmanagedLibs.foreach(f => {
-            Log.debug(f.getAbsolutePath))
-            copyFileToDirectory(f, file(warImage, "WEB-INF/lib")))
-        }
+            Log.debug(f.getAbsolutePath)
+            copyFileToDirectory(f, file(warImage, "WEB-INF/lib"))
+        })
 
         val warName = project.outputJar.getAbsolutePath.replaceAll(".jar", ".war") // quite weak, but just to get things working
         Log.info("packaging war " + warName)
