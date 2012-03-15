@@ -23,7 +23,7 @@
       <artifact pattern="https://oss.sonatype.org/service/local/staging/deploy/maven2/maker-test/[artifact]/[revision]/[artifact]/pom.xml]" />
     </url>
     <ibiblio name="central" m2compatible="true"/>
-    <ibiblio name="akka" m2compatible="true" root="http://akka.io/repository/"/>
+    <ibiblio name="akka" m2compatible="true" root="http://repo.akka.io/repository/"/>
     <chain name="default" returnFirst="true">
       <resolver ref="central"/>
       <resolver ref="akka"/>
