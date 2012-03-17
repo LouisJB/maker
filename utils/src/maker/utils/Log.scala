@@ -2,7 +2,10 @@ package maker.utils
 
 import org.apache.log4j._
 
-object Log extends Log(Logger.getRootLogger)
+object Log extends Log(Logger.getRootLogger) {
+  def debug = Log.level = Level.DEBUG
+  def info = Log.level = Level.INFO
+}
 
 case class Log(logger: Logger) {
 

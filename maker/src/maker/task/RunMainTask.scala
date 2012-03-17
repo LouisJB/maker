@@ -17,7 +17,7 @@ case object RunMainTask extends Task {
           project.props.JavaHome() + "/bin/java",
           "-Dscala.usejavacp=true",
           "-classpath",
-          project.runClasspath,
+          project.runClasspath + ":" + project.scalaLibs.mkString(":"),
           "scala.tools.nsc.MainGenericRunner",
           parameters("mainClassName")) ::: mainArgs
 
