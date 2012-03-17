@@ -104,7 +104,10 @@ case class Project(
     publish_(List(this), resolver, version)
   private def publish_(projects : List[Project], resolver : String = props.DefaultPublishResolver().getOrElse("default"), version : String = props.Version()) =
     QueueManager(projects, PublishTask, Map("publishResolver" -> resolver, "version" -> version))
-  
+
+  def runMain(className : String, args : String = "") =
+    QueueManager(List(this), RunMainTask, Map("mainClassName" -> className, "args" -> args))
+
   def ~ (task : () => BuildResult) {
     var lastTaskTime : Option[Long] = None
     def printWaitingMessage = println("\nWaiting for source file changes (press 'enter' to interrupt)")
