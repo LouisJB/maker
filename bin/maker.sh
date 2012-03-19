@@ -137,6 +137,7 @@ run_command(){
 
 external_jars() {
   cp=`ls $MAKER_OWN_ROOT_DIR/.maker/lib/*.jar | xargs | sed 's/ /:/g'`
+  cp=$cp:`ls $MAKER_OWN_ROOT_DIR/.maker/scala-lib/*.jar | xargs | sed 's/ /:/g'`
   cp=$cp:`ls $MAKER_OWN_ROOT_DIR/libs/*.jar | xargs | sed 's/ /:/g'`
   echo $cp
 }
@@ -187,7 +188,7 @@ process_options() {
       -m | --mem-heap-space ) MAKER_HEAP_SPACE=$2; shift 2;;
       -y | --do-ivy-update ) MAKER_IVY_UPDATE=true; shift;;
       -b | --boostrap ) MAKER_BOOTSTRAP=true; shift;;
-      -d | --download-project-scala-lib ) $MAKER_DOWNLOAD_PROJECT_LIB=true; shift;;
+      -d | --download-project-scala-lib ) MAKER_DOWNLOAD_PROJECT_LIB=true; shift;;
       -x | --allow-remote-debugging ) MAKER_DEBUG_PARAMETERS="-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005"; shift;;
       -i | --developer-mode ) MAKER_DEVELOPER_MODE=true; shift;;
       --mem-permgen-space ) MAKER_PERM_GEN_SPACE=$2; shift 2;;
@@ -289,6 +290,7 @@ cat > $ivy_file << EOF
   <dependencies defaultconfmapping="*->default,sources">
     <dependency org="org.scala-lang" name="scala-compiler" rev="2.9.1"/>
     <dependency org="org.scala-lang" name="scala-library" rev="2.9.1"/>
+    <dependency org="org.scala-lang" name="jline" rev="2.9.1"/>
   </dependencies>
 </ivy-module>
 EOF
@@ -334,6 +336,5 @@ if [[ ! $? ]]; then
 fi
 
 scala_exit_status=127
-saved_stty=""
 main $*
 onExit
