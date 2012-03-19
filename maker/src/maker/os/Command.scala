@@ -17,7 +17,7 @@ case class Command(args : String*) {
       val buf = new StringBuffer()
       var line : String =null;
       line = br.readLine()
-      while ( line != null){
+      while (line != null) {
         System.out.println(line)
         line = br.readLine()
         buf.append(line)

@@ -12,14 +12,16 @@ case object RunMainTask extends Task {
     parameters.get("mainClassName") match {
       case Some(name) => {
         Log.info("running main in class " + name + " of project " + project)
+        val opts : List[String] = parameters.get("opts").map(_.split(",").toList).getOrElse(Nil)
         val mainArgs : List[String] = parameters.get("args").map(_.split(",").toList).getOrElse(Nil)
         val args = List(
           project.props.JavaHome() + "/bin/java",
           "-Dscala.usejavacp=true",
           "-classpath",
-          project.runClasspath + ":" + project.scalaLibs.mkString(":"),
-          "scala.tools.nsc.MainGenericRunner",
-          parameters("mainClassName")) ::: mainArgs
+          project.runClasspath + ":" + project.scalaLibs.mkString(":")) :::
+          opts ::: (
+          "scala.tools.nsc.MainGenericRunner" ::
+          parameters("mainClassName") :: mainArgs)
 
         Command(args: _*).exec() match {
           case (0, _) => Right("Ok")
