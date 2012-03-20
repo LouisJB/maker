@@ -19,6 +19,7 @@ case class Project(
   sourceDirs: List[File] = Nil,
   tstDirs: List[File] = Nil,
   libDirs: List[File] = Nil,
+  providedDirs: List[File] = Nil, // compile time only, don't add to runtime classpath or any packaging
   managedLibDirName : String = "maker-lib",
   resourceDirs : List[File] = Nil,
   children: List[Project] = Nil,

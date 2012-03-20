@@ -53,16 +53,19 @@ case object PackageTask extends Task{
         copyDirectory(webAppDir, warImage)
         (classDirsToPack ::: resourceDirsToPack).foreach(dir => copyDirectory(dir, file(warImage, "WEB-INF/classes")))
         
-        // until we properly support scopes, treat lib unmanaged as runtime provided scope 
+        // until we properly support scopes, treat lib provided as runtime provided scope and so exclude it from war packaging
         val allLibs = project.libDirs.filter(_.exists).flatMap(_.listFiles)
         Log.debug("allLibs: ")
         allLibs.foreach(f => Log.debug(f.getAbsolutePath))
-        val unmanagedLibs = allLibs.filter(f => !project.managedLibDir.listFiles.toList.contains(f))
-        Log.debug("unmanaged libs: ")
-        unmanagedLibs.foreach(f => Log.debug(f.getAbsolutePath))
-        val managedButNotUnmanagedLibs = allLibs.filter(f => !unmanagedLibs.exists(uf => uf.getName == f.getName))
-        Log.debug("managedButNotUnmanaged: ")
-        managedButNotUnmanagedLibs.foreach(f => {
+        //val unmanagedLibs = allLibs.filter(f => !project.managedLibDir.listFiles.toList.contains(f))
+        //Log.debug("unmanaged libs: ")
+        //unmanagedLibs.foreach(f => Log.debug(f.getAbsolutePath))
+        val providedLibs : List[java.io.File] = project.providedDirs.flatMap(d => Option(d).map(_.listFiles.toList)).flatten
+        Log.debug("providedLibs libs: ")
+        providedLibs.foreach(f => Log.debug(f.getAbsolutePath))
+        val allLibsButNotProvidedLibs = allLibs.filter(f => !providedLibs.exists(uf => uf.getName == f.getName))
+        Log.debug("allLibsButNotProvidedLibs: ")
+        allLibsButNotProvidedLibs.foreach(f => {
             Log.debug(f.getAbsolutePath)
             copyFileToDirectory(f, file(warImage, "WEB-INF/lib"))
         })
