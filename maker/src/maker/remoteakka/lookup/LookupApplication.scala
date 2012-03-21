@@ -49,7 +49,7 @@ class LocalLookupActor extends Actor {
 object LookupApp {
   def main(args: Array[String]) {
     val cmd = Command("/usr/local/scala/bin/scala", "maker.remoteakka.CalcApp")
-    cmd.exec(async=true)
+    cmd.exec
     var sleepTime = 500
     if (args.size > 0)
       sleepTime = args(0).toInt

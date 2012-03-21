@@ -23,12 +23,6 @@ case class ProcessID(id : String)
 //#actor
 class LookupCalculatorActor extends Actor {
   def receive = {
-    case Add(n1, n2) ⇒
-      println("Calculating %d + %d".format(n1, n2))
-      sender ! AddResult(n1, n2, n1 + n2)
-    case Subtract(n1, n2) ⇒
-      println("Calculating %d - %d".format(n1, n2))
-      sender ! SubtractResult(n1, n2, n1 - n2)
     case ProcessID(id) ⇒
       println("Lookup calc actor Received " + id)
       sender ! ProcessID()
@@ -39,7 +33,6 @@ class LookupCalculatorActor extends Actor {
 class CalculatorApplication extends Bootable {
   //#setup
   val system = ActorSystem("CalculatorApplication", ConfigFactory.load.getConfig("calculator"))
-  val actor = system.actorOf(Props[LookupCalculatorActor], "lookupCalculator")
   //#setup
 
   def startup() {

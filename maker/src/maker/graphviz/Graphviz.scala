@@ -107,7 +107,7 @@ object GraphVizUtils {
 
   def showImage(f : File) = {
     if (isLinux)
-      Command("xdg-open", f.getAbsolutePath).exec(true)
+      Command("xdg-open", f.getAbsolutePath).execAsync
     else // assume OSX until we want to support other OSes such as windows
       Command("open", f.getAbsolutePath).exec()
     f

@@ -11,9 +11,10 @@ import akka.kernel.Bootable
 import com.typesafe.config.ConfigFactory
 import scala.util.Random
 import akka.actor._
-import maker.remoteakka._
 import maker.os.Command
 import akka.remote.RemoteClientStarted
+import akka.remote.RemoteClientError
+import maker.remoteakka.ProcessID
 
 
 class ListeningActor extends Actor{
@@ -22,25 +23,8 @@ class ListeningActor extends Actor{
   }
 }
 
-class CreationApplication extends Bootable {
-  //#setup
-  println("Local process id = " + ProcessID())
-  val system = ActorSystem("RemoteCreation", ConfigFactory.load.getConfig("remotecreation"))
-  println("Creating local actor")
-  val localActor = system.actorOf(Props[CreationActor], "creationActor")
-  system.eventStream.subscribe(localActor, classOf[AnyRef])
-  println("\n\n\n")
-  Thread.sleep(500)
-  println("Creating remote actor")
-  val remoteActor = system.actorOf(Props[AdvancedCalculatorActor], "advancedCalculator")
-  println("\n\n\n")
-Thread.sleep(500)
-  localActor ! remoteActor
-
-  def doSomething(op: AnyRef) = {
-    localActor ! ("foo", op)
-  }
-  //#setup
+class RemoteApplication extends Bootable {
+  val system = ActorSystem("RemoteApplication", ConfigFactory.load.getConfig("calculator"))
 
   def startup() {
   }
@@ -50,49 +34,61 @@ Thread.sleep(500)
   }
 }
 
-//#actor
-class CreationActor extends Actor {
-  var remoteActor : Option[ActorRef] = None
-  var buffer = List[AnyRef]()
-  var isRemoteActorReady = false
-  def clearBuffer{
-    (remoteActor, isRemoteActorReady) match{
-      case (Some(a), true) ⇒ 
-        buffer.foreach(remoteActor.get ! _)
-        buffer = Nil
-      case _ ⇒
-    }
+object RemoteApplication extends Application {
+  new RemoteApplication
+  println("Started Remote Application - waiting for messages")
+}
+
+class CreationApplication extends Bootable {
+  val system = ActorSystem("RemoteCreation", ConfigFactory.load.getConfig("remotecreation"))
+  Thread.sleep(500)
+  println("Creating local actor")
+  val localActor = system.actorOf(Props(new CreationActor(system)), "creationActor")
+
+  def startup() {}
+
+  def shutdown() {
+    system.shutdown()
   }
+}
+
+class RemoteActor extends Actor {
+  println("new Advanced calc created")
+  def receive = {
+    case ProcessID(id) ⇒
+      println("new Advanced calc actor Received " + id)
+      sender ! ProcessID()
+  }
+}
+//#actor
+class CreationActor(system : ActorSystem) extends Actor {
+  val cmd = Command("/usr/local/scala/bin/scala", "maker.remoteakka.creation.RemoteApplication")
+  var proc : Process = null
+  var remoteActor : ActorRef = null
+  private def createRemoteActor{
+    Option(proc).foreach(_.destroy)
+    proc = cmd.execAsync
+    Thread.sleep(1000)
+    remoteActor = system.actorOf(Props[RemoteActor], "remoteActor")
+  }
+  
+  createRemoteActor
   def receive = {
     case ProcessID(id) ⇒ println("Creation actor Received " + id + " from remote actor, this actor's id is " + ProcessID())
-    case _ : RemoteClientStarted ⇒ 
-      isRemoteActorReady = true
-      clearBuffer
-    case actor : ActorRef ⇒
-      remoteActor = Some(actor)
-      clearBuffer
     case  (msg : String, op: AnyRef) ⇒ 
-      println("Received " + op + ", " + isRemoteActorReady)
-      buffer = op :: buffer
-      clearBuffer
-    case a : AnyRef ⇒
-      println("RECD " + a)
+      println("Local Received " + op)
+      remoteActor ! op
   }
 }
 //#actor
 
 object CreationApp {
   def main(args: Array[String]) {
-    val cmd = Command("/usr/local/scala/bin/scala", "maker.remoteakka.CalcApp")
-    cmd.exec(async=true)
-    var sleepTime = 500
-    if (args.size > 0)
-      sleepTime = args(0).toInt
-    //Thread.sleep(sleepTime)
     val app = new CreationApplication
     println("Started Creation Application")
     while (true) {
-      app.doSomething(ProcessID())
+      app.localActor ! ("foo", ProcessID())
+      //app.doSomething(ProcessID())
       Thread.sleep(1500)
     }
   }
