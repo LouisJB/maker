@@ -8,3 +8,5 @@ GRTAGS
 GSYMS
 GTAGS
 *.png
+maker.jar
+vim-compile-output

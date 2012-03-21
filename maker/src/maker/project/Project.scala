@@ -54,7 +54,7 @@ case class Project(
   def jars = findJars(jarDirs: _*).toList.sortWith(_.getPath < _.getPath)
   def scalaLibs = List(file(props.ScalaHome(), "lib/scala-compiler.jar"), file(props.ScalaHome(), "lib/scala-library.jar"))
 
-  def classpathDirectoriesAndJars : List[File] = ((outputDir :: javaOutputDir :: testOutputDir :: jars) ::: resourceDirs ::: children.flatMap(_.classpathDirectoriesAndJars)).distinct
+  def classpathDirectoriesAndJars : List[File] = ((outputDir :: javaOutputDir :: testOutputDir :: (jars ::: scalaLibs)) ::: resourceDirs ::: children.flatMap(_.classpathDirectoriesAndJars)).distinct
   def compilationClasspath = classpathDirectoriesAndJars.map(_.getAbsolutePath).mkString(":")
   def runClasspath = classpathDirectoriesAndJars.map(_.getAbsolutePath).mkString(":")
   def scalatestRunpath = classpathDirectoriesAndJars.mkString(" ")

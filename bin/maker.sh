@@ -26,6 +26,8 @@ MAKER_PROJECT_ROOT_DIR=`pwd`
 
 set -e
 
+#MAKER_IVY_UPDATE=true
+#MAKER_BOOTSTRAP=true 
 MAKER_OWN_LIB_DIR=$MAKER_OWN_ROOT_DIR/.maker/lib
 MAKER_PROJECT_SCALA_LIB_DIR=.maker/scala-lib
 
@@ -47,11 +49,6 @@ main() {
     bootstrap || exit -1
   else
     echo "Omitting bootstrap as $MAKER_OWN_ROOT_DIR/maker.jar exists"
-  fi
-
-  if [ $MAKER_DOWNLOAD_PROJECT_LIB ] || [ ! -e $MAKER_PROJECT_SCALA_LIB_DIR ];
-  then
-    download_scala_library_and_compiler
   fi
 
   if [ -z $MAKER_SKIP_LAUNCH ];
@@ -137,7 +134,7 @@ run_command(){
 
 external_jars() {
   cp=`ls $MAKER_OWN_ROOT_DIR/.maker/lib/*.jar | xargs | sed 's/ /:/g'`
-  cp=$cp:`ls $MAKER_OWN_ROOT_DIR/.maker/scala-lib/*.jar | xargs | sed 's/ /:/g'`
+  #cp=$cp:`ls $MAKER_OWN_ROOT_DIR/.maker/scala-lib/*.jar | xargs | sed 's/ /:/g'`
   cp=$cp:`ls $MAKER_OWN_ROOT_DIR/libs/*.jar | xargs | sed 's/ /:/g'`
   echo $cp
 }
@@ -188,7 +185,6 @@ process_options() {
       -m | --mem-heap-space ) MAKER_HEAP_SPACE=$2; shift 2;;
       -y | --do-ivy-update ) MAKER_IVY_UPDATE=true; shift;;
       -b | --boostrap ) MAKER_BOOTSTRAP=true; shift;;
-      -d | --download-project-scala-lib ) MAKER_DOWNLOAD_PROJECT_LIB=true; shift;;
       -x | --allow-remote-debugging ) MAKER_DEBUG_PARAMETERS="-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005"; shift;;
       -i | --developer-mode ) MAKER_DEVELOPER_MODE=true; shift;;
       --mem-permgen-space ) MAKER_PERM_GEN_SPACE=$2; shift 2;;
@@ -270,37 +266,11 @@ ivy_command(){
 
 ivy_update() {
   echo "Updating ivy"
-  MAKER_IVY_FILE="$MAKER_OWN_ROOT_DIR/utils/ivy.xml"
+  MAKER_IVY_FILE="$MAKER_OWN_ROOT_DIR/ivy.xml"
   run_command "$(ivy_command $MAKER_IVY_FILE $MAKER_OWN_LIB_DIR) -types jar -sync"
   run_command "$(ivy_command $MAKER_IVY_FILE $MAKER_OWN_LIB_DIR) -types bundle"
   run_command "$(ivy_command $MAKER_IVY_FILE $MAKER_OWN_LIB_DIR) -types source "
 }
-
-download_scala_library_and_compiler(){
-  ivy_file=.maker/scala-lib-ivy.xml
-  rm -f $ivy_file
-  if [ ! -e $ivy_file ];
-  then
-cat > $ivy_file << EOF
-<ivy-module version="1.0" xmlns:e="http://ant.apache.org/ivy/extra">
-  <info organisation="maker" module="maker"/>
-  <configurations>
-    <conf name="default" transitive="false"/>
-  </configurations>
-  <dependencies defaultconfmapping="*->default,sources">
-    <dependency org="org.scala-lang" name="scala-compiler" rev="2.9.1"/>
-    <dependency org="org.scala-lang" name="scala-library" rev="2.9.1"/>
-    <dependency org="org.scala-lang" name="jline" rev="2.9.1"/>
-  </dependencies>
-</ivy-module>
-EOF
-  command="$(ivy_command $ivy_file $MAKER_PROJECT_SCALA_LIB_DIR ) -types jar -sync"
-  run_command "$command"
-  command="$(ivy_command $ivy_file $MAKER_PROJECT_SCALA_LIB_DIR ) -types source"
-  run_command "$command"
-  fi
-}
-
 
 set_jrebel_options() {
   if [ ! -f $JREBEL_HOME/jrebel.jar ];

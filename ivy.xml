@@ -4,13 +4,6 @@
     <conf name="default" transitive="false"/>
   </configurations>
 
-  <publications>
-    <artifact name="utils" type="pom"/>
-    <artifact name="utils" type="jar" ext="jar" conf="default" />
-    <artifact name="utils-sources" type="jar" ext="jar" conf="default" />
-    <artifact name="utils-docs" type="jar" ext="jar" conf="default" />
-  </publications>
-
   <dependencies defaultconfmapping="*->default,sources">
     <dependency org="log4j" name="log4j" rev="1.2.16" />
     <dependency org="commons-io" name="commons-io" rev="2.1"/>
