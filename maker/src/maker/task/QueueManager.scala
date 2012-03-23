@@ -11,6 +11,9 @@ import akka.actor.ActorSystem
 import akka.actor.Props
 import akka.routing.SmallestMailboxRouter
 import akka.dispatch.Await
+import akka.util.Duration
+import akka.pattern.ask
+import akka.util.duration._
 
 trait TaskResult
 case object TaskSuccess extends TaskResult { 
@@ -140,10 +143,8 @@ object QueueManager{
     val router = system.actorOf(Props[Worker].withRouter(SmallestMailboxRouter(nWorkers)))
       //val router = Routing.loadBalancerActor(CyclicIterator(workers)).start()
     val qm = system.actorOf(Props(new QueueManager(projectTasks, router, originalProjectAndTask, parameters)))
-   import  akka.pattern.ask
     val future = qm ? StartBuild
-    import akka.util.duration._
-    val result = Await.result(future, 1000 seconds).asInstanceOf[BuildResult]
+    val result = Await.result(future, Duration.Inf).asInstanceOf[BuildResult]
 
     import akka.actor.PoisonPill
     qm ! PoisonPill
