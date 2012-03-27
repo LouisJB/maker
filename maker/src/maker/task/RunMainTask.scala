@@ -2,6 +2,7 @@ package maker.task
 
 import maker.project.Project
 import maker.utils.Log
+import maker.utils.FileUtils._
 import maker.os.Command
 
 /**
@@ -23,7 +24,7 @@ case object RunMainTask extends Task {
           "scala.tools.nsc.MainGenericRunner" ::
           parameters("mainClassName") :: mainArgs)
 
-        Command(args: _*).exec() match {
+        Command(file("runlog.out"), args: _*).exec() match {
           case (0, _) => Right("Ok")
           case (code, msg) => Left(TaskFailed(ProjectAndTask(project, this), "Run Main failed in " + project + ", " + msg))
         }
@@ -34,3 +35,4 @@ case object RunMainTask extends Task {
     }
   }
 }
+

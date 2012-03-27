@@ -6,6 +6,7 @@ import java.util.Properties
 import java.io.FileInputStream
 import scala.collection.JavaConversions
 import java.io.OutputStream
+import utils.TeeToFileOutputStream
 
 case class Props(private val overrides : Map[String, String] = Map()) {
   type PropertyS = Property[String]
@@ -78,27 +79,10 @@ case class Props(private val overrides : Map[String, String] = Map()) {
    */
   object VimErrorFile extends FileProperty("vim-compile-output")
 
-  object CompilationOutputStream extends OutputStream {
-    import java.io.FileOutputStream
-    import java.io.PrintStream
-    import org.apache.commons.io.output.TeeOutputStream
-
-    private def makeTeeStream = {
-      new PrintStream(
-        new TeeOutputStream(
-          Console.err, 
-          new PrintStream(new FileOutputStream(VimErrorFile()))
-        )
-      )
-    }
-    var teeErr = makeTeeStream
-
+  val CompilationOutputStream = new TeeToFileOutputStream(VimErrorFile(), Console.err) {
     def emptyVimErrorFile{
       VimErrorFile().delete
-      teeErr = makeTeeStream
-    }
-    def write(b : Int){
-      teeErr.write(b)
+      tee = makeTeeStream
     }
   }
 

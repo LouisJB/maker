@@ -30,3 +30,8 @@ case class Command(args : String*) {
 
   override def toString = "Command: " + args.mkString(" ")
 }
+
+object Command{
+  def apply(args : String*) : Command = Command(System.out, args : _*)
+  def apply(file : File, args : String*) : Command = Command(TeeToFileOutputStream(file), args : _*)
+}
