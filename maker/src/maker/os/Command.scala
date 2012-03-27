@@ -1,26 +1,34 @@
 package maker.os
 
 import java.lang.ProcessBuilder
-import java.io.InputStreamReader
-import java.io.BufferedReader
-import maker.utils.Log
+import java.io.{File, OutputStream, InputStreamReader, BufferedReader, PrintWriter}
+import maker.utils.{TeeToFileOutputStream, Log}
 
-case class Command(args : String*) {
+
+case class Command(os : OutputStream, args : String*) {
   def exec(async : Boolean = false) : (Int, String) = {
     Log.debug("Executing cmd (async = " + async + ") - " + toString)
     val procBuilder = new ProcessBuilder(args : _*)
     procBuilder.redirectErrorStream(true)
     val proc = procBuilder.start
     val (procResult, msg) = if (!async) {
-      val isr = new InputStreamReader(proc.getInputStream)
-      val br = new BufferedReader(isr)
+      var ps : PrintWriter = null
       val buf = new StringBuffer()
-      var line : String =null;
-      line = br.readLine()
-      while (line != null) {
-        System.out.println(line)
+      try {
+        ps = new PrintWriter(os)
+        val isr = new InputStreamReader(proc.getInputStream)
+        val br = new BufferedReader(isr)
+        var line : String =null;
         line = br.readLine()
-        buf.append(line)
+        while (line != null) {
+          ps.println(line)
+          line = br.readLine()
+          buf.append(line)
+        }
+      }
+      finally {
+        ps.flush()
+        ps.close
       }
       (proc.waitFor, buf.toString)
     }

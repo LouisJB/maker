@@ -63,7 +63,7 @@ case object UpdateExternalDependencies extends Task {
     try {
       if (project.ivyFile.exists){
         val confs = Array[String]("default")
-        val artifactFilter = FilterHelper.getArtifactTypeFilter(Array[String]("jar", "bundle", "source"))
+        val artifactFilter = FilterHelper.getArtifactTypeFilter(Array[String]("jar", "war", "bundle", "source"))
 
         val resolveOptions = new ResolveOptions().setConfs(confs)
                       .setValidate(true)
