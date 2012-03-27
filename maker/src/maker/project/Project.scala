@@ -186,6 +186,10 @@ case class Project(
 
   def delete = recursiveDelete(root)
 
+  def findLibs(libName : String) = 
+    classpathDirectoriesAndJars.filter(f => f.getName.contains("trademgmt")).foreach(println)
+
+  // maven / ivy integration
   import maker.utils.maven._
   def moduleDef : ModuleDef = {
     val deps : List[DependencyLib] = readIvyDependencies()
