@@ -106,8 +106,11 @@ case class Project(
   private def publish_(projects : List[Project], resolver : String = props.DefaultPublishResolver().getOrElse("default"), version : String = props.Version()) =
     QueueManager(projects, PublishTask, Map("publishResolver" -> resolver, "version" -> version))
 
-  def runMain(className : String)(opts : String*)(args : String*) =
-    QueueManager(List(this), RunMainTask, Map("mainClassName" -> className, "opts" -> opts.mkString(",") , "args" -> args.mkString(",")))
+  def runMain(className : String)(opts : String*)(args : String*) = {
+    val r = QueueManager(List(this), RunMainTask, Map("mainClassName" -> className, "opts" -> opts.mkString(",") , "args" -> args.mkString(",")))
+    println("runMain task completed for class: " + className)
+    r
+  }
 
   def ~ (task : () => BuildResult) {
     var lastTaskTime : Option[Long] = None

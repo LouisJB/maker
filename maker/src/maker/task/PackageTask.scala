@@ -4,9 +4,8 @@ import maker.project.Project
 import maker.utils.FileUtils._
 import maker.os.Command
 import maker.utils.Log
-import org.apache.commons.io._
 import org.apache.commons.io.FileUtils._
-
+import maker.utils.Utils._
 
 /**
  * Packages this project and its children
@@ -76,8 +75,6 @@ case object PackageTask extends Task{
         Command(List(jar, "cf", warName, "-C", warImage.getAbsolutePath, ".") : _*) :: Nil
       }
     }
-
-    def fix[A,B](f: (A=>B)=>(A=>B)): A=>B = f(fix(f))(_)
 
     fix[List[Command], Either[TaskFailed, AnyRef]](exec => cs => {
       cs match {
