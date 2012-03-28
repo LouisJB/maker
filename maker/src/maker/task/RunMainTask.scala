@@ -4,10 +4,11 @@ import maker.project.Project
 import maker.utils.Log
 import maker.utils.FileUtils._
 import maker.os.Command
-import scala.actors.Futures._
+import annotation.tailrec
+
 
 /**
- * run a class main in a separate JVM instance
+ * run a class main in a separate JVM instance (but currently synchronously to maker repl)
  */
 case object RunMainTask extends Task {
   def exec(project: Project, acc: List[AnyRef], parameters: Map[String, String] = Map()) = {
@@ -26,28 +27,27 @@ case object RunMainTask extends Task {
           "scala.tools.nsc.MainGenericRunner" ::
           className :: mainArgs)
 
-        var proc : Process = null
-        val r = future {
-          val cmd = Command(file("runlog.out"), args: _*)
-          Log.info("Running, press enter to terminate process...")
-          proc = cmd.startProc()
-          cmd.waitOnProc(proc) match {
-            case (0, _) => Right("Ok")
-            case (code, msg) => Left(TaskFailed(ProjectAndTask(project, this), "Run Main failed in " + project + ", " + msg))
-          }
-        }
+        val cmd = Command(file("runlog.out"), args: _*)
+        Log.info("Running, press enter to terminate process...")
+        val procHandle = cmd.execProc()
+        @tailrec
         def checkRunning() : Either[TaskFailed, AnyRef] = {
-          if (!r.isSet) {
+          if (!procHandle._2.isSet) {
             Thread.sleep(1000)
             if (System.in.available > 0 && System.in.read == ('\n').toInt) {
               Log.info("Terminating: " + className)
-              proc.destroy()
+              procHandle._1.destroy()
               Log.info("Terminated process for runMain of class : " + className)
               Right("User terminated")
             }
             else checkRunning()
           }
-          else r()
+          else {
+            procHandle._2() match {
+              case (0, _) => Right("Ok")
+              case (code, msg) => Left(TaskFailed(ProjectAndTask(project, this), "Run Main failed in " + project + ", " + msg))
+            }
+          }
         }
         checkRunning()
       }
