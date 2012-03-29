@@ -5,7 +5,6 @@ import java.io.File
 import java.util.Properties
 import java.io.FileInputStream
 import scala.collection.JavaConversions
-import java.io.OutputStream
 import utils.TeeToFileOutputStream
 
 case class Props(private val overrides : Map[String, String] = Map()) {
@@ -107,13 +106,21 @@ case class Props(private val overrides : Map[String, String] = Map()) {
 }
 
 object Props {
-  def apply(file : File) : Props = Props(propsFromFile(file))
+  import RichProperties._
+  def apply(file : File) : Props = fileToProps(file)
+}
 
-  private def propsFromFile(propsFile:File) : Map[String, String] = {
+object RichProperties {
+  implicit def fileToProps(propsFile : File) : Props = {
+    val p : Properties = fileToProperties(propsFile)
+    val propsMap = Map() ++ JavaConversions.mapAsScalaMap(p.asInstanceOf[java.util.Map[String,String]])
+    Props(propsMap)
+  }
+  implicit def fileToProperties(propsFile : File) : Properties = {
     val p = new Properties()
     if (propsFile.exists) {
       p.load(new FileInputStream(propsFile))
     }
-    Map() ++ JavaConversions.mapAsScalaMap(p.asInstanceOf[java.util.Map[String,String]])
+    p
   }
 }

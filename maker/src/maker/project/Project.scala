@@ -5,8 +5,8 @@ import java.lang.System
 import maker.task._
 import maker.utils.FileUtils._
 import maker.Props
+import java.util.Properties
 import java.net.URLClassLoader
-import maker.os.Command
 import maker.graphviz.GraphVizUtils._
 import maker.graphviz.GraphVizDiGrapher._
 import maker.utils.{DependencyLib, Log}
@@ -14,21 +14,22 @@ import maker.utils.RichString._
 import maker.utils.FileUtils
 
 case class Project(
-  name: String,
-  root: File,
-  sourceDirs: List[File] = Nil,
-  tstDirs: List[File] = Nil,
-  libDirs: List[File] = Nil,
-  providedDirs: List[File] = Nil, // compile time only, don't add to runtime classpath or any packaging
-  managedLibDirName : String = "maker-lib",
-  resourceDirs : List[File] = Nil,
-  children: List[Project] = Nil,
-  props : Props = Props(),
-  description : Option[String] = None,
-  ivySettingsFile : File = file("maker-ivysettings.xml"), // assumption this is typically absolute and module ivy is relative, this might be invalid?
-  ivyFileRel : String = "maker-ivy.xml",
-  webAppDir : Option[File] = None
-) {
+      name: String,
+      root: File,
+      sourceDirs: List[File] = Nil,
+      tstDirs: List[File] = Nil,
+      libDirs: List[File] = Nil,
+      providedDirs: List[File] = Nil, // compile time only, don't add to runtime classpath or any packaging
+      managedLibDirName : String = "maker-lib",
+      resourceDirs : List[File] = Nil,
+      children: List[Project] = Nil,
+      props : Props = Props(),
+      unmanagedProperties : Properties = new Properties(),
+      description : Option[String] = None,
+      ivySettingsFile : File = file("maker-ivysettings.xml"), // assumption this is typically absolute and module ivy is relative, this might be invalid?
+      ivyFileRel : String = "maker-ivy.xml",
+      webAppDir : Option[File] = None) {
+
   def outputDir = file(root, "classes")
   def javaOutputDir = file(root, "java-classes")
   def testOutputDir = file(root, "test-classes")
@@ -246,4 +247,3 @@ object Project {
   def apply(name : String,  libDirectories : => List[File]) : Project = Project(name, file(name), libDirs = libDirectories, props = Props())
   def apply(name : String,  libDirectories : => List[File], props : Props) : Project = Project(name, file(name), libDirs = libDirectories, props = props)
 }
-
