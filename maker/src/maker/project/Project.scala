@@ -204,16 +204,23 @@ case class Project(
   override def toString = "Project " + name
 }
 
+case class ProjectLib(projectName:String, exported:Boolean)
+
 class TopLevelProject(name:String,
                       children:List[Project],
-                      props:Props = Props()) extends Project(name, file("."), Nil, Nil, Nil, resourceDirs = Nil, children = children, props = props) {
+                      props:Props = Props(),
+                      scalaSwingLibraryProjects:List[ProjectLib] = Nil) extends Project(name, file("."), Nil, Nil, Nil, resourceDirs = Nil, children = children, props = props) {
 
   def generateIDEAProject() {
     val allModules = children.flatMap(_.projectAndDescendents).distinct
 
+    val swingLibraryRequired = scalaSwingLibraryProjects.nonEmpty
+
     IDEAProjectGenerator.generateTopLevelModule(root, name)
-    IDEAProjectGenerator.generateIDEAProjectDir(root, name)
-    allModules foreach IDEAProjectGenerator.generateModule
+    IDEAProjectGenerator.generateIDEAProjectDir(root, name, swingLibraryRequired)
+    allModules.foreach(module => IDEAProjectGenerator.generateModule(
+      module,
+      scalaSwingLibraryProjects.find(_.projectName == module.name)))
 
     IDEAProjectGenerator.generateModulesFile(file(root, ".idea"), (this :: allModules).map(_.name))
 
