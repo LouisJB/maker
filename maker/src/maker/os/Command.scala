@@ -39,7 +39,7 @@ case class Command(os : OutputStream, closeStream : Boolean, args : String*) {
     try {
       val br = new BufferedReader(new InputStreamReader(proc.getInputStream))
       ps = new PrintWriter(os, true)
-      ps.println("Executing command:\n%s\n".format(asString)) 
+      if (closeStream) ps.println("Executing command:\n%s\n".format(asString)) 
       var line : String = null
       line = br.readLine()
       while (line != null) {
