@@ -43,6 +43,22 @@ case class Project(
   def jarDirs : List[File] = if (libDirs.isEmpty) List(file(root, "lib"), managedLibDir) else libDirs
 
   def dependsOn(projects: Project*) = copy(children = children ::: projects.toList)
+  def withAdditionalSourceDirs(dirs : List[String]) = copy(sourceDirs = dirs.map(d => file(root, d)) ::: this.sourceDirs)
+
+  def allDeps : List[Project] = this :: children.flatMap(_.allDeps).sortWith(_.name < _.name)
+  def isDependentOn(project : Project) = allDeps.exists(p => p == project)
+  def dependsOnPaths(project : Project) : List[List[Project]] = {
+    def depends(currentProject : Project, currentPath : List[Project], allPaths : List[List[Project]]) : List[List[Project]] = {
+      if (project == currentProject) (currentProject :: currentPath).reverse :: allPaths
+      else {
+        currentProject.children match {
+          case Nil => Nil
+          case ps => ps.flatMap(p => depends(p, currentProject :: currentPath, allPaths))
+        }
+      }
+    }
+    depends(this, Nil, Nil)
+  }
 
   def srcFiles() = findSourceFiles(srcDirs: _*)
   def testSrcFiles() = findSourceFiles(testDirs: _*)
