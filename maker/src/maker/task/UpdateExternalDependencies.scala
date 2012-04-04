@@ -29,6 +29,7 @@ case object UpdateExternalDependencies extends Task {
         proxyParameter("-Dhttp.proxyHost", project.props.HttpProxyHost()) :::
         proxyParameter("-Dhttp.proxyPort", project.props.HttpProxyPort()) :::
         proxyParameter("-Dhttp.nonProxyHosts", project.props.HttpNonProxyHosts()) :::
+        List("ivy.checksums=") :::
         ("-jar"::ivyJar::"-settings"::ivySettingsFile.getPath::"-ivy"::ivyFile.getPath::"-retrieve"::Nil) 
 
       List(

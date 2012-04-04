@@ -78,7 +78,7 @@ case class Project(
   **********************/
   def projectAndDescendents = this::dependencies.descendents.toList
   def clean = QueueManager(projectAndDescendents, CleanTask)
-  def compile = QueueManager(projectAndDescendents, CompileSourceTask)
+  def compile = QueueManager(projectAndDescendents, CompileJavaSourceTask)
   def javaCompile = QueueManager(projectAndDescendents, CompileJavaSourceTask)
   def testCompile = QueueManager(projectAndDescendents, CompileTestsTask)
   def test = QueueManager(projectAndDescendents, RunUnitTestsTask)

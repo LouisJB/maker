@@ -10,17 +10,17 @@ trait Task{
 
 object Task {
   lazy val standardWithinProjectDependencies = Map[Task, Set[Task]](
-    CompileSourceTask -> Set(CompileJavaSourceTask),
-    CompileTestsTask -> Set(CompileSourceTask),
-    PackageTask -> Set(CompileSourceTask),
+    CompileJavaSourceTask -> Set(CompileSourceTask),
+    CompileTestsTask -> Set(CompileJavaSourceTask),
+    PackageTask -> Set(CompileJavaSourceTask),
     PublishLocalTask -> Set(PackageTask),
     PublishTask -> Set(PublishLocalTask),
     RunUnitTestsTask -> Set(CompileTestsTask),
-    RunMainTask -> Set(CompileSourceTask)
+    RunMainTask -> Set(CompileJavaSourceTask)
   )
   lazy val standardDependentProjectDependencies = Map[Task, Set[Task]](
-    CompileSourceTask -> Set(CompileSourceTask),
+    CompileSourceTask -> Set(CompileJavaSourceTask),
     CompileTestsTask -> Set(CompileTestsTask),
-    CompileJavaSourceTask → Set(CompileSourceTask)
+    CompileJavaSourceTask → Set(CompileJavaSourceTask)
   )
 }

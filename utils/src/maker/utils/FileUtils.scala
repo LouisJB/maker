@@ -53,6 +53,8 @@ object FileUtils {
       dirs : _*
     )
   }
+  def findFilesWithExtensions(exts : List[String], dirs : File*) =
+    findFiles((f : File) => exts.exists(e => f.getName.endsWith("." + e)), dirs : _*)
 
   def traverseDirectories(root : File, fn : File => Unit){
     fn(root)
@@ -61,7 +63,7 @@ object FileUtils {
 
   def findJars(dirs : File*) = findFilesWithExtension("jar", dirs : _*)
   def findClasses(dirs : File*) = findFilesWithExtension("class", dirs : _*)
-  def findSourceFiles(dirs : File*) = findFilesWithExtension("scala", dirs : _*)
+  def findSourceFiles(dirs : File*) = findFilesWithExtensions("scala" :: "java" :: Nil, dirs : _*)
   def findJavaSourceFiles(dirs : File*) = findFilesWithExtension("java", dirs : _*)
 
   def withFileWriter(file : File)(f : BufferedWriter => _){
