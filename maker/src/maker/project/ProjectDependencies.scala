@@ -1,6 +1,7 @@
 package maker.project
 
 import maker.task._
+import maker.utils.Memoize1
 
 case class ProjectDependencies(project : Project){
   def descendents : Set[Project] = {
@@ -18,10 +19,11 @@ case class ProjectDependencies(project : Project){
    */
   def childTasksInChildProjects(task : Task) : Set[Task] = Task.standardDependentProjectDependencies.getOrElse(task, Set())
 
-  def childProjectTasks(task : Task) : Set[ProjectAndTask] = {
-    val withinProjectDeps : Set[ProjectAndTask] = childTasksWithinProject(task).map(ProjectAndTask(project, _)) 
-    val childProjectDependencies : Set[ProjectAndTask] = project.children.flatMap{p => childTasksInChildProjects(task).map{t => ProjectAndTask(p, t)}}.toSet
+  lazy val childProjectTasks = 
+    Memoize1((task : Task) => {
+      val withinProjectDeps : Set[ProjectAndTask] = childTasksWithinProject(task).map(ProjectAndTask(project, _)) 
+      val childProjectDependencies : Set[ProjectAndTask] = project.children.flatMap{p => childTasksInChildProjects(task).map{t => ProjectAndTask(p, t)}}.toSet
     withinProjectDeps ++ childProjectDependencies
-  }
+    })
 }
 

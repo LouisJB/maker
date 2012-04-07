@@ -107,18 +107,17 @@ class QueueManager(projectTasks : Set[ProjectAndTask], router : ActorRef,
 
 object QueueManager{
   def apply(projects : List[Project], task : Task, parameters : Map[String, String] = Map()) : BuildResult = {
+    val sw = new Stopwatch()
     val originalProjectAndTask = ProjectAndTask(projects.head, task)
     val projectTasks = {
       def recurse(moreProjectTasks : Set[ProjectAndTask], acc : Set[ProjectAndTask]) : Set[ProjectAndTask] = {
-        if (moreProjectTasks.isEmpty)
-          acc
-        else {
+        if (moreProjectTasks.isEmpty) acc
+        else
           recurse(moreProjectTasks.flatMap(_.immediateDependencies), acc ++ moreProjectTasks)
-        }
       }
       recurse(projects.toSet.map{proj : Project => ProjectAndTask(proj, task)}, Set[ProjectAndTask]())
     }
-
+    Log.debug("took %s to compute %d project tasks".format(sw, projectTasks.size))
     Log.debug("About to do " + task + " for projects " + projects.toList.mkString(","))
     projects.head.props.CompilationOutputStream.emptyVimErrorFile
     apply(projectTasks, originalProjectAndTask, parameters)
