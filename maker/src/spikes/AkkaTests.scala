@@ -1,4 +1,4 @@
-package maker
+package spikes
 import org.scalatest.FunSuite
 import akka.actor.Actor
 import akka.actor.ActorSystem
