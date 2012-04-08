@@ -24,7 +24,22 @@ case class Command(args : String*) {
       }
       (proc.waitFor, buf.toString)
     }
-    else (0, "")
+    else {
+      val redirectOutput = new Runnable(){
+        def run(){
+          val isr = new InputStreamReader(proc.getInputStream)
+          val br = new BufferedReader(isr)
+          var line : String =null;
+          line = br.readLine()
+          while (line != null) {
+            System.out.println(line)
+            line = br.readLine()
+          }
+        }
+      }
+      new Thread(redirectOutput).start
+      (0, "")
+    }
     (procResult, msg)
   }
 

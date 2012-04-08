@@ -267,6 +267,7 @@ ivy_command(){
 ivy_update() {
   echo "Updating ivy"
   MAKER_IVY_FILE="$MAKER_OWN_ROOT_DIR/utils/ivy.xml"
+  echo "$(ivy_command $MAKER_IVY_FILE $MAKER_OWN_LIB_DIR) -types jar -sync"
   run_command "$(ivy_command $MAKER_IVY_FILE $MAKER_OWN_LIB_DIR) -types jar -sync"
   run_command "$(ivy_command $MAKER_IVY_FILE $MAKER_OWN_LIB_DIR) -types bundle"
   run_command "$(ivy_command $MAKER_IVY_FILE $MAKER_OWN_LIB_DIR) -types source "
