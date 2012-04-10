@@ -48,11 +48,8 @@ class SimpleCalculatorActor extends Actor {
 }
 //#actor
 
-class CalculatorApplication extends Bootable {
-  //#setup
-  val system = ActorSystem("CalculatorApplication", ConfigFactory.load.getConfig("calculator"))
-  //val actor = system.actorOf(AkkaProps[SimpleCalculatorActor], "simpleCalculator")
-  //#setup
+case class RemoteActor(actorName : String, configName : String) extends Bootable{
+  val system = ActorSystem(actorName, ConfigFactory.load.getConfig(configName))
 
   def startup() {
   }
@@ -62,24 +59,24 @@ class CalculatorApplication extends Bootable {
   }
 }
 
-object CalcApp {
+object RemoteActor {
   def main(args: Array[String]) {
-    new CalculatorApplication
+    val Array(actorName, configName) = args
+    new RemoteActor(actorName, configName)
     println("Started Calculator Application - waiting for messages")
   }
 }
 
+
 class LookupApplication extends Bootable {
-  val mathProc = Command("/usr/local/scala/bin/scala", "maker.CalcApp")
+  val mathProc = Command("/usr/local/scala/bin/scala", "maker.RemoteActor", "CalculatorApplication", "calculator")
   mathProc.exec(async = true)
-  //#setup
   val system = ActorSystem("LookupApplication", ConfigFactory.load.getConfig("remotelookup"))
   val remoteActor = system.actorOf(AkkaProps[SimpleCalculatorActor], "simpleCalculator")
   val actor = system.actorOf(AkkaProps(new LookupActor(remoteActor)), "lookupActor")
   def doSomething(op: MathOp) = {
     actor ! op
   }
-  //#setup
 
   def startup() {
   }
@@ -89,7 +86,6 @@ class LookupApplication extends Bootable {
   }
 }
 
-//#actor
 class LookupActor(remoteActor : ActorRef) extends Actor {
   def receive = {
     case op: MathOp ⇒ {
