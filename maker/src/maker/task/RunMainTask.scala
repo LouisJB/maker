@@ -16,16 +16,14 @@ case object RunMainTask extends Task {
       case Some(name) => {
         Log.info("running main in class " + name + " of project " + project)
         val className = parameters("mainClassName")
-        val opts : List[String] = parameters.get("opts").map(_.split(",").toList).getOrElse(Nil)
-        val mainArgs : List[String] = parameters.get("args").map(_.split(",").toList).getOrElse(Nil)
+        val opts : List[String] = parameters.get("opts").map(_.split("\\|").toList).getOrElse(Nil)
+        val mainArgs : List[String] = parameters.get("args").map(_.split("\\|").toList).getOrElse(Nil)
         val args = List(
           project.props.JavaHome() + "/bin/java",
           "-Dscala.usejavacp=true",
           "-classpath",
           project.runClasspath + ":" + project.scalaLibs.mkString(":")) :::
-          opts ::: (
-          //"scala.tools.nsc.MainGenericRunner" :: // not really needed when invoking directly?
-          className :: mainArgs)
+          opts ::: (className :: mainArgs)
 
         val cmd = Command(file("runlog.out"), args: _*)
         Log.info("Running, press enter to terminate process...")

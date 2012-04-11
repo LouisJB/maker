@@ -125,7 +125,7 @@ case class Project(
     QueueManager(projects, PublishTask, Map("publishResolver" -> resolver, "version" -> version))
 
   def runMain(className : String)(opts : String*)(args : String*) = {
-    val r = QueueManager(List(this), RunMainTask, Map("mainClassName" -> className, "opts" -> opts.mkString(",") , "args" -> args.mkString(",")))
+    val r = QueueManager(List(this), RunMainTask, Map("mainClassName" -> className, "opts" -> opts.mkString("|") , "args" -> args.mkString("|")))
     println("runMain task completed for class: " + className)
     r
   }
