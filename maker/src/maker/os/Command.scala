@@ -7,11 +7,12 @@ import actors.Future
 import actors.Futures._
 
 
-case class Command(os : OutputStream, closeStream : Boolean, args : String*) {
+case class Command(os : OutputStream, closeStream : Boolean, pwd : Option[File], args : String*) {
 
   def startProc() : Process = {
     val procBuilder = new ProcessBuilder(args : _*)
     procBuilder.redirectErrorStream(true)
+    pwd.map(procBuilder.directory(_))
     procBuilder.start
   }
 
@@ -62,7 +63,8 @@ case class Command(os : OutputStream, closeStream : Boolean, args : String*) {
 }
 
 object Command{
-  def apply(os : OutputStream, args : String*) : Command = Command(os, false, args : _*)
-  def apply(args : String*) : Command = Command(System.out, false, args : _*)
-  def apply(file : File, args : String*) : Command = Command(TeeToFileOutputStream(file), true, args : _*)
+  def apply(os : OutputStream, args : String*) : Command = Command(os, false, None, args : _*)
+  def apply(args : String*) : Command = Command(System.out, false, None, args : _*)
+  def apply(file : File, args : String*) : Command = Command(TeeToFileOutputStream(file), true, None, args : _*)
+  def apply(pwd : Option[File], args : String*) : Command = Command(System.out, false, pwd, args : _*)
 }

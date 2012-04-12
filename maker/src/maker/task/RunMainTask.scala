@@ -28,7 +28,7 @@ case object RunMainTask extends Task {
         val cmd = Command(file("runlog.out"), args: _*)
         Log.info("Running, press enter to terminate process...")
  
-        writeCmdToFile(cmd, file("runCmd.sh"))
+        writeCmdToFile(cmd, file("runcmd.sh"))
 
         val procHandle = cmd.execProc()
         @tailrec
