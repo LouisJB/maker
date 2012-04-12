@@ -34,5 +34,8 @@ class AdvancedCalculatorActor extends Actor {
     case Divide(n1, n2) ⇒
       println("Calculating %.0f / %d".format(n1, n2))
       sender ! DivisionResult(n1, n2, n1 / n2)
+    case ProcessID(id) ⇒
+      println("Advanced calc actor Received " + id)
+      sender ! ProcessID()
   }
 }

@@ -13,7 +13,9 @@ import scala.util.Random
 import com.typesafe.config.ConfigFactory
 import akka.actor.{ ActorRef, Props, Actor, ActorSystem }
 import maker.remoteakka._
+import maker.remoteakka.ProcessID
 //#imports
+
 
 class LocalLookupApplication extends Bootable {
   //#setup
@@ -21,7 +23,7 @@ class LocalLookupApplication extends Bootable {
   val actor = system.actorOf(Props[LocalLookupActor], "lookupActor")
   val remoteActor = system.actorFor("akka://CalculatorApplication@127.0.0.1:2552/user/lookupCalculator")
 
-  def doSomething(op: MathOp) = {
+  def doSomething(op: AnyRef) = {
     actor ! (remoteActor, op)
   }
   //#setup
@@ -37,11 +39,12 @@ class LocalLookupApplication extends Bootable {
 //#actor
 class LocalLookupActor extends Actor {
   def receive = {
-    case (actor: ActorRef, op: MathOp) ⇒ actor ! op
+    case (actor: ActorRef, op: AnyRef) ⇒ actor ! op
     case result: MathResult ⇒ result match {
       case AddResult(n1, n2, r)      ⇒ println("Add result: %d + %d = %d".format(n1, n2, r))
       case SubtractResult(n1, n2, r) ⇒ println("Sub result: %d - %d = %d".format(n1, n2, r))
     }
+    case ProcessID(id) ⇒ println("Received " + id + " from remote actor, this actor's id is " + ProcessID())
   }
 }
 //#actor
@@ -51,8 +54,9 @@ object LookupApp {
     val app = new LocalLookupApplication
     println("Started Lookup Application")
     while (true) {
-      if (Random.nextInt(100) % 2 == 0) app.doSomething(Add(Random.nextInt(100), Random.nextInt(100)))
-      else app.doSomething(Subtract(Random.nextInt(100), Random.nextInt(100)))
+      app.doSomething(ProcessID())
+      //if (Random.nextInt(100) % 2 == 0) app.doSomething(Add(Random.nextInt(100), Random.nextInt(100)))
+      //else app.doSomething(Subtract(Random.nextInt(100), Random.nextInt(100)))
 
       Thread.sleep(200)
     }

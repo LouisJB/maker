@@ -13,10 +13,12 @@ import com.typesafe.config.ConfigFactory
 import java.lang.management.ManagementFactory
 
 object ProcessID{
-  def apply = {
-    ManagementFactory.getRuntimeMXBean().getName()
+  def apply() : ProcessID = {
+    ProcessID(ManagementFactory.getRuntimeMXBean().getName())
   }
 }
+
+case class ProcessID(id : String)
 
 //#actor
 class LookupCalculatorActor extends Actor {
@@ -27,6 +29,9 @@ class LookupCalculatorActor extends Actor {
     case Subtract(n1, n2) ⇒
       println("Calculating %d - %d".format(n1, n2))
       sender ! SubtractResult(n1, n2, n1 - n2)
+    case ProcessID(id) ⇒
+      println("Lookup calc actor Received " + id)
+      sender ! ProcessID()
   }
 }
 //#actor
