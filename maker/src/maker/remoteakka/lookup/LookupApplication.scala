@@ -15,10 +15,10 @@ import akka.actor.{ ActorRef, Props, Actor, ActorSystem }
 import maker.remoteakka._
 //#imports
 
-class LookupApplication extends Bootable {
+class LocalLookupApplication extends Bootable {
   //#setup
-  val system = ActorSystem("LookupApplication", ConfigFactory.load.getConfig("remotelookup"))
-  val actor = system.actorOf(Props[LookupActor], "lookupActor")
+  val system = ActorSystem("LocalLookupApplication", ConfigFactory.load.getConfig("remotelookup"))
+  val actor = system.actorOf(Props[LocalLookupActor], "lookupActor")
   val remoteActor = system.actorFor("akka://CalculatorApplication@127.0.0.1:2552/user/lookupCalculator")
 
   def doSomething(op: MathOp) = {
@@ -35,7 +35,7 @@ class LookupApplication extends Bootable {
 }
 
 //#actor
-class LookupActor extends Actor {
+class LocalLookupActor extends Actor {
   def receive = {
     case (actor: ActorRef, op: MathOp) ⇒ actor ! op
     case result: MathResult ⇒ result match {
@@ -48,7 +48,7 @@ class LookupActor extends Actor {
 
 object LookupApp {
   def main(args: Array[String]) {
-    val app = new LookupApplication
+    val app = new LocalLookupApplication
     println("Started Lookup Application")
     while (true) {
       if (Random.nextInt(100) % 2 == 0) app.doSomething(Add(Random.nextInt(100), Random.nextInt(100)))
