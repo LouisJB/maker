@@ -14,6 +14,7 @@ import com.typesafe.config.ConfigFactory
 import akka.actor.{ ActorRef, Props, Actor, ActorSystem }
 import maker.remoteakka._
 import maker.remoteakka.ProcessID
+import maker.os.Command
 //#imports
 
 
@@ -40,10 +41,6 @@ class LocalLookupApplication extends Bootable {
 class LocalLookupActor extends Actor {
   def receive = {
     case (actor: ActorRef, op: AnyRef) ⇒ actor ! op
-    case result: MathResult ⇒ result match {
-      case AddResult(n1, n2, r)      ⇒ println("Add result: %d + %d = %d".format(n1, n2, r))
-      case SubtractResult(n1, n2, r) ⇒ println("Sub result: %d - %d = %d".format(n1, n2, r))
-    }
     case ProcessID(id) ⇒ println("Received " + id + " from remote actor, this actor's id is " + ProcessID())
   }
 }
@@ -51,12 +48,16 @@ class LocalLookupActor extends Actor {
 
 object LookupApp {
   def main(args: Array[String]) {
+    val cmd = Command("/usr/local/scala/bin/scala", "maker.remoteakka.CalcApp")
+    cmd.exec(async=true)
+    var sleepTime = 500
+    if (args.size > 0)
+      sleepTime = args(0).toInt
+    Thread.sleep(sleepTime)
     val app = new LocalLookupApplication
     println("Started Lookup Application")
     while (true) {
       app.doSomething(ProcessID())
-      //if (Random.nextInt(100) % 2 == 0) app.doSomething(Add(Random.nextInt(100), Random.nextInt(100)))
-      //else app.doSomething(Subtract(Random.nextInt(100), Random.nextInt(100)))
 
       Thread.sleep(200)
     }

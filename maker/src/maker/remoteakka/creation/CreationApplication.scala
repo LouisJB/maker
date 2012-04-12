@@ -12,6 +12,7 @@ import com.typesafe.config.ConfigFactory
 import scala.util.Random
 import akka.actor._
 import maker.remoteakka._
+import maker.os.Command
 
 class CreationApplication extends Bootable {
   //#setup
@@ -36,10 +37,6 @@ class CreationApplication extends Bootable {
 class CreationActor extends Actor {
   def receive = {
     case (actor: ActorRef, op: AnyRef) ⇒ actor ! op
-    case result: MathResult ⇒ result match {
-      case MultiplicationResult(n1, n2, r) ⇒ println("Mul result: %d * %d = %d".format(n1, n2, r))
-      case DivisionResult(n1, n2, r)       ⇒ println("Div result: %.0f / %d = %.2f".format(n1, n2, r))
-    }
     case ProcessID(id) ⇒ println("Creation actor Received " + id + " from remote actor, this actor's id is " + ProcessID())
   }
 }
@@ -47,13 +44,16 @@ class CreationActor extends Actor {
 
 object CreationApp {
   def main(args: Array[String]) {
+    val cmd = Command("/usr/local/scala/bin/scala", "maker.remoteakka.CalcApp")
+    cmd.exec(async=true)
+    var sleepTime = 500
+    if (args.size > 0)
+      sleepTime = args(0).toInt
+    Thread.sleep(sleepTime)
     val app = new CreationApplication
     println("Started Creation Application")
     while (true) {
       app.doSomething(ProcessID())
-      //if (Random.nextInt(100) % 2 == 0) app.doSomething(Multiply(Random.nextInt(20), Random.nextInt(20)))
-      //else app.doSomething(Divide(Random.nextInt(10000), (Random.nextInt(99) + 1)))
-
       Thread.sleep(200)
     }
   }
