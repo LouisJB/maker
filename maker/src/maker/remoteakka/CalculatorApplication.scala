@@ -10,9 +10,16 @@ package maker.remoteakka
 import akka.kernel.Bootable
 import akka.actor.{ Props, Actor, ActorSystem }
 import com.typesafe.config.ConfigFactory
+import java.lang.management.ManagementFactory
+
+object ProcessID{
+  def apply = {
+    ManagementFactory.getRuntimeMXBean().getName()
+  }
+}
 
 //#actor
-class SimpleCalculatorActor extends Actor {
+class LookupCalculatorActor extends Actor {
   def receive = {
     case Add(n1, n2) ⇒
       println("Calculating %d + %d".format(n1, n2))
@@ -27,7 +34,7 @@ class SimpleCalculatorActor extends Actor {
 class CalculatorApplication extends Bootable {
   //#setup
   val system = ActorSystem("CalculatorApplication", ConfigFactory.load.getConfig("calculator"))
-  val actor = system.actorOf(Props[SimpleCalculatorActor], "simpleCalculator")
+  val actor = system.actorOf(Props[LookupCalculatorActor], "lookupCalculator")
   //#setup
 
   def startup() {
