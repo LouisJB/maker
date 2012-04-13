@@ -12,7 +12,7 @@ case class ProjectDependencies(project : Project){
    * The tasks that need to be run WITHIN this project before the given task is run
    */
   def childTasksWithinProject(task : Task) : Set[Task] =
-    Task.standardWithinProjectDependencies.getOrElse(task, Set[Task]()).filterNot{tsk=> project.javaSrcFiles.isEmpty && tsk == CompileJavaSourceTask}
+    Task.standardWithinProjectDependencies.getOrElse(task, Set[Task]()) //.filterNot{tsk=> project.javaSrcFiles.isEmpty && tsk == CompileJavaSourceTask}
 
   /**
    * The tasks that need to be run IN CHILD PROJECTS before the given task is run

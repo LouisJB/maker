@@ -61,6 +61,20 @@ object FileUtils {
     root.listFiles.filter(_.isDirectory).foreach(traverseDirectories(_, fn))
   }
 
+  def allFiles(f : File) : List[File] =
+    Option(f.listFiles).map(_.toList.flatMap(x =>
+      if (x.isDirectory) allFiles(x)
+      else x :: Nil)
+    ).getOrElse(Nil)
+
+  def lastModifiedFileTime(files : List[File]) = 
+    files.flatMap(allFiles).map(_.lastModified).sortWith(_ > _).head
+  
+  def targetLaterThan(target : File, dirs : List[File]) = {
+    Log.debug("dirs = " + dirs + ", latest target time " + target.lastModified() + ", latest file time = " + lastModifiedFileTime(dirs))
+    target.exists() && (target.lastModified >= lastModifiedFileTime(dirs))
+  }
+
   def findJars(dirs : File*) = findFilesWithExtension("jar", dirs : _*)
   def findClasses(dirs : File*) = findFilesWithExtension("class", dirs : _*)
   def findSourceFiles(dirs : File*) = findFilesWithExtensions("scala" :: "java" :: Nil, dirs : _*)
