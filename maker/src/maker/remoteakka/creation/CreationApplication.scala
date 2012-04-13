@@ -13,15 +13,32 @@ import scala.util.Random
 import akka.actor._
 import maker.remoteakka._
 import maker.os.Command
+import akka.remote.RemoteClientStarted
+
+
+class ListeningActor extends Actor{
+  def receive = {
+    case a : AnyRef ⇒ println("Listener received " + a + ", " + a.getClass)
+  }
+}
 
 class CreationApplication extends Bootable {
   //#setup
+  println("Local process id = " + ProcessID())
   val system = ActorSystem("RemoteCreation", ConfigFactory.load.getConfig("remotecreation"))
+  println("Creating local actor")
   val localActor = system.actorOf(Props[CreationActor], "creationActor")
+  system.eventStream.subscribe(localActor, classOf[AnyRef])
+  println("\n\n\n")
+  Thread.sleep(500)
+  println("Creating remote actor")
   val remoteActor = system.actorOf(Props[AdvancedCalculatorActor], "advancedCalculator")
+  println("\n\n\n")
+Thread.sleep(500)
+  localActor ! remoteActor
 
   def doSomething(op: AnyRef) = {
-    localActor ! (remoteActor, op)
+    localActor ! ("foo", op)
   }
   //#setup
 
@@ -35,9 +52,31 @@ class CreationApplication extends Bootable {
 
 //#actor
 class CreationActor extends Actor {
+  var remoteActor : Option[ActorRef] = None
+  var buffer = List[AnyRef]()
+  var isRemoteActorReady = false
+  def clearBuffer{
+    (remoteActor, isRemoteActorReady) match{
+      case (Some(a), true) ⇒ 
+        buffer.foreach(remoteActor.get ! _)
+        buffer = Nil
+      case _ ⇒
+    }
+  }
   def receive = {
-    case (actor: ActorRef, op: AnyRef) ⇒ actor ! op
     case ProcessID(id) ⇒ println("Creation actor Received " + id + " from remote actor, this actor's id is " + ProcessID())
+    case _ : RemoteClientStarted ⇒ 
+      isRemoteActorReady = true
+      clearBuffer
+    case actor : ActorRef ⇒
+      remoteActor = Some(actor)
+      clearBuffer
+    case  (msg : String, op: AnyRef) ⇒ 
+      println("Received " + op + ", " + isRemoteActorReady)
+      buffer = op :: buffer
+      clearBuffer
+    case a : AnyRef ⇒
+      println("RECD " + a)
   }
 }
 //#actor
@@ -49,12 +88,12 @@ object CreationApp {
     var sleepTime = 500
     if (args.size > 0)
       sleepTime = args(0).toInt
-    Thread.sleep(sleepTime)
+    //Thread.sleep(sleepTime)
     val app = new CreationApplication
     println("Started Creation Application")
     while (true) {
       app.doSomething(ProcessID())
-      Thread.sleep(200)
+      Thread.sleep(1500)
     }
   }
 }
