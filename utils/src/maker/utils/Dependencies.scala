@@ -18,9 +18,13 @@ trait GAV {
 }
 case class GroupAndArtifact(groupId : GroupId, artifactId : ArtifactId) extends GAV {
   def %(version : String) = GroupArtifactAndVersion(groupId, artifactId, Some(Version(version)))
+  override def toString = groupId.id + ":" + artifactId.id
 }
 case class Version(version : String)
-case class GroupArtifactAndVersion(groupId : GroupId, artifactId : ArtifactId, override val version : Option[Version]) extends GAV
+case class GroupArtifactAndVersion(groupId : GroupId, artifactId : ArtifactId, override val version : Option[Version]) extends GAV {
+
+  override def toString = groupId.id + ":" + artifactId.id + ":" + version.map(_.version).getOrElse("")
+}
 
 /**
  * Simple case class representing a library dependency definition (from a Maven repo)

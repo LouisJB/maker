@@ -47,7 +47,7 @@ case class Project(
   def dependsOn(projects: Project*) = copy(children = children ::: projects.toList)
   def withAdditionalSourceDirs(dirs : List[String]) = copy(sourceDirs = dirs.map(d => file(root, d)) ::: this.sourceDirs)
 
-  def allDeps : List[Project] = this.children.flatMap(_.allDeps).sortWith(_.name < _.name)
+  def allDeps : List[Project] = this :: children.flatMap(_.allDeps).sortWith(_.name < _.name)
   def isDependentOn(project : Project) = allDeps.exists(p => p == project)
   def dependsOnPaths(project : Project) : List[List[Project]] = {
     def depends(currentProject : Project, currentPath : List[Project], allPaths : List[List[Project]]) : List[List[Project]] = {
@@ -221,7 +221,7 @@ case class Project(
     ModuleDef(projectDef, deps, repos, ScmDef(props.ScmUrl(), props.ScmConnection()), props.Licenses(), props.Developers())
   }
 
-  override def toString = "Project " + name
+  override def toString = "Project " + moduleId.toString
 }
 
 case class ProjectLib(projectName:String, exported:Boolean)
