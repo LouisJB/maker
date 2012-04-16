@@ -75,6 +75,19 @@ object FileUtils {
     target.exists() && (target.lastModified >= lastModifiedFileTime(dirs))
   }
 
+  def replaceInFile(file : File, placeholder : String, repl : String) = {
+    val lines = file.read.map(_.replace(placeholder, repl))
+    writeToFile(file, lines.mkString("\n"))
+  }
+
+  def nameAndExt(file : File) = {
+    val name = file.getName
+    file.getName.lastIndexOf('.') match {
+      case -1 => (name, "")
+      case n => val parts = name.splitAt(n); (parts._1, parts._2.substring(1))
+    }
+  }
+
   def findJars(dirs : File*) = findFilesWithExtension("jar", dirs : _*)
   def findClasses(dirs : File*) = findFilesWithExtension("class", dirs : _*)
   def findSourceFiles(dirs : File*) = findFilesWithExtensions("scala" :: "java" :: Nil, dirs : _*)

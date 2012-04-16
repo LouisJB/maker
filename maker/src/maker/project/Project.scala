@@ -28,7 +28,7 @@ case class Project(
       ivySettingsFile : File = file("maker-ivysettings.xml"), // assumption this is typically absolute and module ivy is relative, this might be invalid?
       ivyFileRel : String = "maker-ivy.xml",
       webAppDir : Option[File] = None,
-      module : Option[GroupAndArtifact] = None,
+      moduleIdentity : Option[GroupAndArtifact] = None,
       additionalExcludedLibs : List[GroupArtifactAndVersion] = Nil) {
 
   def outputDir = file(root, "classes")
@@ -42,12 +42,12 @@ case class Project(
   val srcDirs : List[File] = if (sourceDirs.isEmpty) List(file(root, "src")) else sourceDirs
   val testDirs : List[File] = if (tstDirs.isEmpty) List(file(root, "tests")) else tstDirs
   val jarDirs : List[File] = if (libDirs.isEmpty) List(file(root, "lib"), managedLibDir) else libDirs
-  val moduleId = if (module.isEmpty) name % name else moduleDef
+  val moduleId : GroupAndArtifact = if (moduleIdentity.isEmpty) name % name else moduleIdentity.get
 
   def dependsOn(projects: Project*) = copy(children = children ::: projects.toList)
   def withAdditionalSourceDirs(dirs : List[String]) = copy(sourceDirs = dirs.map(d => file(root, d)) ::: this.sourceDirs)
 
-  def allDeps : List[Project] = this :: children.flatMap(_.allDeps).sortWith(_.name < _.name)
+  def allDeps : List[Project] = this.children.flatMap(_.allDeps).sortWith(_.name < _.name)
   def isDependentOn(project : Project) = allDeps.exists(p => p == project)
   def dependsOnPaths(project : Project) : List[List[Project]] = {
     def depends(currentProject : Project, currentPath : List[Project], allPaths : List[List[Project]]) : List[List[Project]] = {

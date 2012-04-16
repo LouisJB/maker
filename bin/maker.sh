@@ -187,6 +187,7 @@ process_options() {
       -b | --boostrap ) MAKER_BOOTSTRAP=true; shift;;
       -x | --allow-remote-debugging ) MAKER_DEBUG_PARAMETERS="-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005"; shift;;
       -i | --developer-mode ) MAKER_DEVELOPER_MODE=true; shift;;
+      -nr | --no-repl ) MAKER_SKIP_LAUNCH=true; shift 1;; 
       --mem-permgen-space ) MAKER_PERM_GEN_SPACE=$2; shift 2;;
       --ivy-proxy-host ) MAKER_IVY_PROXY_HOST=$2; shift 2;;
       --ivy-proxy-port ) MAKER_IVY_PROXY_PORT=$2; shift 2;;
@@ -225,6 +226,8 @@ cat << EOF
       For maker developers.
       Sets the maker classpath to maker/classes:utils/classes etc rather than 
       maker.jar. Allows work on maker and another project to be done simultaneously.
+    -nr, --no-repl
+      skip repl launch (just performs bootstrapping/building)
     --mem-permgen-space <space in MB>
       default is 1/10th of heap space
     --ivy-proxy-host <host>

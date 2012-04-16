@@ -1,16 +1,16 @@
 package maker.task
 
 import maker.project.Project
-import maker.os.Command
-import maker.utils.Log
-import java.io.File
+import org.apache.commons.io.FileUtils._
+import maker.utils.FileUtils._
 import org.apache.ivy.core.resolve.ResolveOptions
 import org.apache.ivy.util.filter.FilterHelper
 import org.apache.ivy.Ivy
 import org.apache.ivy.core.retrieve.RetrieveOptions
+import maker.utils.{GroupAndArtifact, Log}
 
 case object UpdateExternalDependencies extends Task {
-
+/*
   def execOld(project : Project, acc : List[AnyRef], parameters : Map[String, String] = Map()) = {
     import project._
     managedLibDir.mkdirs
@@ -59,7 +59,7 @@ case object UpdateExternalDependencies extends Task {
       Right("OK")
     }
   }
-
+*/
   def exec(project : Project, acc : List[AnyRef], parameters : Map[String, String] = Map()) = {
     try {
       if (project.ivyFile.exists){
@@ -73,7 +73,17 @@ case object UpdateExternalDependencies extends Task {
         val settings = ivy.getSettings
         settings.addAllVariables(System.getProperties)
         ivy.configure(project.ivySettingsFile)
-        val report = ivy.resolve(project.ivyFile.toURI().toURL(), resolveOptions)
+        val ivyFile = file(project.root, nameAndExt(project.ivyFile)._1 + "-dynamic.ivy")
+        copyFile(project.ivyFile, ivyFile)
+
+        val excludedBinaryModules : List[GroupAndArtifact] = project.allDeps.map(_.moduleId)
+        val excludes = excludedBinaryModules.map(e => <exclude org={e.groupId.id} module={e.artifactId.id} />.toString)
+
+        replaceInFile(ivyFile, "${maker.module.excluded.libs}", excludes.mkString("\n")) // """<exclude org="com.trafigura.titan" module="model-referencedata-public-scala-bindings" />""".toString)
+        ivy.configure(ivyFile)
+
+        //settings.setVariable("maker.module.excluded.libs", """<exclude org="com.trafigura.titan" module="model-referencedata-public-scala-bindings" />""".toString, true)
+        val report = ivy.resolve(ivyFile.toURI().toURL(), resolveOptions)
         val md = report.getModuleDescriptor
         ivy.retrieve(
           md.getModuleRevisionId(), 
