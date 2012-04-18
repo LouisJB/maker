@@ -1,13 +1,14 @@
-package maker.task
+package maker.task.tasks
 
 import maker.utils.FileUtils._
 import org.apache.commons.io.FileUtils._
 import maker.utils.maven._
 import maker.project._
 import maker.utils.{Version, Log}
+import maker.task.Task
 
-case object PublishLocalTask extends Task{
-  def exec(project : Project, acc : List[AnyRef], parameters : Map[String, String] = Map()) = {
+case object PublishLocalTask extends Task {
+  def exec(project: Project, acc: List[AnyRef], parameters: Map[String, String] = Map()) = {
     val homeDir = project.props.HomeDir()
     val moduleDef = project.moduleDef
     val moduleLocal = file(homeDir, ".ivy2/maker-local/" + project.name)
@@ -23,8 +24,8 @@ case object PublishLocalTask extends Task{
     val md = parameters.get("version") match {
       case Some(v) => moduleDef
         .copy(projectDef = moduleDef.projectDef
-          .copy(moduleLibDef = moduleDef.projectDef.moduleLibDef
-            .copy(gav = moduleDef.projectDef.moduleLibDef.gav.copy(version = Some(Version(v))))))
+        .copy(moduleLibDef = moduleDef.projectDef.moduleLibDef
+        .copy(gav = moduleDef.projectDef.moduleLibDef.gav.copy(version = Some(Version(v))))))
       case None => moduleDef
     }
     PomWriter.writePom(project.ivyFile, project.ivySettingsFile, pomFile, confs, md, project.props.PomTemplateFile())

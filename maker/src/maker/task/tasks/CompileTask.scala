@@ -1,10 +1,11 @@
-package maker.task
+package maker.task.tasks
 
 import maker.project.Project
-import maker.os.Command
+import maker.task.{TaskFailed, Task, ProjectAndTask}
 import maker.utils.Log
-import scala.tools.nsc.Global
+import maker.os.Command
 import java.io.File
+import tools.nsc.Global
 import scalaz.Scalaz._
 
 abstract class CompileTask extends Task{
@@ -22,7 +23,7 @@ abstract class CompileTask extends Task{
     comp.settings.classpath.value = proj.compilationClasspath
     val reporter = comp.reporter
     outputDir(proj).mkdirs
-    
+
     val modifiedSrcFiles = changedSrcFiles(proj)
     val deletedSrcFiles_ = deletedSrcFiles(proj)
 
@@ -54,7 +55,7 @@ abstract class CompileTask extends Task{
       debug("Files with changed sigs is , " + listOfFiles(sourceFilesFromThisProjectWithChangedSigs))
 
       val dependentFiles = (sourceFilesFromThisProjectWithChangedSigs ++ sourceFilesFromOtherProjectsWithChangedSigs ++ deletedSrcFiles_) |> {
-        filesWhoseDependentsMustRecompile => 
+        filesWhoseDependentsMustRecompile =>
           val dependentFiles = proj.state.classFileDependencies.dependentFiles(filesWhoseDependentsMustRecompile).filterNot(filesWhoseDependentsMustRecompile)
           debug("Files dependent on those with shanged sigs" + listOfFiles(dependentFiles))
           debug("Compiling " + dependentFiles.size + " dependent files")
@@ -73,11 +74,15 @@ abstract class CompileTask extends Task{
   }
 }
 
-case object CompileSourceTask extends CompileTask{
-  def deletedSrcFiles(proj : Project) = proj.state.deletedSrcFiles
-  def changedSrcFiles(proj : Project) = proj.state.changedSrcFiles
-  def outputDir(proj : Project) = proj.outputDir
-  def compiler(proj : Project) = proj.compilers.compiler
+case object CompileSourceTask extends CompileTask {
+  def deletedSrcFiles(proj: Project) = proj.state.deletedSrcFiles
+
+  def changedSrcFiles(proj: Project) = proj.state.changedSrcFiles
+
+  def outputDir(proj: Project) = proj.outputDir
+
+  def compiler(proj: Project) = proj.compilers.compiler
+
   def taskName = "Compile source"
 }
 

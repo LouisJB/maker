@@ -1,10 +1,11 @@
-package maker.task
+package maker.task.tasks
 
 import maker.project.Project
 import maker.utils.Log
 import maker.utils.FileUtils._
 import maker.os.Command
 import annotation.tailrec
+import maker.task.{ProjectAndTask, TaskFailed, Task}
 
 /**
  * run a class main in a separate JVM instance (but currently synchronously to maker repl)
@@ -15,8 +16,8 @@ case object RunMainTask extends Task {
       case Some(name) => {
         Log.info("running main in class " + name + " of project " + project)
         val className = parameters("mainClassName")
-        val opts : List[String] = parameters.get("opts").map(_.split("\\|").toList).getOrElse(Nil)
-        val mainArgs : List[String] = parameters.get("args").map(_.split("\\|").toList).getOrElse(Nil)
+        val opts: List[String] = parameters.get("opts").map(_.split("\\|").toList).getOrElse(Nil)
+        val mainArgs: List[String] = parameters.get("args").map(_.split("\\|").toList).getOrElse(Nil)
         val args = List(
           project.props.JavaHome() + "/bin/java",
           "-Dscala.usejavacp=true",
@@ -30,10 +31,10 @@ case object RunMainTask extends Task {
 
         val procHandle = cmd.execProc()
         @tailrec
-        def checkRunning() : Either[TaskFailed, AnyRef] = {
+        def checkRunning(): Either[TaskFailed, AnyRef] = {
           if (!procHandle._2.isSet) {
             Thread.sleep(1000)
-            if (System.in.available > 0 && System.in.read == 04 /* ctrl-d */) {
+            if (System.in.available > 0 && System.in.read == 04 /* ctrl-d */ ) {
               Log.info("Terminating: " + className)
               procHandle._1.destroy()
               Log.info("Terminated process for runMain of class : " + className)

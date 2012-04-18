@@ -1,26 +1,26 @@
-package maker.task
+package maker.task.tasks
 
 import maker.project.Project
 import maker.utils.Log
-import org.scalatest.Suite
 import java.lang.reflect.Modifier
 import maker.utils.FileUtils
 import maker.os.Command
+import maker.task.{ProjectAndTask, TaskFailed, Task}
 
 case object RunUnitTestsTask extends Task {
 
   private def isAccessibleSuite(suiteClass: java.lang.Class[_], clazz: java.lang.Class[_]): Boolean = {
-    val emptyClassArray = new Array[java.lang.Class[T] forSome { type T }](0)
-      try {
-        suiteClass.isAssignableFrom(clazz) &&
-          Modifier.isPublic(clazz.getModifiers) &&
-          !Modifier.isAbstract(clazz.getModifiers) &&
-          Modifier.isPublic(clazz.getConstructor(emptyClassArray: _*).getModifiers)
-      }
-      catch {
-        case nsme: NoSuchMethodException => false
-        case se: SecurityException => false
-      }
+    val emptyClassArray = new Array[java.lang.Class[T] forSome {type T}](0)
+    try {
+      suiteClass.isAssignableFrom(clazz) &&
+        Modifier.isPublic(clazz.getModifiers) &&
+        !Modifier.isAbstract(clazz.getModifiers) &&
+        Modifier.isPublic(clazz.getConstructor(emptyClassArray: _*).getModifiers)
+    }
+    catch {
+      case nsme: NoSuchMethodException => false
+      case se: SecurityException => false
+    }
   }
 
   private def isAccessibleSuite(className: String, loader: ClassLoader): Boolean = {
@@ -34,12 +34,12 @@ case object RunUnitTestsTask extends Task {
     }
   }
 
-  private def suiteClassNames(project : Project) : List[String] = {
+  private def suiteClassNames(project: Project): List[String] = {
     val classNames = project.testClassFiles.map(FileUtils.classNameFromFile(project.testOutputDir, _))
     classNames.filter(isAccessibleSuite(_, project.classLoader)).toList
   }
-  
-  private def runnerClassAndMethod(project : Project) = {
+
+  private def runnerClassAndMethod(project: Project) = {
     val runnerClass = project.classLoader.loadClass("org.scalatest.tools.Runner$")
     val cons = runnerClass.getDeclaredConstructors
     cons(0).setAccessible(true)
@@ -48,13 +48,13 @@ case object RunUnitTestsTask extends Task {
     (runner, method)
   }
 
-  def exec(project : Project, acc : List[AnyRef], parameters : Map[String, String] = Map()) = {
+  def exec(project: Project, acc: List[AnyRef], parameters: Map[String, String] = Map()) = {
     Log.info("Testing " + project)
     val suiteParameters = suiteClassNames(project).map(List("-s", _)).flatten
-    if (suiteParameters.isEmpty){
+    if (suiteParameters.isEmpty) {
       Right(Unit)
     } else {
-      
+
       val args = List(
         project.props.JavaHome() + "/bin/java",
         "-Dscala.usejavacp=true",
@@ -63,26 +63,27 @@ case object RunUnitTestsTask extends Task {
         "scala.tools.nsc.MainGenericRunner",
         "org.scalatest.tools.Runner") ::: (List("-c", "-o", "-p", project.scalatestRunpath) ::: suiteParameters)
 
-      val cmd = Command(args : _*)
+      val cmd = Command(args: _*)
       val (result, msg) = cmd.exec()
 
-      if (result == 0){
+      if (result == 0) {
         Right(Unit)
       } else {
         Left(TaskFailed(ProjectAndTask(project, this), "Test failed in " + project))
       }
-    //val pars = List("-c", "-o", "-p", project.scalatestRunpath) ::: suiteParameters
-    //val result = method.invoke(runner, pars.toArray).asInstanceOf[Boolean]
-    //if (result)
-    //Right(Unit)
-    //else
-    //Left(TaskFailed(ProjectAndTask(project, this), "Test failed in " + project))
+      //val pars = List("-c", "-o", "-p", project.scalatestRunpath) ::: suiteParameters
+      //val result = method.invoke(runner, pars.toArray).asInstanceOf[Boolean]
+      //if (result)
+      //Right(Unit)
+      //else
+      //Left(TaskFailed(ProjectAndTask(project, this), "Test failed in " + project))
     }
   }
-  def exec_old(project : Project, acc : List[AnyRef], parameters : Map[String, String] = Map()) = {
+
+  def exec_old(project: Project, acc: List[AnyRef], parameters: Map[String, String] = Map()) = {
     Log.info("Testing " + project)
     val suiteParameters = suiteClassNames(project).map(List("-s", _)).flatten
-    if (suiteParameters.isEmpty){
+    if (suiteParameters.isEmpty) {
       Right(Unit)
     } else {
       val (runner, method) = runnerClassAndMethod(project)

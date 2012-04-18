@@ -11,6 +11,7 @@ import maker.graphviz.GraphVizUtils._
 import maker.graphviz.GraphVizDiGrapher._
 import maker.utils._
 import maker.utils.GroupId._
+import tasks._
 
 case class Project(
       name: String,
@@ -95,17 +96,17 @@ case class Project(
     Tasks
   **********************/
   def projectAndDescendents = this::dependencies.descendents.toList
-  def clean = QueueManager(projectAndDescendents, CleanTask)
-  def cleanOnly = QueueManager(List(this), CleanTask)
-  def compile = QueueManager(projectAndDescendents, CompileJavaSourceTask)
-  def javaCompile = QueueManager(projectAndDescendents, CompileJavaSourceTask)
-  def testCompile = QueueManager(projectAndDescendents, CompileTestsTask)
-  def test = QueueManager(projectAndDescendents, RunUnitTestsTask)
-  def testOnly = QueueManager(List(this), RunUnitTestsTask)
-  def pack = QueueManager(projectAndDescendents, PackageTask)
-  def packOnly = QueueManager(List(this), PackageTask)
-  def update = QueueManager(projectAndDescendents, UpdateExternalDependencies)
-  def updateOnly = QueueManager(List(this), UpdateExternalDependencies)
+  def clean = TaskManager(projectAndDescendents, CleanTask)
+  def cleanOnly = TaskManager(List(this), CleanTask)
+  def compile = TaskManager(projectAndDescendents, CompileJavaSourceTask)
+  def javaCompile = TaskManager(projectAndDescendents, CompileJavaSourceTask)
+  def testCompile = TaskManager(projectAndDescendents, CompileTestsTask)
+  def test = TaskManager(projectAndDescendents, RunUnitTestsTask)
+  def testOnly = TaskManager(List(this), RunUnitTestsTask)
+  def pack = TaskManager(projectAndDescendents, PackageTask)
+  def packOnly = TaskManager(List(this), PackageTask)
+  def update = TaskManager(projectAndDescendents, UpdateTask)
+  def updateOnly = TaskManager(List(this), UpdateTask)
 
   // work in progress - incomplete tasks
   def publishLocal : BuildResult = publishLocal()
@@ -115,7 +116,7 @@ case class Project(
   def publishLocalOnly(configurations : String = "default", version : String = props.Version()) =
     publishLocal_(List(this), configurations, version)
   private def publishLocal_(projects : List[Project], configurations : String = "default", version : String = props.Version()) =
-    QueueManager(projects, PublishLocalTask, Map("configurations"-> configurations, "version" -> version))
+    TaskManager(projects, PublishLocalTask, Map("configurations"-> configurations, "version" -> version))
 
   def publish : BuildResult = publish()
   def publish(resolver : String = props.DefaultPublishResolver().getOrElse("default"), version : String = props.Version()) =
@@ -124,10 +125,10 @@ case class Project(
   def publishOnly(resolver : String = props.DefaultPublishResolver().getOrElse("default"), version : String = props.Version()) =
     publish_(List(this), resolver, version)
   private def publish_(projects : List[Project], resolver : String = props.DefaultPublishResolver().getOrElse("default"), version : String = props.Version()) =
-    QueueManager(projects, PublishTask, Map("publishResolver" -> resolver, "version" -> version))
+    TaskManager(projects, PublishTask, Map("publishResolver" -> resolver, "version" -> version))
 
   def runMain(className : String)(opts : String*)(args : String*) = {
-    val r = QueueManager(List(this), RunMainTask, Map("mainClassName" -> className, "opts" -> opts.mkString("|") , "args" -> args.mkString("|")))
+    val r = TaskManager(List(this), RunMainTask, Map("mainClassName" -> className, "opts" -> opts.mkString("|") , "args" -> args.mkString("|")))
     println("runMain task completed for class: " + className)
     r
   }

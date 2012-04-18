@@ -1,4 +1,4 @@
-package maker.task
+package maker.task.tasks
 
 import maker.project.Project
 import maker.utils.FileUtils._
@@ -6,23 +6,24 @@ import maker.os.Command
 import maker.utils.Log
 import org.apache.commons.io.FileUtils._
 import maker.utils.Utils._
-import java.io.File
+import maker.task.{ProjectAndTask, TaskFailed, Task}
 
 /**
  * Packages this project and its children
- *   handles jars and wars, war is triggered by the presence of a web app directory (which is presumed contains the
- *   WEB-INF/web.xml and other essential webapp content)
+ * handles jars and wars, war is triggered by the presence of a web app directory (which is presumed contains the
+ * WEB-INF/web.xml and other essential webapp content)
  */
-case object PackageTask extends Task{
-  def exec(project : Project, acc : List[AnyRef], parameters : Map[String, String] = Map()) = {
+case object PackageTask extends Task {
+  def exec(project: Project, acc: List[AnyRef], parameters: Map[String, String] = Map()) = {
     import project._
     if (!packageDir.exists)
       packageDir.mkdirs
 
     val jar = project.props.JavaHome().getAbsolutePath + "/bin/jar"
     val dirsToPack = {
-      val dirs = (project :: project.children).flatMap{p =>
-        p.outputDir :: p.javaOutputDir :: p.resourceDirs // :: p.testOutputDir:
+      val dirs = (project :: project.children).flatMap {
+        p =>
+          p.outputDir :: p.javaOutputDir :: p.resourceDirs // :: p.testOutputDir:
       }.filter(_.exists)
       dirs.foreach(d => Log.debug(d.getAbsolutePath))
       dirs
@@ -35,10 +36,10 @@ case object PackageTask extends Task{
           Nil
         }
         else {
-          val createCmd = Command(List(jar, "cf", project.outputJar.getAbsolutePath, "-C", dirsToPack.head.getAbsolutePath, ".") : _*)
+          val createCmd = Command(List(jar, "cf", project.outputJar.getAbsolutePath, "-C", dirsToPack.head.getAbsolutePath, "."): _*)
           val updateCmds = dirsToPack.tail.map(dir => List(jar, "uf", project.outputJar.getAbsolutePath, "-C", dir.getAbsolutePath, "."))
           Log.info("Packaging artifact " + project.outputJar.getAbsolutePath)
-          createCmd :: updateCmds.map(args => Command(args : _*))
+          createCmd :: updateCmds.map(args => Command(args: _*))
         }
       }
       case Some(webAppDir) => {
@@ -71,18 +72,18 @@ case object PackageTask extends Task{
           val allLibs = project.libDirs.filter(_.exists).flatMap(_.listFiles)
           Log.debug("allLibs: ")
           allLibs.foreach(f => Log.debug(f.getAbsolutePath))
-          val providedLibs : List[java.io.File] = project.providedDirs.flatMap(d => Option(d).map(_.listFiles.toList)).flatten
+          val providedLibs: List[java.io.File] = project.providedDirs.flatMap(d => Option(d).map(_.listFiles.toList)).flatten
           Log.debug("providedLibs libs: ")
           providedLibs.foreach(f => Log.debug(f.getAbsolutePath))
           val allLibsButNotProvidedLibs = allLibs.filter(f => !providedLibs.exists(uf => uf.getName == f.getName))
           Log.debug("allLibsButNotProvidedLibs: ")
           allLibsButNotProvidedLibs.foreach(f => {
-              Log.debug(f.getAbsolutePath)
-              copyFileToDirectory(f, file(warImage, "WEB-INF/lib"))
+            Log.debug(f.getAbsolutePath)
+            copyFileToDirectory(f, file(warImage, "WEB-INF/lib"))
           })
 
           Log.info("Packaging artifact " + warFile.getAbsolutePath)
-          Command(List(jar, "cf", warName, "-C", warImage.getAbsolutePath, ".") : _*) :: Nil
+          Command(List(jar, "cf", warName, "-C", warImage.getAbsolutePath, "."): _*) :: Nil
         }
       }
     }

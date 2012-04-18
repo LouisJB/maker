@@ -1,7 +1,7 @@
 package maker.project
 
 import java.io.File
-import _root_.maker.utils.FileUtils._
+import maker.utils.FileUtils._
 
 object FileSignatures{
   def apply(file: File): FileSignatures = {
