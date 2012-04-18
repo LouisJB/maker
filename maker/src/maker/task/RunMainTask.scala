@@ -26,15 +26,14 @@ case object RunMainTask extends Task {
 
         val cmd = Command(file("runlog.out"), args: _*)
         writeToFile(file("runcmd.sh"), "#!/bin/bash\n" + cmd.asString)
-
-        Log.info("Running, press enter to terminate process...")
+        Log.info("Running, press ctrl-d to terminate process...")
 
         val procHandle = cmd.execProc()
         @tailrec
         def checkRunning() : Either[TaskFailed, AnyRef] = {
           if (!procHandle._2.isSet) {
             Thread.sleep(1000)
-            if (System.in.available > 0 && System.in.read == ('\n').toInt) {
+            if (System.in.available > 0 && System.in.read == 04 /* ctrl-d */) {
               Log.info("Terminating: " + className)
               procHandle._1.destroy()
               Log.info("Terminated process for runMain of class : " + className)
