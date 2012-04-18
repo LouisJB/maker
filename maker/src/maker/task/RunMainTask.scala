@@ -5,7 +5,6 @@ import maker.utils.Log
 import maker.utils.FileUtils._
 import maker.os.Command
 import annotation.tailrec
-import java.io.{File, FileOutputStream, PrintWriter}
 
 /**
  * run a class main in a separate JVM instance (but currently synchronously to maker repl)
@@ -26,9 +25,9 @@ case object RunMainTask extends Task {
           opts ::: (className :: mainArgs)
 
         val cmd = Command(file("runlog.out"), args: _*)
+        writeToFile(file("runcmd.sh"), "#!/bin/bash\n" + cmd.asString)
+
         Log.info("Running, press enter to terminate process...")
- 
-        writeCmdToFile(cmd, file("runcmd.sh"))
 
         val procHandle = cmd.execProc()
         @tailrec
@@ -57,18 +56,4 @@ case object RunMainTask extends Task {
         Left(TaskFailed(ProjectAndTask(project, this), "No class specified"))
     }
   }
-
-  private def writeCmdToFile(cmd : Command, file : File) {
-    var ps : PrintWriter = null
-    try {
-      ps = new PrintWriter(new FileOutputStream(file))
-      ps.println("#!/bin/bash")
-      ps.println(cmd.asString)
-    }
-    finally {
-      ps.flush
-      ps.close
-    }
-  }
 }
-

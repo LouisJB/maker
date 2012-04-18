@@ -32,12 +32,6 @@ case class GroupArtifactAndVersion(groupId : GroupId, artifactId : ArtifactId, o
 case class DependencyLib(
     name : String,
     gav : GroupArtifactAndVersion,
-    /*
-    groupId : String,
-    artifactId : String,
-    version : String,
-    org : String,
-    */
     scope : String,
     classifierOpt : Option[String] = None) {
 

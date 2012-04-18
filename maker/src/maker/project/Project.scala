@@ -45,7 +45,7 @@ case class Project(
   val moduleId : GroupAndArtifact = if (moduleIdentity.isEmpty) name % name else moduleIdentity.get
 
   def dependsOn(projects: Project*) = copy(children = children ::: projects.toList)
-  def withAdditionalSourceDirs(dirs : List[String]) = copy(sourceDirs = dirs.map(d => file(root, d)) ::: this.sourceDirs)
+  def withAdditionalSourceDirs(dirs : String*) = copy(sourceDirs = dirs.toList.map(d => file(root, d)) ::: this.sourceDirs)
 
   def allDeps : List[Project] = this :: children.flatMap(_.allDeps).sortWith(_.name < _.name)
   def isDependentOn(project : Project) = allDeps.exists(p => p == project)

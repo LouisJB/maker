@@ -129,7 +129,6 @@ object QueueManager{
     implicit val timeout = Timeout(1000000)
     def nWorkers = (Runtime.getRuntime.availableProcessors / 2) max 1
 
-
     val workers = (1 to nWorkers).map{i => actorOf(new Worker()).start}
     Log.debug("Running with " + nWorkers + " workers")
     val router = Routing.loadBalancerActor(CyclicIterator(workers)).start()
@@ -148,4 +147,3 @@ object QueueManager{
     result
   }
 }
-

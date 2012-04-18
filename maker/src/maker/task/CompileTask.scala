@@ -2,7 +2,6 @@ package maker.task
 
 import maker.project.Project
 import maker.os.Command
-import maker.utils.Stopwatch
 import maker.utils.Log
 import scala.tools.nsc.Global
 import java.io.File
@@ -42,10 +41,10 @@ abstract class CompileTask extends Task{
           classFiles.foreach(_.delete)
       }
       debug("Compiling, " + modifiedSrcFiles.size + " modified or uncompiled files")
-      val sw = new Stopwatch
-      
+
       debug("Changed files are " + listOfFiles(modifiedSrcFiles))
       reporter.reset
+
       // First compile those files who have changed
       new comp.Run() compile modifiedSrcFiles.toList.map(_.getPath)
 
@@ -109,4 +108,3 @@ case object CompileJavaSourceTask extends Task{
     }
   }
 }
-
