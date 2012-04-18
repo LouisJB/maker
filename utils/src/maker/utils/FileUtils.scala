@@ -94,7 +94,7 @@ object FileUtils {
   def findJavaSourceFiles(dirs : File*) = findFilesWithExtension("java", dirs : _*)
 
   def withFileWriter(file : File)(f : BufferedWriter => _){
-    if (! file.getParentFile.exists)
+    if (file.getParentFile != null && !file.getParentFile.exists)
       file.getParentFile.mkdirs
     val fstream = new FileWriter(file)
     val out = new BufferedWriter(fstream)
@@ -133,7 +133,7 @@ object FileUtils {
       file.delete
   }
 
-  def writeToFile(file : File, text : String){
+  def writeToFile(file : File, text : String) {
     withFileWriter(file){
       out : BufferedWriter =>
         out.write(text)
