@@ -29,7 +29,7 @@ case object PublishLocalTask extends Task {
       case None => moduleDef
     }
     PomWriter.writePom(project.ivyFile, project.ivySettingsFile, pomFile, confs, md, project.props.PomTemplateFile())
-    copyFileToDirectory(project.outputJar, moduleJarDir)
+    copyFileToDirectory(project.outputArtifact, moduleJarDir)
 
     Right("OK")
   }

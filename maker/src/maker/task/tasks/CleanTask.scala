@@ -11,7 +11,7 @@ case object CleanTask extends Task {
     project.classFiles.foreach(_.delete)
     project.testClassFiles.foreach(_.delete)
     project.javaClassFiles.foreach(_.delete)
-    project.outputJar.delete
+    project.outputArtifact.delete
     FileUtils.recursiveDelete(project.makerDirectory)
     Right(Unit)
   }

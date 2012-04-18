@@ -29,16 +29,20 @@ case object PackageTask extends Task {
       dirs
     }
 
+    def doPackage(pack : => List[Command]) : List[Command] = {
+      if (fileIsLaterThan(project.outputArtifact, dirsToPack)) {
+        Log.info("Packaging up to date for " + project.name + ", skipping...")
+        Nil
+      }
+      else pack
+    }
+
     val cmds = project.webAppDir match {
       case None => {
-        if (targetLaterThan(project.outputJar, dirsToPack)) {
-          Log.info("Packaging up to date for " + project.name + ", skipping...")
-          Nil
-        }
-        else {
-          val createCmd = Command(List(jar, "cf", project.outputJar.getAbsolutePath, "-C", dirsToPack.head.getAbsolutePath, "."): _*)
-          val updateCmds = dirsToPack.tail.map(dir => List(jar, "uf", project.outputJar.getAbsolutePath, "-C", dir.getAbsolutePath, "."))
-          Log.info("Packaging artifact " + project.outputJar.getAbsolutePath)
+        doPackage {
+          val createCmd = Command(List(jar, "cf", project.outputArtifact.getAbsolutePath, "-C", dirsToPack.head.getAbsolutePath, "."): _*)
+          val updateCmds = dirsToPack.tail.map(dir => List(jar, "uf", project.outputArtifact.getAbsolutePath, "-C", dir.getAbsolutePath, "."))
+          Log.info("Packaging artifact " + project.outputArtifact.getAbsolutePath)
           createCmd :: updateCmds.map(args => Command(args: _*))
         }
       }
@@ -52,14 +56,8 @@ case object PackageTask extends Task {
 
         // build up the war structure image so we can make a web archive from it...
         val warImage = file(project.root, "package/webapp")
-        val warName = project.outputJar.getAbsolutePath.replaceAll(".jar", ".war")
-        val warFile = file(warName)
 
-        if (targetLaterThan(warFile, webAppDir :: dirsToPack)) {
-          Log.info("Packaging up to date for " + project.name + ", skipping...")
-          Nil
-        }
-        else {
+        doPackage {
           Log.info("Making war image..." + warImage.getAbsolutePath)
           if (warImage.exists) recursiveDelete(warImage)
           warImage.mkdirs()
@@ -82,8 +80,8 @@ case object PackageTask extends Task {
             copyFileToDirectory(f, file(warImage, "WEB-INF/lib"))
           })
 
-          Log.info("Packaging artifact " + warFile.getAbsolutePath)
-          Command(List(jar, "cf", warName, "-C", warImage.getAbsolutePath, "."): _*) :: Nil
+          Log.info("Packaging artifact " + project.outputArtifact.getAbsolutePath)
+          Command(List(jar, "cf", project.outputArtifact.getAbsolutePath, "-C", warImage.getAbsolutePath, "."): _*) :: Nil
         }
       }
     }

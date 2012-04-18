@@ -86,7 +86,10 @@ case class Project(
     new URLClassLoader(urls, null)
   }
 
-  def outputJar = new File(packageDir.getAbsolutePath, name + ".jar")
+  def outputArtifact = file(packageDir.getAbsolutePath, name + (webAppDir match {
+    case None => ".jar"
+    case _ => ".war"
+  }))
 
   val state = ProjectState(this)
   val compilers = ProjectCompilers(this)

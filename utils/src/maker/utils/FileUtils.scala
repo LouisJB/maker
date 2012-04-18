@@ -70,7 +70,7 @@ object FileUtils {
   def lastModifiedFileTime(files : List[File]) = 
     files.flatMap(allFiles).map(_.lastModified).sortWith(_ > _).head
   
-  def targetLaterThan(target : File, dirs : List[File]) = {
+  def fileIsLaterThan(target : File, dirs : List[File]) = {
     Log.debug("dirs = " + dirs + ", latest target time " + target.lastModified() + ", latest file time = " + lastModifiedFileTime(dirs))
     target.exists() && (target.lastModified >= lastModifiedFileTime(dirs))
   }
