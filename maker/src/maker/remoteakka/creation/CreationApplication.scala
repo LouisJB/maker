@@ -39,34 +39,56 @@ object RemoteApplication extends Application {
   println("Started Remote Application - waiting for messages")
 }
 
+case object ShutdownRemoteSystem
+import akka.pattern.ask
+import akka.actor.Actor._
+import akka.util.Timeout
+import akka.dispatch.Await
+import akka.util.Duration
+
 class CreationApplication extends Bootable {
-  val system = ActorSystem("RemoteCreation", ConfigFactory.load.getConfig("remotecreation"))
-  Thread.sleep(500)
-  println("Creating local actor")
-  val localActor = system.actorOf(Props(new CreationActor(system)), "creationActor")
+  var system : ActorSystem = null
+  var localActor : ActorRef = null
+
+  def launchSystem{
+    system = ActorSystem("RemoteCreation", ConfigFactory.load.getConfig("remotecreation"))
+    Thread.sleep(500)
+    println("Creating local actor")
+    localActor = system.actorOf(Props(new CreationActor(system)), "creationActor")
+  }
+  def shutdownSystem {
+    implicit val timeout = Timeout(4000)
+    val future = localActor ? ShutdownRemoteSystem
+    val result = Await.result(future, Duration.Inf)
+    system.shutdown
+  }
 
   def startup() {}
 
   def shutdown() {
-    system.shutdown()
+    Option(system).foreach(_.shutdown())
   }
 }
 
 class RemoteActor extends Actor {
-  println("new Advanced calc created")
+  println("new remote created")
   def receive = {
     case ProcessID(id) ⇒
       println("new Advanced calc actor Received " + id)
       sender ! ProcessID()
   }
 }
+case object MakeNewRemoteActor
 //#actor
 class CreationActor(system : ActorSystem) extends Actor {
   val cmd = Command("/usr/local/scala/bin/scala", "maker.remoteakka.creation.RemoteApplication")
   var proc : Process = null
   var remoteActor : ActorRef = null
   private def createRemoteActor{
+    Option(remoteActor).foreach(_ ! PoisonPill)
     Option(proc).foreach(_.destroy)
+    Thread.sleep(1000)
+    println("Launching new remote actor")
     proc = cmd.execAsync
     Thread.sleep(1000)
     remoteActor = system.actorOf(Props[RemoteActor], "remoteActor")
@@ -78,6 +100,13 @@ class CreationActor(system : ActorSystem) extends Actor {
     case  (msg : String, op: AnyRef) ⇒ 
       println("Local Received " + op)
       remoteActor ! op
+    case ShutdownRemoteSystem ⇒ {
+      println("Been told to shut down")
+      Option(remoteActor).foreach(_ ! PoisonPill)
+      println("Killing proc")
+      Option(proc).foreach(_.destroy)
+      Thread.sleep(1000)
+    }
   }
 }
 //#actor
@@ -85,11 +114,16 @@ class CreationActor(system : ActorSystem) extends Actor {
 object CreationApp {
   def main(args: Array[String]) {
     val app = new CreationApplication
+    app.launchSystem
     println("Started Creation Application")
     while (true) {
-      app.localActor ! ("foo", ProcessID())
-      //app.doSomething(ProcessID())
       Thread.sleep(1500)
+      app.localActor ! ("foo", ProcessID())
+      Thread.sleep(1500)
+      app.shutdownSystem
+      Thread.sleep(1500)
+      println("Launching system ahain")
+      app.launchSystem
     }
   }
 }
