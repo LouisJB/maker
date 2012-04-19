@@ -10,8 +10,8 @@ import java.net.URLClassLoader
 import maker.graphviz.GraphVizUtils._
 import maker.graphviz.GraphVizDiGrapher._
 import maker.utils._
-import maker.utils.GroupId._
 import tasks._
+import maker.utils.ModuleId._
 
 case class Project(
       name: String,

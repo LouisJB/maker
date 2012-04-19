@@ -4,11 +4,13 @@ import org.apache.ivy.ant.IvyMakePom
 import org.apache.ivy.plugins.parser.m2.PomWriterOptions
 
 // mvn group -> artifact -> version <-> ivy org -> name -> rev
+object ModuleId {
+  implicit def toGroupId(id : String) : GroupId = new GroupId(id)
+  implicit def toGroupArtifactAndVersion(groupAndArtifact : GroupAndArtifact) : GroupArtifactAndVersion =
+    GroupArtifactAndVersion(groupAndArtifact.groupId, groupAndArtifact.artifactId, None)
+}
 case class GroupId(id : String) {
   def %(artifactId : String) = GroupAndArtifact(this, ArtifactId(artifactId))
-}
-object GroupId {
-  implicit def toGroupId(id : String) : GroupId = new GroupId(id)
 }
 case class ArtifactId(id : String)
 trait GAV {
@@ -18,12 +20,14 @@ trait GAV {
 }
 case class GroupAndArtifact(groupId : GroupId, artifactId : ArtifactId) extends GAV {
   def %(version : String) = GroupArtifactAndVersion(groupId, artifactId, Some(Version(version)))
+  def toGroupArtifactAndVersion = GroupArtifactAndVersion(groupId, artifactId, None)
   override def toString = groupId.id + ":" + artifactId.id
 }
 case class Version(version : String)
 case class GroupArtifactAndVersion(groupId : GroupId, artifactId : ArtifactId, override val version : Option[Version]) extends GAV {
 
   override def toString = groupId.id + ":" + artifactId.id + ":" + version.map(_.version).getOrElse("")
+  def toGroupAndArtifact = GroupAndArtifact(groupId, artifactId)
 }
 
 /**

@@ -26,8 +26,8 @@ case object UpdateTask extends Task {
         val ivyFile = file(project.root, nameAndExt(project.ivyFile)._1 + "-dynamic.ivy")
         copyFile(project.ivyFile, ivyFile)
 
-        val excludedBinaryModules: List[GroupAndArtifact] = project.allDeps.map(_.moduleId)
-        val excludes = excludedBinaryModules.map(e => <exclude org={e.groupId.id} module={e.artifactId.id}/>.toString)
+        val excludedBinaryModules : List[GroupAndArtifact] = project.allDeps.map(_.moduleId) ::: project.allDeps.flatMap(_.additionalExcludedLibs.map(_.toGroupAndArtifact))
+        val excludes = excludedBinaryModules.map(e => <exclude org={e.groupId.id} module={e.artifactId.id} />.toString)
 
         replaceInFile(ivyFile, "${maker.module.excluded.libs}", excludes.mkString("\n")) // """<exclude org="com.trafigura.titan" module="model-referencedata-public-scala-bindings" />""".toString)
         ivy.configure(ivyFile)

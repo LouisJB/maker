@@ -4,7 +4,7 @@ import java.io.File
 import scala.xml._
 import maker.utils._
 import maker.utils.maven._
-import maker.utils.GroupId._
+import maker.utils.ModuleId._
 
 /**
  * Read in raw ivy xml files for module dependencies
