@@ -17,17 +17,16 @@ trait GAV {
   val groupId : GroupId
   val artifactId : ArtifactId
   val version : Option[Version] = None
+  def toGroupAndArtifact = GroupAndArtifact(groupId, artifactId)
+  def toGroupArtifactAndVersion = GroupArtifactAndVersion(groupId, artifactId, None)
 }
 case class GroupAndArtifact(groupId : GroupId, artifactId : ArtifactId) extends GAV {
   def %(version : String) = GroupArtifactAndVersion(groupId, artifactId, Some(Version(version)))
-  def toGroupArtifactAndVersion = GroupArtifactAndVersion(groupId, artifactId, None)
   override def toString = groupId.id + ":" + artifactId.id
 }
 case class Version(version : String)
 case class GroupArtifactAndVersion(groupId : GroupId, artifactId : ArtifactId, override val version : Option[Version]) extends GAV {
-
   override def toString = groupId.id + ":" + artifactId.id + ":" + version.map(_.version).getOrElse("")
-  def toGroupAndArtifact = GroupAndArtifact(groupId, artifactId)
 }
 
 /**

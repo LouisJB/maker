@@ -70,11 +70,14 @@ case object PackageTask extends Task {
           val allLibs = project.libDirs.filter(_.exists).flatMap(_.listFiles)
           Log.debug("allLibs: ")
           allLibs.foreach(f => Log.debug(f.getAbsolutePath))
-          val providedLibs: List[java.io.File] = project.providedDirs.flatMap(d => Option(d).map(_.listFiles.toList)).flatten
-          Log.debug("providedLibs libs: ")
-          providedLibs.foreach(f => Log.debug(f.getAbsolutePath))
-          val allLibsButNotProvidedLibs = allLibs.filter(f => !providedLibs.exists(uf => uf.getName == f.getName))
-          Log.debug("allLibsButNotProvidedLibs: ")
+          val providedLibJars : List[java.io.File] = project.providedLibDirs.filter(_.exists).flatMap(f => Option(f.listFiles).map(_.toList)).flatten
+          Log.debug("classpath providedLibs libs:")
+          providedLibJars.foreach(f => Log.debug(f.getAbsolutePath))
+          Log.debug("additional named provided libs:")
+          project.providedLibs.foreach(Log.debug(_))
+          val allProvidedLibNames = project.providedLibs ::: providedLibJars.map(_.getName)
+          val allLibsButNotProvidedLibs = allLibs.filter(f => !allProvidedLibNames.exists(libName => f.getName.contains(libName)))
+          Log.debug("allLibsButNotProvidedLibs:")
           allLibsButNotProvidedLibs.foreach(f => {
             Log.debug(f.getAbsolutePath)
             copyFileToDirectory(f, file(warImage, "WEB-INF/lib"))

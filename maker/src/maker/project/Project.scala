@@ -19,7 +19,7 @@ case class Project(
       sourceDirs: List[File] = Nil,
       tstDirs: List[File] = Nil,
       libDirs: List[File] = Nil,
-      providedDirs: List[File] = Nil, // compile time only, don't add to runtime classpath or any packaging
+      providedLibDirs: List[File] = Nil, // compile time only, don't add to runtime classpath or any packaging
       managedLibDirName : String = "maker-lib",
       resourceDirs : List[File] = Nil,
       children: List[Project] = Nil,
@@ -30,7 +30,8 @@ case class Project(
       ivyFileRel : String = "maker-ivy.xml",
       webAppDir : Option[File] = None,
       moduleIdentity : Option[GroupAndArtifact] = None,
-      additionalExcludedLibs : List[GroupArtifactAndVersion] = Nil) {
+      additionalExcludedLibs : List[GAV] = Nil,
+      providedLibs : List[String] = Nil) {
 
   def outputDir = file(root, "classes")
   def javaOutputDir = file(root, "java-classes")
@@ -46,8 +47,14 @@ case class Project(
   val moduleId : GroupAndArtifact = if (moduleIdentity.isEmpty) name % name else moduleIdentity.get
 
   def dependsOn(projects: Project*) = copy(children = children ::: projects.toList)
+ 
+  def withResourceDirs(dirs : List[File]) : Project = copy(resourceDirs = dirs)
+  def withResourceDirs(dirs : String*) : Project = withResourceDirs(dirs.map(d => file(root, d)).toList)
   def withAdditionalSourceDirs(dirs : String*) = copy(sourceDirs = dirs.toList.map(d => file(root, d)) ::: this.sourceDirs)
-
+  def withProvidedLibDirs(dirs : String*) = copy(providedLibDirs = dirs.toList.map(d => file(root, d)) ::: this.providedLibDirs)
+  def setAdditionalExcludedLibs(libs : GAV*) = copy(additionalExcludedLibs = libs.toList)
+  def withProvidedLibs(libNames : String*) = copy(providedLibs = libNames.toList ::: this.providedLibs)
+  
   def allDeps : List[Project] = this :: children.flatMap(_.allDeps).sortWith(_.name < _.name)
   def isDependentOn(project : Project) = allDeps.exists(p => p == project)
   def dependsOnPaths(project : Project) : List[List[Project]] = {
