@@ -108,8 +108,8 @@ case class Project(
   def projectAndDescendents = this::dependencies.descendents.toList
   def clean = TaskManager(projectAndDescendents, CleanTask)
   def cleanOnly = TaskManager(List(this), CleanTask)
-  def compile = TaskManager(projectAndDescendents, CompileJavaSourceTask)
-  def javaCompile = TaskManager(projectAndDescendents, CompileJavaSourceTask)
+  def compile = TaskManager(projectAndDescendents, CompileSourceTask)
+//  def javaCompile = TaskManager(projectAndDescendents, CompileSourceTask)
   def testCompile = TaskManager(projectAndDescendents, CompileTestsTask)
   def test = TaskManager(projectAndDescendents, RunUnitTestsTask)
   def testOnly = TaskManager(List(this), RunUnitTestsTask)
@@ -222,7 +222,6 @@ case class Project(
 
   // maven / ivy integration
   import maker.utils.maven._
-  import maker.utils.GroupId._
   def moduleDef : ModuleDef = {
     val deps : List[DependencyLib] = readIvyDependencies()
     val repos : List[MavenRepository] = readIvyResolvers()
