@@ -18,7 +18,7 @@ case class Command(args : String*) {
     }
   }
   def exec() : (Int, String) = {
-    Log.debug("Executing cmd (async = " + false + ") - " + toString)
+    Log.info("Executing cmd (async = " + false + ") - " + toString)
     val procBuilder = new ProcessBuilder(args : _*)
     procBuilder.redirectErrorStream(true)
     val proc = procBuilder.start

@@ -41,7 +41,7 @@ class LocalLookupApplication extends Bootable {
 class LocalLookupActor extends Actor {
   def receive = {
     case (actor: ActorRef, op: AnyRef) ⇒ actor ! op
-    case ProcessID(id) ⇒ println("Received " + id + " from remote actor, this actor's id is " + ProcessID())
+    case id : ProcessID ⇒ println("Received " + id + " from remote actor, this actor's id is " + ProcessID())
   }
 }
 //#actor

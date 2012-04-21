@@ -34,7 +34,7 @@ class RemoteApplication extends Bootable {
   }
 }
 
-object RemoteApplication extends Application {
+object RemoteApplication extends App{
   new RemoteApplication
   println("Started Remote Application - waiting for messages")
 }
@@ -57,7 +57,7 @@ class CreationApplication extends Bootable {
     localActor = system.actorOf(Props(new CreationActor(system)), "creationActor")
   }
   def shutdownSystem {
-    implicit val timeout = Timeout(4000)
+    implicit val timeout = Timeout(10000)
     val future = localActor ? ShutdownRemoteSystem
     val result = Await.result(future, Duration.Inf)
     system.shutdown
@@ -73,8 +73,8 @@ class CreationApplication extends Bootable {
 class RemoteActor extends Actor {
   println("new remote created")
   def receive = {
-    case ProcessID(id) ⇒
-      println("new Advanced calc actor Received " + id)
+    case id : ProcessID ⇒
+      println("remote actor Received " + id)
       sender ! ProcessID()
   }
 }
@@ -84,6 +84,7 @@ class CreationActor(system : ActorSystem) extends Actor {
   val cmd = Command("/usr/local/scala/bin/scala", "maker.remoteakka.creation.RemoteApplication")
   var proc : Process = null
   var remoteActor : ActorRef = null
+  var remoteProcessID : ProcessID = null
   private def createRemoteActor{
     Option(remoteActor).foreach(_ ! PoisonPill)
     Option(proc).foreach(_.destroy)
@@ -96,7 +97,10 @@ class CreationActor(system : ActorSystem) extends Actor {
   
   createRemoteActor
   def receive = {
-    case ProcessID(id) ⇒ println("Creation actor Received " + id + " from remote actor, this actor's id is " + ProcessID())
+    case id : ProcessID ⇒ {
+      remoteProcessID = id
+      println("Creation actor Received " + id + " from remote actor, this actor's id is " + ProcessID())
+    }
     case  (msg : String, op: AnyRef) ⇒ 
       println("Local Received " + op)
       remoteActor ! op
@@ -106,12 +110,16 @@ class CreationActor(system : ActorSystem) extends Actor {
       println("Killing proc")
       Option(proc).foreach(_.destroy)
       Thread.sleep(1000)
+      println("Killing remote processes")
+      Option(remoteProcessID).foreach(_.kill)
+      println("Finished shutting down")
+      sender ! "Done"
     }
   }
 }
 //#actor
 
-object CreationApp {
+object CreationApplication {
   def main(args: Array[String]) {
     val app = new CreationApplication
     app.launchSystem

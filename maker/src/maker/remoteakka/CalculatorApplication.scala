@@ -11,19 +11,23 @@ import akka.kernel.Bootable
 import akka.actor.{ Props, Actor, ActorSystem }
 import com.typesafe.config.ConfigFactory
 import java.lang.management.ManagementFactory
+import maker.os.Command
 
 object ProcessID{
   def apply() : ProcessID = {
-    ProcessID(ManagementFactory.getRuntimeMXBean().getName())
+    val List(port, host) = ManagementFactory.getRuntimeMXBean().getName().split("@").toList 
+    ProcessID(host, port.toInt)
   }
 }
 
-case class ProcessID(id : String)
+case class ProcessID(hostname : String, id : Int){
+  def kill = Command("kill", "-9", id.toString).exec
+}
 
 //#actor
 class LookupCalculatorActor extends Actor {
   def receive = {
-    case ProcessID(id) ⇒
+    case id : ProcessID ⇒
       println("Lookup calc actor Received " + id)
       sender ! ProcessID()
   }
