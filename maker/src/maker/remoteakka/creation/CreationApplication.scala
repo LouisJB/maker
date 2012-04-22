@@ -17,11 +17,16 @@ import akka.remote.RemoteClientError
 import maker.remoteakka.ProcessID
 
 
+class RemoteAkkaManager{
+  var remoteActor : ActorRef = null
+}
+
 class ListeningActor extends Actor{
   def receive = {
     case a : AnyRef ⇒ println("Listener received " + a + ", " + a.getClass)
   }
 }
+
 
 class RemoteApplication extends Bootable {
   val system = ActorSystem("RemoteApplication", ConfigFactory.load.getConfig("calculator"))
