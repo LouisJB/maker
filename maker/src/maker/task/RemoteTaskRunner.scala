@@ -28,8 +28,9 @@ class RemoteTaskRunner(){
   var system : ActorSystem = null
   var remoteActor : ActorRef = null
   val cmd = Command("/usr/local/scala/bin/scala", "maker.remoteakka.creation.RemoteApplication")
+  var remoteProcessID : ProcessID = null
 
-  def remoteProcessID : ProcessID = {
+  def askRemoteForProcessID : ProcessID = {
     implicit val timeout = Timeout(10000)
     val future = remoteActor ? ProcessID()
     val result = Await.result(future, Duration.Inf)
@@ -38,6 +39,7 @@ class RemoteTaskRunner(){
 
   def shutdown{
     Option(system).foreach(_.shutdown)
+    Option(remoteProcessID).foreach(_.kill)
     Thread.sleep(1000)
   }
 
@@ -47,5 +49,6 @@ class RemoteTaskRunner(){
     system = ActorSystem("RemoteCreation", ConfigFactory.load.getConfig("remotecreation"))
     Thread.sleep(1000)
     remoteActor = system.actorOf(AkkaProps[RemoteActor], "remoteActor")
+    remoteProcessID = askRemoteForProcessID
   }
 }
