@@ -42,7 +42,8 @@ case class BuildResult(res : Either[TaskFailed, AnyRef],
                        originalProjectAndTask : ProjectAndTask) extends BuildMessage {
   import maker.graphviz.GraphVizDiGrapher._
   import maker.graphviz.GraphVizUtils._
-  def stats = projectAndTasks.map(_.allStats).mkString("\n")
+
+  def stats : List[String] = projectAndTasks.map(_.allStats).toList
 
   def resultTree(pt : ProjectAndTask = originalProjectAndTask) =
     pt.getTaskTree.map(p => (projectAndTasks.find(_ == p._1).get, p._2.map(pt => projectAndTasks.find(_ == pt).get)))

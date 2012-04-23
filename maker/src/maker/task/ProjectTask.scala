@@ -54,11 +54,8 @@ case class ProjectAndTask(project: Project, task: Task) {
   var roundNo = 0
 
   def runTimeMs = lastRunTimeMs_
-
   def lastError = lastError_
-
   def completed = completed_
-
   def finishingTime = finishingTime_
 
   val immediateDependencies: Set[ProjectAndTask] = {
@@ -96,10 +93,10 @@ case class ProjectAndTask(project: Project, task: Task) {
 
   override def toString = "Task[" + project.name + ":" + task + "]"
 
-  def runStats = toString + " took " + runTimeMs + "ms"
+  def runStats = toString + ", took " + runTimeMs + "ms"
 
-  def allStats = "%s took %d, status %s".format(
-    toString, runTimeMs, lastError.map(_.toString).getOrElse("OK"))
+  def allStats = "%s, status %s".format(
+    runStats, lastError.map(_.toString).getOrElse("OK"))
 
   def getTaskTree: List[(ProjectAndTask, List[ProjectAndTask])] = ProjectAndTask.getTaskTree(project, task)
 }
