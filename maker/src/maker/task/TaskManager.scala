@@ -98,7 +98,7 @@ object TaskManager{
     router ! PoisonPill
     EventHandler.shutdown()
     Log.debug("Stats: \n" + projectTasks.map(_.runStats).mkString("\n"))
-    Log.info("Completed, took" + sw + ", result " + result)
+    Log.info("Completed " + originalProjectAndTask + ", took" + sw + ", result " + result)
     result
   }
 }
