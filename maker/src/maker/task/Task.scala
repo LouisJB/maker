@@ -1,6 +1,7 @@
 package maker.task
 
 import maker.project.Project
+import maker.utils.Memoize1
 import tasks._
 
 case class TaskFailed(task : ProjectAndTask, reason : String)
@@ -10,8 +11,7 @@ trait Task {
 }
 
 object Task {
-  lazy val standardWithinProjectDependencies = Map[Task, Set[Task]](
-    //CompileJavaSourceTask -> Set(CompileSourceTask),
+  lazy val standardFixedWithinProjectDependencies = Map[Task, Set[Task]](
     CompileTestsTask -> Set(CompileSourceTask),
     PackageTask -> Set(CompileSourceTask),
     PublishLocalTask -> Set(PackageTask),
@@ -19,6 +19,11 @@ object Task {
     RunUnitTestsTask -> Set(CompileTestsTask),
     RunMainTask -> Set(CompileSourceTask)
   )
+
+  lazy val standardWithinProjectDependencies : Project => Map[Task, Set[Task]] = Memoize1((project : Project) => {
+    if (project.props.UpdateOnCompile()) standardFixedWithinProjectDependencies + (CompileSourceTask -> Set(UpdateTask)) else standardFixedWithinProjectDependencies
+  })
+
   lazy val standardDependentProjectDependencies = Map[Task, Set[Task]](
     CompileTestsTask -> Set(CompileTestsTask),
     CompileSourceTask → Set(CompileSourceTask)

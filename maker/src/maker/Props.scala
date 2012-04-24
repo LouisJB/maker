@@ -31,6 +31,10 @@ case class Props(private val overrides : Map[String, String] = Map()) {
     def toT(s : String) = file(s)
     def apply() = value
   }
+  class BooleanProperty(val default : String) extends Property[Boolean] {
+    def toT(s : String) = java.lang.Boolean.parseBoolean(Option(s).getOrElse(default))
+    def apply() = value
+  }
   trait OptionalStringProperty extends TypedOptionalProperty[String] {
     def toT(s : String) = Option(s)
   }
@@ -95,6 +99,7 @@ case class Props(private val overrides : Map[String, String] = Map()) {
   object Developers extends StringProperty("")
   object Username extends StringProperty("")
   object Password extends StringProperty("")
+  object UpdateOnCompile extends BooleanProperty("false")
 
   lazy val properties = propertyMethods.map(m =>
       m.getName -> m.invoke(this).asInstanceOf[PropertyS]).toMap
