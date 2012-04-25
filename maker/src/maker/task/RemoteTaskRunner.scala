@@ -44,8 +44,10 @@ class RemoteTaskRunner(){
   }
 
   def initialise{
-    cmd.exec
+    println("Launching application")
+    cmd.execAsync
     Thread.sleep(1000)
+    println("Creating local system")
     system = ActorSystem("RemoteCreation", ConfigFactory.load.getConfig("remotecreation"))
     Thread.sleep(1000)
     remoteActor = system.actorOf(AkkaProps[RemoteActor], "remoteActor")

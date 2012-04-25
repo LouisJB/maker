@@ -10,5 +10,6 @@ class RemoteTaskRunnerTests extends FunSuite{
     val thisProcessID = ProcessID()
     val thatProcessID = taskRunner.askRemoteForProcessID
     assert(thisProcessID != thatProcessID)
+    taskRunner.shutdown
   }
 }
