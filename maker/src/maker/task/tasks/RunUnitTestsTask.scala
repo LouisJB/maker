@@ -50,11 +50,18 @@ case object RunUnitTestsTask extends Task {
 
   def exec(project: Project, acc: List[AnyRef], parameters: Map[String, String] = Map()) = {
     Log.info("Testing " + project)
-    val suiteParameters = suiteClassNames(project).map(List("-s", _)).flatten
+    val classOrSuiteNames = parameters.get("testClassOrSuiteName").map(_.split(":").toList.filter(_.size > 0)).getOrElse(Nil)
+    val suiteParameters = classOrSuiteNames match {
+      case Nil => suiteClassNames(project).map(List("-s", _)).flatten
+      case _ => classOrSuiteNames.map(List("-s", _)).flatten
+    }
     if (suiteParameters.isEmpty) {
+      Log.info("No tests found, nothing to do")
       Right(Unit)
-    } else {
-
+    }
+    else {
+      Log.info("Tests to run: ")
+      suiteParameters.foreach(Log.debug(_)  )
       val args = List(
         project.props.JavaHome() + "/bin/java",
         "-Dscala.usejavacp=true",

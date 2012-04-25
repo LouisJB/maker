@@ -113,6 +113,7 @@ case class Project(
   def testCompile = TaskManager(projectAndDescendents, CompileTestsTask)
   def test = TaskManager(projectAndDescendents, RunUnitTestsTask)
   def testOnly = TaskManager(List(this), RunUnitTestsTask)
+  def testClassOnly(testClassNames : String*) = TaskManager(List(this), RunUnitTestsTask, Map("testClassOrSuiteName" -> testClassNames.mkString(":")))
   def pack = TaskManager(projectAndDescendents, PackageTask)
   def packOnly = TaskManager(List(this), PackageTask)
   def update = TaskManager(projectAndDescendents, UpdateTask)
