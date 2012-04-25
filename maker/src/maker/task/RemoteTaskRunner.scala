@@ -41,16 +41,11 @@ class RemoteTaskRunner(){
 
   def shutdown{
     println("Been told to shut down")
-    Option(remoteActor).foreach(_ ! PoisonPill)
-    Thread.sleep(1000)
     println("Killing local system")
     Option(system).foreach(_.shutdown)
     Thread.sleep(1000)
-    println("Killing proc")
-    Option(proc).foreach(_.destroy)
     println("Killing remote processes")
     Option(remoteProcessID).foreach(_.kill)
-    Thread.sleep(1000)
   }
 
   def initialise{
@@ -59,9 +54,7 @@ class RemoteTaskRunner(){
     Thread.sleep(1000)
     println("Creating local system")
     system = ActorSystem("RemoteCreation", ConfigFactory.load.getConfig("remotecreation"))
-    Thread.sleep(1000)
     remoteActor = system.actorOf(AkkaProps[RemoteActor], "remoteActor")
-    Thread.sleep(1000)
     remoteProcessID = askRemoteForProcessID
   }
 }
