@@ -120,19 +120,19 @@ case class Project(
   def updateOnly = TaskManager(List(this), UpdateTask)
 
   // work in progress - incomplete tasks
-  def publishLocal : BuildResult = publishLocal()
+  def publishLocal : BuildResult[AnyRef] = publishLocal()
   def publishLocal(configurations : String = "default", version : String = props.Version()) =
     publishLocal_(projectAndDescendents, configurations, version)
-  def publishLocalOnly : BuildResult = publishLocalOnly()
+  def publishLocalOnly : BuildResult[AnyRef] = publishLocalOnly()
   def publishLocalOnly(configurations : String = "default", version : String = props.Version()) =
     publishLocal_(List(this), configurations, version)
   private def publishLocal_(projects : List[Project], configurations : String = "default", version : String = props.Version()) =
     TaskManager(projects, PublishLocalTask, Map("configurations"-> configurations, "version" -> version))
 
-  def publish : BuildResult = publish()
+  def publish : BuildResult[AnyRef] = publish()
   def publish(resolver : String = props.DefaultPublishResolver().getOrElse("default"), version : String = props.Version()) =
     publish_(projectAndDescendents, resolver, version)
-  def publishOnly : BuildResult = publishOnly()
+  def publishOnly : BuildResult[AnyRef] = publishOnly()
   def publishOnly(resolver : String = props.DefaultPublishResolver().getOrElse("default"), version : String = props.Version()) =
     publish_(List(this), resolver, version)
   private def publish_(projects : List[Project], resolver : String = props.DefaultPublishResolver().getOrElse("default"), version : String = props.Version()) =
@@ -144,7 +144,7 @@ case class Project(
     r
   }
 
-  def ~ (task : () => BuildResult) {
+  def ~ (task : () => BuildResult[AnyRef]) {
     var lastTaskTime : Option[Long] = None
     def printWaitingMessage = println("\nWaiting for source file changes (press 'enter' to interrupt)")
     def rerunTask{

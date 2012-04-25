@@ -37,9 +37,10 @@ class Worker() extends Actor{
   }
 }
 
-case class BuildResult(res : Either[TaskFailed, AnyRef],
+case class BuildResult[+A](res : Either[TaskFailed, A],
                        projectAndTasks : Set[ProjectAndTask],
                        originalProjectAndTask : ProjectAndTask) extends BuildMessage {
+
   import maker.graphviz.GraphVizDiGrapher._
   import maker.graphviz.GraphVizUtils._
 
@@ -55,4 +56,22 @@ case class BuildResult(res : Either[TaskFailed, AnyRef],
     }
 
   override def toString = res.toString
+
+  @inline final def flatMap[B](f : A => BuildResult[B]) : BuildResult[B] = {
+    res match {
+      case l: Left[_, _] => BuildResult(l.asInstanceOf[Either[TaskFailed, B]], projectAndTasks, originalProjectAndTask)
+      case Right(a) => {
+        val z: BuildResult[B] = f(a)
+        z.copy(projectAndTasks = projectAndTasks ++ z.projectAndTasks)
+      }
+    }
+  }
+
+  @inline final def map[B](f: A => B): BuildResult[B] = {
+    val mappedRes = res match {
+      case l: Left[_, _] => l.asInstanceOf[Either[TaskFailed, B]]
+      case Right(_) => res.right.map(f)
+    }
+    BuildResult(mappedRes, projectAndTasks, originalProjectAndTask)
+  }
 }

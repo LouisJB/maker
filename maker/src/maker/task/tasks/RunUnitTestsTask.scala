@@ -73,17 +73,10 @@ case object RunUnitTestsTask extends Task {
       val cmd = Command(args: _*)
       val (result, msg) = cmd.exec()
 
-      if (result == 0) {
+      if (result == 0)
         Right(Unit)
-      } else {
+      else
         Left(TaskFailed(ProjectAndTask(project, this), "Test failed in " + project))
-      }
-      //val pars = List("-c", "-o", "-p", project.scalatestRunpath) ::: suiteParameters
-      //val result = method.invoke(runner, pars.toArray).asInstanceOf[Boolean]
-      //if (result)
-      //Right(Unit)
-      //else
-      //Left(TaskFailed(ProjectAndTask(project, this), "Test failed in " + project))
     }
   }
 

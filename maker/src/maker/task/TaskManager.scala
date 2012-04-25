@@ -61,7 +61,7 @@ class TaskManager(projectTasks : Set[ProjectAndTask], router : ActorRef,
 }
 
 object TaskManager{
-  def apply(projects : List[Project], task : Task, parameters : Map[String, String] = Map()) : BuildResult = {
+  def apply(projects : List[Project], task : Task, parameters : Map[String, String] = Map()) : BuildResult[AnyRef] = {
     val sw = new Stopwatch()
     val originalProjectAndTask = ProjectAndTask(projects.head, task)
     val projectTasks = {
@@ -78,7 +78,7 @@ object TaskManager{
     apply(projectTasks, originalProjectAndTask, parameters)
   }
 
-  def apply(projectTasks : Set[ProjectAndTask], originalProjectAndTask : ProjectAndTask, parameters : Map[String, String]) : BuildResult = {
+  def apply(projectTasks : Set[ProjectAndTask], originalProjectAndTask : ProjectAndTask, parameters : Map[String, String]) : BuildResult[AnyRef] = {
     Log.info("Queue manager - tasks = " + projectTasks.mkString(", "))
     val sw = Stopwatch()
     implicit val timeout = Timeout(1000000)
@@ -90,7 +90,7 @@ object TaskManager{
     val qm = actorOf(new TaskManager(projectTasks, router, originalProjectAndTask, parameters)).start
     
     val future = qm ? StartBuild
-    val result = future.get.asInstanceOf[BuildResult]
+    val result = future.get.asInstanceOf[BuildResult[AnyRef]]
 
     import akka.actor.PoisonPill
     qm ! PoisonPill
