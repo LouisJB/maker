@@ -11,6 +11,7 @@ import akka.pattern.ask
 import maker.remoteakka.ProcessID
 import akka.dispatch.Await
 import akka.util.Duration
+import akka.actor.PoisonPill
 
 
 class RemoteApplication extends Bootable {
@@ -29,6 +30,7 @@ class RemoteTaskRunner(){
   var remoteActor : ActorRef = null
   val cmd = Command("/usr/local/scala/bin/scala", "maker.remoteakka.creation.RemoteApplication")
   var remoteProcessID : ProcessID = null
+  var proc : Process = null
 
   def askRemoteForProcessID : ProcessID = {
     implicit val timeout = Timeout(10000)
@@ -38,19 +40,28 @@ class RemoteTaskRunner(){
   }
 
   def shutdown{
+    println("Been told to shut down")
+    Option(remoteActor).foreach(_ ! PoisonPill)
+    Thread.sleep(1000)
+    println("Killing local system")
     Option(system).foreach(_.shutdown)
+    Thread.sleep(1000)
+    println("Killing proc")
+    Option(proc).foreach(_.destroy)
+    println("Killing remote processes")
     Option(remoteProcessID).foreach(_.kill)
     Thread.sleep(1000)
   }
 
   def initialise{
     println("Launching application")
-    cmd.execAsync
+    proc = cmd.execAsync
     Thread.sleep(1000)
     println("Creating local system")
     system = ActorSystem("RemoteCreation", ConfigFactory.load.getConfig("remotecreation"))
     Thread.sleep(1000)
     remoteActor = system.actorOf(AkkaProps[RemoteActor], "remoteActor")
+    Thread.sleep(1000)
     remoteProcessID = askRemoteForProcessID
   }
 }
