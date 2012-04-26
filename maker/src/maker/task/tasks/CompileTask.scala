@@ -1,11 +1,11 @@
-package maker.task
+package maker.task.tasks
 
 import maker.project.Project
-import maker.os.Command
-import maker.utils.Stopwatch
+import maker.task.{TaskFailed, Task, ProjectAndTask}
 import maker.utils.Log
-import scala.tools.nsc.Global
+import maker.os.Command
 import java.io.File
+import tools.nsc.Global
 import scalaz.Scalaz._
 
 abstract class CompileTask extends Task{
@@ -23,7 +23,7 @@ abstract class CompileTask extends Task{
     comp.settings.classpath.value = proj.compilationClasspath
     val reporter = comp.reporter
     outputDir(proj).mkdirs
-    
+
     val modifiedSrcFiles = changedSrcFiles(proj)
     val deletedSrcFiles_ = deletedSrcFiles(proj)
 
@@ -42,10 +42,10 @@ abstract class CompileTask extends Task{
           classFiles.foreach(_.delete)
       }
       debug("Compiling, " + modifiedSrcFiles.size + " modified or uncompiled files")
-      val sw = new Stopwatch
-      
+
       debug("Changed files are " + listOfFiles(modifiedSrcFiles))
       reporter.reset
+
       // First compile those files who have changed
       new comp.Run() compile modifiedSrcFiles.toList.map(_.getPath)
 
@@ -55,7 +55,7 @@ abstract class CompileTask extends Task{
       debug("Files with changed sigs is , " + listOfFiles(sourceFilesFromThisProjectWithChangedSigs))
 
       val dependentFiles = (sourceFilesFromThisProjectWithChangedSigs ++ sourceFilesFromOtherProjectsWithChangedSigs ++ deletedSrcFiles_) |> {
-        filesWhoseDependentsMustRecompile => 
+        filesWhoseDependentsMustRecompile =>
           val dependentFiles = proj.state.classFileDependencies.dependentFiles(filesWhoseDependentsMustRecompile).filterNot(filesWhoseDependentsMustRecompile)
           debug("Files dependent on those with shanged sigs" + listOfFiles(dependentFiles))
           debug("Compiling " + dependentFiles.size + " dependent files")
@@ -68,17 +68,20 @@ abstract class CompileTask extends Task{
       else {
         proj.state.classFileDependencies.persist
         proj.state.sourceToClassFiles.persist
-        Right((sourceFilesFromThisProjectWithChangedSigs, modifiedSrcFiles ++ dependentFiles))
+        CompileJavaSourceTask.exec(proj, acc, parameters) match {
+          case Right(javaFilesToCompile) => Right((sourceFilesFromThisProjectWithChangedSigs, modifiedSrcFiles ++ dependentFiles))
+          case err @ Left(TaskFailed(ProjectAndTask(project, _), error)) => err
+        }
       }
     }
   }
 }
 
-case object CompileSourceTask extends CompileTask{
-  def deletedSrcFiles(proj : Project) = proj.state.deletedSrcFiles
-  def changedSrcFiles(proj : Project) = proj.state.changedSrcFiles
-  def outputDir(proj : Project) = proj.outputDir
-  def compiler(proj : Project) = proj.compilers.compiler
+case object CompileSourceTask extends CompileTask {
+  def deletedSrcFiles(proj: Project) = proj.state.deletedSrcFiles
+  def changedSrcFiles(proj: Project) = proj.state.changedSrcFiles
+  def outputDir(proj: Project) = proj.outputDir
+  def compiler(proj: Project) = proj.compilers.compiler
   def taskName = "Compile source"
 }
 
@@ -90,7 +93,7 @@ case object CompileTestsTask extends CompileTask{
   def taskName = "Compile test"
 }
 
-case object CompileJavaSourceTask extends Task{
+case object CompileJavaSourceTask extends Task {
 
   def exec(project : Project, acc : List[AnyRef], parameters : Map[String, String] = Map()) = {
     import project._
@@ -101,7 +104,7 @@ case object CompileJavaSourceTask extends Task{
     else {
       Log.info("Compiling " + javaFilesToCompile.size + " java files")
       val javac = project.props.JavaHome().getAbsolutePath + "/bin/javac"
-      val parameters = javac::"-cp"::compilationClasspath::"-d"::javaOutputDir.getAbsolutePath::javaSrcFiles.toList.map(_.getAbsolutePath)
+      val parameters = javac :: "-cp" :: compilationClasspath :: "-d" :: javaOutputDir.getAbsolutePath :: javaSrcFiles.toList.map(_.getAbsolutePath)
       Command(parameters : _*).exec() match {
         case (0, _) => Right(javaFilesToCompile)
         case (_, error) => Left(TaskFailed(ProjectAndTask(project, this), error))
@@ -109,4 +112,3 @@ case object CompileJavaSourceTask extends Task{
     }
   }
 }
-

@@ -53,19 +53,48 @@ object FileUtils {
       dirs : _*
     )
   }
+  def findFilesWithExtensions(exts : List[String], dirs : File*) =
+    findFiles((f : File) => exts.exists(e => f.getName.endsWith("." + e)), dirs : _*)
 
   def traverseDirectories(root : File, fn : File => Unit){
     fn(root)
     root.listFiles.filter(_.isDirectory).foreach(traverseDirectories(_, fn))
   }
 
+  def allFiles(f : File) : List[File] =
+    Option(f.listFiles).map(_.toList.flatMap(x =>
+      if (x.isDirectory) allFiles(x)
+      else x :: Nil)
+    ).getOrElse(Nil)
+
+  def lastModifiedFileTime(files : List[File]) = 
+    files.flatMap(allFiles).map(_.lastModified).sortWith(_ > _).head
+  
+  def fileIsLaterThan(target : File, dirs : List[File]) = {
+    Log.debug("dirs = " + dirs + ", latest target time " + target.lastModified() + ", latest file time = " + lastModifiedFileTime(dirs))
+    target.exists() && (target.lastModified >= lastModifiedFileTime(dirs))
+  }
+
+  def replaceInFile(file : File, placeholder : String, repl : String) = {
+    val lines = file.read.map(_.replace(placeholder, repl))
+    writeToFile(file, lines.mkString("\n"))
+  }
+
+  def nameAndExt(file : File) = {
+    val name = file.getName
+    file.getName.lastIndexOf('.') match {
+      case -1 => (name, "")
+      case n => val parts = name.splitAt(n); (parts._1, parts._2.substring(1))
+    }
+  }
+
   def findJars(dirs : File*) = findFilesWithExtension("jar", dirs : _*)
   def findClasses(dirs : File*) = findFilesWithExtension("class", dirs : _*)
-  def findSourceFiles(dirs : File*) = findFilesWithExtension("scala", dirs : _*)
+  def findSourceFiles(dirs : File*) = findFilesWithExtensions("scala" :: "java" :: Nil, dirs : _*)
   def findJavaSourceFiles(dirs : File*) = findFilesWithExtension("java", dirs : _*)
 
   def withFileWriter(file : File)(f : BufferedWriter => _){
-    if (! file.getParentFile.exists)
+    if (file.getParentFile != null && !file.getParentFile.exists)
       file.getParentFile.mkdirs
     val fstream = new FileWriter(file)
     val out = new BufferedWriter(fstream)
@@ -104,7 +133,7 @@ object FileUtils {
       file.delete
   }
 
-  def writeToFile(file : File, text : String){
+  def writeToFile(file : File, text : String) {
     withFileWriter(file){
       out : BufferedWriter =>
         out.write(text)

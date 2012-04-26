@@ -1,8 +1,7 @@
 package plugin.utils
 
-import scala.collection.mutable.{Set => MSet, Map => MMap}
 import collection.immutable.Map
-import maker.utils.FileUtils
+import maker.utils.FileUtils._
 import java.io.{BufferedReader, BufferedWriter, File}
 import maker.utils.Log
 
@@ -14,7 +13,7 @@ case class ProjectSignatures(persistFile: File, private var sigs: Map[File, Set[
 
     val SourceFile = "([^\t]*)".r
     val Line = "\t([^\t]*)".r
-    FileUtils.withFileReader(persistFile) {
+    withFileReader(persistFile) {
       in: BufferedReader => {
         var line = in.readLine()
         while (line != null) {
@@ -54,17 +53,12 @@ case class ProjectSignatures(persistFile: File, private var sigs: Map[File, Set[
       file => (sigs(file) != olderSigs.signature.getOrElse(file, Set[String]()))
     }
     Log.debug("Files with changed sigs " + changedFiles.mkString("\n\t", "\n\t", ""))
-    sigs.foreach {
-      case (file, sig) =>
-        val os = olderSigs.signature.getOrElse(file, Set[String]())
-    }
-
     Log.debug("Sig changes\n" + changeAsString(olderSigs))
     changedFiles
   }
 
   def persist() {
-    FileUtils.withFileWriter(persistFile) {
+    withFileWriter(persistFile) {
       writer: BufferedWriter =>
         sigs.foreach {
           case (sourceFile, sig) =>
@@ -100,7 +94,6 @@ case class ProjectSignatures(persistFile: File, private var sigs: Map[File, Set[
     val buff = new StringBuffer()
     files.foreach {
       file =>
-        val signature = sigs(file)
         buff.append("\n\t" + file)
         buff.append(sigString(sigs(file)))
     }

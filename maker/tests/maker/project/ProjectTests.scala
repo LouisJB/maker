@@ -62,12 +62,12 @@ class ProjectTests extends FunSuite {
     assert(proj.classFiles.size === 0)
     proj.compile
     assert(proj.classFiles.size > 0)
-    assert(!proj.outputJar.exists)
+    assert(!proj.outputArtifact.exists)
     proj.pack
-    assert(proj.outputJar.exists)
+    assert(proj.outputArtifact.exists)
     proj.clean
     assert(proj.classFiles.size === 0)
-    assert(!proj.outputJar.exists)
+    assert(!proj.outputArtifact.exists)
     proj.delete
   }
 

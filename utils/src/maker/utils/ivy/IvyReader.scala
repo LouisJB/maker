@@ -4,6 +4,7 @@ import java.io.File
 import scala.xml._
 import maker.utils._
 import maker.utils.maven._
+import maker.utils.ModuleId._
 
 /**
  * Read in raw ivy xml files for module dependencies
@@ -17,7 +18,7 @@ object IvyReader {
         val name = (d \\ "@name").toString
         val rev = (d \\ "@rev").toString
         val org = (d \\ "@org").toString
-        DependencyLib(name, org, name, rev, org, "compile")
+        DependencyLib(name, org % name % rev, "compile")
       }).toList
     }
     catch {

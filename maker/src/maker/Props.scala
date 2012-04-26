@@ -5,7 +5,7 @@ import java.io.File
 import java.util.Properties
 import java.io.FileInputStream
 import scala.collection.JavaConversions
-import java.io.OutputStream
+import utils.TeeToFileOutputStream
 
 case class Props(private val overrides : Map[String, String] = Map()) {
   type PropertyS = Property[String]
@@ -29,6 +29,10 @@ case class Props(private val overrides : Map[String, String] = Map()) {
   }
   class FileProperty(val default : String) extends Property[File] {
     def toT(s : String) = file(s)
+    def apply() = value
+  }
+  class BooleanProperty(val default : String) extends Property[Boolean] {
+    def toT(s : String) = java.lang.Boolean.parseBoolean(Option(s).getOrElse(default))
     def apply() = value
   }
   trait OptionalStringProperty extends TypedOptionalProperty[String] {
@@ -78,27 +82,10 @@ case class Props(private val overrides : Map[String, String] = Map()) {
    */
   object VimErrorFile extends FileProperty("vim-compile-output")
 
-  object CompilationOutputStream extends OutputStream {
-    import java.io.FileOutputStream
-    import java.io.PrintStream
-    import org.apache.commons.io.output.TeeOutputStream
-
-    private def makeTeeStream = {
-      new PrintStream(
-        new TeeOutputStream(
-          Console.err, 
-          new PrintStream(new FileOutputStream(VimErrorFile()))
-        )
-      )
-    }
-    var teeErr = makeTeeStream
-
+  val CompilationOutputStream = new TeeToFileOutputStream(VimErrorFile(), Console.err) {
     def emptyVimErrorFile{
       VimErrorFile().delete
-      teeErr = makeTeeStream
-    }
-    def write(b : Int){
-      teeErr.write(b)
+      tee = makeTeeStream
     }
   }
 
@@ -112,6 +99,7 @@ case class Props(private val overrides : Map[String, String] = Map()) {
   object Developers extends StringProperty("")
   object Username extends StringProperty("")
   object Password extends StringProperty("")
+  object UpdateOnCompile extends BooleanProperty("false")
 
   lazy val properties = propertyMethods.map(m =>
       m.getName -> m.invoke(this).asInstanceOf[PropertyS]).toMap
@@ -123,13 +111,21 @@ case class Props(private val overrides : Map[String, String] = Map()) {
 }
 
 object Props {
-  def apply(file : File) : Props = Props(propsFromFile(file))
+  import RichProperties._
+  def apply(file : File) : Props = fileToProps(file)
+}
 
-  private def propsFromFile(propsFile:File) : Map[String, String] = {
+object RichProperties {
+  implicit def fileToProps(propsFile : File) : Props = {
+    val p : Properties = fileToProperties(propsFile)
+    val propsMap = Map() ++ JavaConversions.mapAsScalaMap(p.asInstanceOf[java.util.Map[String,String]])
+    Props(propsMap)
+  }
+  implicit def fileToProperties(propsFile : File) : Properties = {
     val p = new Properties()
     if (propsFile.exists) {
       p.load(new FileInputStream(propsFile))
     }
-    Map() ++ JavaConversions.mapAsScalaMap(p.asInstanceOf[java.util.Map[String,String]])
+    p
   }
 }

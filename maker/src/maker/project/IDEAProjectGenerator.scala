@@ -21,7 +21,7 @@ object IDEAProjectGenerator {
     writeToFile(file(rootDir, name + ".iml"), content)
   }
 
-  def generateIDEAProjectDir(rootDir:File, name:String) {
+  def generateIDEAProjectDir(rootDir:File, name:String, swingLibraryRequired:Boolean) {
     val ideaProjectRoot = mkdirs(file(rootDir, ".idea"))
     writeToFile(file(ideaProjectRoot, ".name"), name)
 
@@ -29,7 +29,7 @@ object IDEAProjectGenerator {
     val scalaLibraryContent = """<component name="libraryTable">
   <library name="scala-library-2.9.1">
     <CLASSES>
-      <root url="jar://$PROJECT_DIR$/maker-lib/scala-library-2.9.1.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/scala/lib_managed/scala-library-jar-2.9.1.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES />
@@ -41,8 +41,8 @@ object IDEAProjectGenerator {
     val scalaCompilerLibraryContent = """<component name="libraryTable">
   <library name="scala-compiler-2.9.1">
     <CLASSES>
-      <root url="jar://$PROJECT_DIR$/maker-lib/scala-compiler-2.9.1.jar!/" />
-      <root url="jar://$PROJECT_DIR$/maker-lib/scala-library-2.9.1.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/scala/lib_managed/scala-compiler-jar-2.9.1.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/scala/lib_managed/scala-library-jar-2.9.1.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES />
@@ -54,8 +54,10 @@ object IDEAProjectGenerator {
     val scalaCompilerContent = """<?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ScalacSettings">
-    <option name="COMPILER_LIBRARY_NAME" value="Scala-Compiler-2.9.1" />
-    <option name="COMPILER_LIBRARY_LEVEL" value="Global" />
+    <option name="COMPILER_LIBRARY_NAME" value="scala-compiler-2.9.1" />
+    <option name="COMPILER_LIBRARY_LEVEL" value="Project" />
+    <option name="MAXIMUM_HEAP_SIZE" value="2048" />
+    <option name="FSC_OPTIONS" value="-max-idle 0" />
   </component>
 </project>
 """
@@ -79,9 +81,23 @@ object IDEAProjectGenerator {
 </project>
 """
     writeToFile(file(ideaProjectRoot, "highlighting.xml"), highlightingContent)
+
+    if (swingLibraryRequired) {
+      val swingLibraryContent = """<component name="libraryTable">
+  <library name="scala-swing-library-2.9.1">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/lib/scala/lib_managed/scala-swing-jar-2.9.1.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
+"""
+      writeToFile(file(librariesDir, "scala_swing_library_2_9_1.xml"), swingLibraryContent)
+    }
   }
 
-  def generateModule(project:Project) {
+  def generateModule(project:Project, scalaSwingProjectLib:Option[ProjectLib]) {
     val sources = if (project.srcDirs.isEmpty && project.resourceDirs.isEmpty && project.testDirs.isEmpty) {
         """    <content url="file://$MODULE_DIR$" />"""
     } else {
@@ -125,13 +141,18 @@ object IDEAProjectGenerator {
     <output-test url="file://$MODULE_DIR$/%s" />""".format(relativeOutputDir, relativeTestOutputDir)
     }
 
+    val swingLibraryEntry = scalaSwingProjectLib match {
+      case Some(pl) => """    <orderEntry type="library" %sname="scala-swing-library-2.9.1" level="project" />""".format((if (pl.exported)"""exported="" """ else ""))
+      case _ => ""
+    }
+
     val moduleContent = """<?xml version="1.0" encoding="UTF-8"?>
 <module type="JAVA_MODULE" version="4">
   <component name="FacetManager">
     <facet type="scala" name="Scala">
       <configuration>
-        <option name="compilerLibraryLevel" value="Global" />
-        <option name="compilerLibraryName" value="Scala-Compiler-2.9.1" />
+        <option name="compilerLibraryLevel" value="Project" />
+        <option name="compilerLibraryName" value="scala-compiler-2.9.1" />
         <option name="fsc" value="true" />
       </configuration>
     </facet>
@@ -144,9 +165,10 @@ object IDEAProjectGenerator {
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="scala-library-2.9.1" level="project" />
 %s
+%s
   </component>
 </module>
-""".format(output, sources, dependencies)
+""".format(output, sources, swingLibraryEntry, dependencies)
     writeToFile(file(project.root, project.name + ".iml"), moduleContent)
   }
 

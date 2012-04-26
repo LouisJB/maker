@@ -107,14 +107,14 @@ object PomWriter {
         //<?xml version="1.0" encoding=\'UTF-8\'?>
         <project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.  org/POM/4.0.0">
             <modelVersion>4.0.0</modelVersion>
-            <groupId>{moduleDef.projectDef.moduleLibDef.name}</groupId>
-            <artifactId>todo</artifactId>
+            <groupId>{moduleDef.projectDef.moduleLibDef.gav.groupId.id}</groupId>
+            <artifactId>{moduleDef.projectDef.moduleLibDef.gav.artifactId.id}</artifactId>
             <packaging>jar</packaging>
             <description>{moduleDef.projectDef.description}</description>
             <version>{moduleDef.projectDef.moduleLibDef.version}</version>
             <name>{moduleDef.projectDef.moduleLibDef.name}</name>
             <organization>
-                <name>{moduleDef.projectDef.moduleLibDef.org}</name>
+                <name>{moduleDef.projectDef.moduleLibDef.gav.groupId.id}</name>
             </organization>
             {mkDependencies(moduleDef.dependencies)}
             {mkRepositories(moduleDef.repositories)}

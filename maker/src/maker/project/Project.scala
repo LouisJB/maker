@@ -5,30 +5,34 @@ import java.lang.System
 import maker.task._
 import maker.utils.FileUtils._
 import maker.Props
+import java.util.Properties
 import java.net.URLClassLoader
-import maker.os.Command
 import maker.graphviz.GraphVizUtils._
 import maker.graphviz.GraphVizDiGrapher._
-import maker.utils.{DependencyLib, Log}
-import maker.utils.RichString._
-import maker.utils.FileUtils
+import maker.utils._
+import tasks._
+import maker.utils.ModuleId._
 
 case class Project(
-  name: String,
-  root: File,
-  sourceDirs: List[File] = Nil,
-  tstDirs: List[File] = Nil,
-  libDirs: List[File] = Nil,
-  providedDirs: List[File] = Nil, // compile time only, don't add to runtime classpath or any packaging
-  managedLibDirName : String = "maker-lib",
-  resourceDirs : List[File] = Nil,
-  children: List[Project] = Nil,
-  props : Props = Props(),
-  description : Option[String] = None,
-  ivySettingsFile : File = file("maker-ivysettings.xml"), // assumption this is typically absolute and module ivy is relative, this might be invalid?
-  ivyFileRel : String = "maker-ivy.xml",
-  webAppDir : Option[File] = None
-) {
+      name: String,
+      root: File,
+      sourceDirs: List[File] = Nil,
+      tstDirs: List[File] = Nil,
+      libDirs: List[File] = Nil,
+      providedLibDirs: List[File] = Nil, // compile time only, don't add to runtime classpath or any packaging
+      managedLibDirName : String = "maker-lib",
+      resourceDirs : List[File] = Nil,
+      children: List[Project] = Nil,
+      props : Props = Props(),
+      unmanagedProperties : Properties = new Properties(),
+      description : Option[String] = None,
+      ivySettingsFile : File = file("maker-ivysettings.xml"), // assumption this is typically absolute and module ivy is relative, this might be invalid?
+      ivyFileRel : String = "maker-ivy.xml",
+      webAppDir : Option[File] = None,
+      moduleIdentity : Option[GroupAndArtifact] = None,
+      additionalExcludedLibs : List[GAV] = Nil,
+      providedLibs : List[String] = Nil) {
+
   def outputDir = file(root, "classes")
   def javaOutputDir = file(root, "java-classes")
   def testOutputDir = file(root, "test-classes")
@@ -37,11 +41,34 @@ case class Project(
   def ivyFile = new File(root, ivyFileRel)
   val makerDirectory = mkdirs(new File(root, ".maker"))
 
-  def srcDirs : List[File] = if (sourceDirs.isEmpty) List(file(root, "src")) else sourceDirs
-  def testDirs : List[File] = if (tstDirs.isEmpty) List(file(root, "tests")) else tstDirs
-  def jarDirs : List[File] = if (libDirs.isEmpty) List(file(root, "lib"), managedLibDir) else libDirs
+  val srcDirs : List[File] = if (sourceDirs.isEmpty) List(file(root, "src")) else sourceDirs
+  val testDirs : List[File] = if (tstDirs.isEmpty) List(file(root, "tests")) else tstDirs
+  val jarDirs : List[File] = if (libDirs.isEmpty) List(file(root, "lib"), managedLibDir) else libDirs
+  val moduleId : GroupAndArtifact = if (moduleIdentity.isEmpty) name % name else moduleIdentity.get
 
   def dependsOn(projects: Project*) = copy(children = children ::: projects.toList)
+ 
+  def withResourceDirs(dirs : List[File]) : Project = copy(resourceDirs = dirs)
+  def withResourceDirs(dirs : String*) : Project = withResourceDirs(dirs.map(d => file(root, d)).toList)
+  def withAdditionalSourceDirs(dirs : String*) = copy(sourceDirs = dirs.toList.map(d => file(root, d)) ::: this.sourceDirs)
+  def withProvidedLibDirs(dirs : String*) = copy(providedLibDirs = dirs.toList.map(d => file(root, d)) ::: this.providedLibDirs)
+  def setAdditionalExcludedLibs(libs : GAV*) = copy(additionalExcludedLibs = libs.toList)
+  def withProvidedLibs(libNames : String*) = copy(providedLibs = libNames.toList ::: this.providedLibs)
+  
+  def allDeps : List[Project] = this :: children.flatMap(_.allDeps).sortWith(_.name < _.name)
+  def isDependentOn(project : Project) = allDeps.exists(p => p == project)
+  def dependsOnPaths(project : Project) : List[List[Project]] = {
+    def depends(currentProject : Project, currentPath : List[Project], allPaths : List[List[Project]]) : List[List[Project]] = {
+      if (project == currentProject) (currentProject :: currentPath).reverse :: allPaths
+      else {
+        currentProject.children match {
+          case Nil => Nil
+          case ps => ps.flatMap(p => depends(p, currentProject :: currentPath, allPaths))
+        }
+      }
+    }
+    depends(this, Nil, Nil)
+  }
 
   def srcFiles() = findSourceFiles(srcDirs: _*)
   def testSrcFiles() = findSourceFiles(testDirs: _*)
@@ -66,7 +93,10 @@ case class Project(
     new URLClassLoader(urls, null)
   }
 
-  def outputJar = new File(packageDir.getAbsolutePath, name + ".jar")
+  def outputArtifact = file(packageDir.getAbsolutePath, name + (webAppDir match {
+    case None => ".jar"
+    case _ => ".war"
+  }))
 
   val state = ProjectState(this)
   val compilers = ProjectCompilers(this)
@@ -76,40 +106,45 @@ case class Project(
     Tasks
   **********************/
   def projectAndDescendents = this::dependencies.descendents.toList
-  def clean = QueueManager(projectAndDescendents, CleanTask)
-  def compile = QueueManager(projectAndDescendents, CompileSourceTask)
-  def javaCompile = QueueManager(projectAndDescendents, CompileJavaSourceTask)
-  def testCompile = QueueManager(projectAndDescendents, CompileTestsTask)
-  def test = QueueManager(projectAndDescendents, RunUnitTestsTask)
-  def testOnly = QueueManager(List(this), RunUnitTestsTask)
-  def pack = QueueManager(projectAndDescendents, PackageTask)
-  def packOnly = QueueManager(List(this), PackageTask)
-  def update = QueueManager(projectAndDescendents, UpdateExternalDependencies)
-  def updateOnly = QueueManager(List(this), UpdateExternalDependencies)
+  def clean = TaskManager(projectAndDescendents, CleanTask)
+  def cleanOnly = TaskManager(List(this), CleanTask)
+  def compile = TaskManager(projectAndDescendents, CompileSourceTask)
+//  def javaCompile = TaskManager(projectAndDescendents, CompileSourceTask)
+  def testCompile = TaskManager(projectAndDescendents, CompileTestsTask)
+  def test = TaskManager(projectAndDescendents, RunUnitTestsTask)
+  def testOnly = TaskManager(List(this), RunUnitTestsTask)
+  def testClassOnly(testClassNames : String*) = TaskManager(List(this), RunUnitTestsTask, Map("testClassOrSuiteName" -> testClassNames.mkString(":")))
+  def pack = TaskManager(projectAndDescendents, PackageTask)
+  def packOnly = TaskManager(List(this), PackageTask)
+  def update = TaskManager(projectAndDescendents, UpdateTask)
+  def updateOnly = TaskManager(List(this), UpdateTask)
 
   // work in progress - incomplete tasks
-  def publishLocal : BuildResult = publishLocal()
+  def publishLocal : BuildResult[AnyRef] = publishLocal()
   def publishLocal(configurations : String = "default", version : String = props.Version()) =
     publishLocal_(projectAndDescendents, configurations, version)
-  def publishLocalOnly : BuildResult = publishLocalOnly()
+  def publishLocalOnly : BuildResult[AnyRef] = publishLocalOnly()
   def publishLocalOnly(configurations : String = "default", version : String = props.Version()) =
     publishLocal_(List(this), configurations, version)
   private def publishLocal_(projects : List[Project], configurations : String = "default", version : String = props.Version()) =
-    QueueManager(projects, PublishLocalTask, Map("configurations"-> configurations, "version" -> version))
+    TaskManager(projects, PublishLocalTask, Map("configurations"-> configurations, "version" -> version))
 
-  def publish : BuildResult = publish()
+  def publish : BuildResult[AnyRef] = publish()
   def publish(resolver : String = props.DefaultPublishResolver().getOrElse("default"), version : String = props.Version()) =
     publish_(projectAndDescendents, resolver, version)
-  def publishOnly : BuildResult = publishOnly()
+  def publishOnly : BuildResult[AnyRef] = publishOnly()
   def publishOnly(resolver : String = props.DefaultPublishResolver().getOrElse("default"), version : String = props.Version()) =
     publish_(List(this), resolver, version)
   private def publish_(projects : List[Project], resolver : String = props.DefaultPublishResolver().getOrElse("default"), version : String = props.Version()) =
-    QueueManager(projects, PublishTask, Map("publishResolver" -> resolver, "version" -> version))
+    TaskManager(projects, PublishTask, Map("publishResolver" -> resolver, "version" -> version))
 
-  def runMain(className : String)(opts : String*)(args : String*) =
-    QueueManager(List(this), RunMainTask, Map("mainClassName" -> className, "opts" -> opts.mkString(",") , "args" -> args.mkString(",")))
+  def runMain(className : String)(opts : String*)(args : String*) = {
+    val r = TaskManager(List(this), RunMainTask, Map("mainClassName" -> className, "opts" -> opts.mkString("|") , "args" -> args.mkString("|")))
+    println("runMain task completed for class: " + className)
+    r
+  }
 
-  def ~ (task : () => BuildResult) {
+  def ~ (task : () => BuildResult[AnyRef]) {
     var lastTaskTime : Option[Long] = None
     def printWaitingMessage = println("\nWaiting for source file changes (press 'enter' to interrupt)")
     def rerunTask{
@@ -183,35 +218,47 @@ case class Project(
 
   def delete = recursiveDelete(root)
 
+  def findLibs(libName : String) = 
+    classpathDirectoriesAndJars.filter(f => f.getName.contains(libName)).foreach(println)
+
+  // maven / ivy integration
   import maker.utils.maven._
   def moduleDef : ModuleDef = {
     val deps : List[DependencyLib] = readIvyDependencies()
     val repos : List[MavenRepository] = readIvyResolvers()
-    val moduleLibDef = DependencyLib(name, props.Organisation(), name, props.Version(), props.Organisation(), "compile", None)
-    val moduleDeps = children.map(c => DependencyLib(name, props.Organisation(), c.name, props.Version(), props.Organisation(), "compile", None))
+    val moduleLibDef = DependencyLib(name, props.Organisation() % name % props.Version(), "compile", None)
+    val moduleDeps = children.map(c => DependencyLib(name, props.Organisation() % c.name % props.Version(), "compile", None))
     val projectDef = ProjectDef(description.getOrElse("Module " + name + " definition (generated by Maker)"), moduleLibDef, moduleDeps)
     ModuleDef(projectDef, deps, repos, ScmDef(props.ScmUrl(), props.ScmConnection()), props.Licenses(), props.Developers())
   }
 
-  override def toString = "Project " + name
+  override def toString = "Project " + moduleId.toString
 }
+
+case class ProjectLib(projectName:String, exported:Boolean)
 
 class TopLevelProject(name:String,
                       children:List[Project],
-                      props:Props = Props()) extends Project(name, file("."), Nil, Nil, Nil, resourceDirs = Nil, children = children, props = props) {
+                      props:Props = Props(),
+                      scalaSwingLibraryProjects:List[ProjectLib] = Nil) extends Project(name, file("."), Nil, Nil, Nil, resourceDirs = Nil, children = children, props = props) {
 
   def generateIDEAProject() {
     val allModules = children.flatMap(_.projectAndDescendents).distinct
 
+    val swingLibraryRequired = scalaSwingLibraryProjects.nonEmpty
+
     IDEAProjectGenerator.generateTopLevelModule(root, name)
-    IDEAProjectGenerator.generateIDEAProjectDir(root, name)
-    allModules foreach IDEAProjectGenerator.generateModule
+    IDEAProjectGenerator.generateIDEAProjectDir(root, name, swingLibraryRequired)
+    allModules.foreach(module => IDEAProjectGenerator.generateModule(
+      module,
+      scalaSwingLibraryProjects.find(_.projectName == module.name)))
 
     IDEAProjectGenerator.generateModulesFile(file(root, ".idea"), (this :: allModules).map(_.name))
 
     IDEAProjectGenerator.updateGitIgnoreIfRequired(this)
   }
   def downloadScalaCompilerAndLibrary{
+    import maker.utils.RichString._
     val ivyText="""
 <ivy-module version="1.0" xmlns:e="http://ant.apache.org/ivy/extra">
   <info organisation="maker" module="maker"/>
@@ -239,4 +286,3 @@ object Project {
   def apply(name : String,  libDirectories : => List[File]) : Project = Project(name, file(name), libDirs = libDirectories, props = Props())
   def apply(name : String,  libDirectories : => List[File], props : Props) : Project = Project(name, file(name), libDirs = libDirectories, props = props)
 }
-

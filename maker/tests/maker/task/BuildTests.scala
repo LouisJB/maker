@@ -4,8 +4,6 @@ import org.scalatest.FunSuite
 import maker.utils.FileUtils._
 import maker.project.Project
 import java.io.File
-import maker.utils.Log
-import org.apache.log4j.Level
 
 class BuildTests extends FunSuite {
 
