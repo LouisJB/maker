@@ -138,7 +138,6 @@ object QueueManager{
     def nWorkers = (Runtime.getRuntime.availableProcessors / 2) max 1
 
 
-    //val workers = (1 to nWorkers).map{i => system.actorOf(Props(new Worker()))}
     Log.debug("Running with " + nWorkers + " workers")
     val router = system.actorOf(Props[Worker].withRouter(SmallestMailboxRouter(nWorkers)))
       //val router = Routing.loadBalancerActor(CyclicIterator(workers)).start()
@@ -146,10 +145,10 @@ object QueueManager{
     val future = qm ? StartBuild
     val result = Await.result(future, Duration.Inf).asInstanceOf[BuildResult]
 
-    import akka.actor.PoisonPill
-    qm ! PoisonPill
-    //workers.foreach(_ ! PoisonPill)
-    router ! PoisonPill
+    //import akka.actor.PoisonPill
+    //qm ! PoisonPill
+    ////workers.foreach(_ ! PoisonPill)
+    //router ! PoisonPill
     system.shutdown()
     Log.debug("Stats: \n" + projectTasks.map(_.runStats).mkString("\n"))
     Log.info("Completed, took" + sw + ", result " + result)

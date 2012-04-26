@@ -16,6 +16,7 @@ val propsFile = Props(file("Maker.conf"))
 def mkProject(name : String, libs : List[File] = Nil) = new Project(
   name, file(name),
   libDirs=libs,
+  resourceDirs = List(file(name + "/resources")),
   props = propsFile,
   ivySettingsFile = ivySettingsFile_,
   ivyFileRel = ivyFileName
