@@ -30,15 +30,16 @@ case class Project(
       ivyFileRel : String = "maker-ivy.xml",
       webAppDir : Option[File] = None,
       moduleIdentity : Option[GroupAndArtifact] = None,
+      additionalLibs : List[GAV] = Nil,
       additionalExcludedLibs : List[GAV] = Nil,
       providedLibs : List[String] = Nil) {
 
-  def outputDir = file(root, "classes")
-  def javaOutputDir = file(root, "java-classes")
-  def testOutputDir = file(root, "test-classes")
-  def packageDir = file(root, "package")
-  def managedLibDir = file(root, managedLibDirName)
-  def ivyFile = new File(root, ivyFileRel)
+  val outputDir = file(root, "classes")
+  val javaOutputDir = file(root, "java-classes")
+  val testOutputDir = file(root, "test-classes")
+  val packageDir = file(root, "package")
+  val managedLibDir = file(root, managedLibDirName)
+  val ivyFile = new File(root, ivyFileRel)
   val makerDirectory = mkdirs(new File(root, ".maker"))
 
   val srcDirs : List[File] = if (sourceDirs.isEmpty) List(file(root, "src")) else sourceDirs
@@ -51,10 +52,12 @@ case class Project(
   def withResourceDirs(dirs : List[File]) : Project = copy(resourceDirs = dirs)
   def withResourceDirs(dirs : String*) : Project = withResourceDirs(dirs.map(d => file(root, d)).toList)
   def withAdditionalSourceDirs(dirs : String*) = copy(sourceDirs = dirs.toList.map(d => file(root, d)) ::: this.sourceDirs)
+  def withAdditionalTestDirs(dirs : String*) = copy(tstDirs = dirs.toList.map(d => file(root, d)) ::: this.tstDirs)
+  def withAdditionalLibs(libs : GAV*) = copy(additionalLibs = libs.toList ::: this.additionalLibs)
   def withProvidedLibDirs(dirs : String*) = copy(providedLibDirs = dirs.toList.map(d => file(root, d)) ::: this.providedLibDirs)
   def setAdditionalExcludedLibs(libs : GAV*) = copy(additionalExcludedLibs = libs.toList)
   def withProvidedLibs(libNames : String*) = copy(providedLibs = libNames.toList ::: this.providedLibs)
-  
+
   def allDeps : List[Project] = this :: children.flatMap(_.allDeps).sortWith(_.name < _.name)
   def isDependentOn(project : Project) = allDeps.exists(p => p == project)
   def dependsOnPaths(project : Project) : List[List[Project]] = {
@@ -183,6 +186,8 @@ case class Project(
       }
     }
   }
+
+  def mkTask(t : Task) = ProjectAndTask(this, t)
 
   def showDependencyProjectGraph(depth : Int = 100, showLibDirs : Boolean = false, showLibs : Boolean = false) = {
     def dependentProjects(project : Project, depth : Int) : List[(Project, List[Project])] = {

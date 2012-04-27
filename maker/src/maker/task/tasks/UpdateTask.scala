@@ -7,14 +7,15 @@ import org.apache.ivy.core.resolve.ResolveOptions
 import org.apache.ivy.util.filter.FilterHelper
 import org.apache.ivy.Ivy
 import org.apache.ivy.core.retrieve.RetrieveOptions
-import maker.utils.{GroupAndArtifact, Log}
 import maker.task.{ProjectAndTask, TaskFailed, Task}
+import maker.utils.{GAV, GroupAndArtifact, Log}
+import xml.NodeSeq
 
 case object UpdateTask extends Task {
   def exec(project: Project, acc: List[AnyRef], parameters: Map[String, String] = Map()) = {
     try {
       if (project.ivyFile.exists) {
-        val confs = Array[String]("default")
+        val confs = Array[String]("default", "compile", "test") // todo, need to handle confs / scopes properly in the near future... for now get all appropriate confs
         val artifactFilter = FilterHelper.getArtifactTypeFilter(Array[String]("jar", "war", "bundle", "source"))
         val resolveOptions = new ResolveOptions().setConfs(confs)
           .setValidate(true)
@@ -26,10 +27,11 @@ case object UpdateTask extends Task {
         val ivyFile = file(project.root, nameAndExt(project.ivyFile)._1 + "-dynamic.ivy")
         copyFile(project.ivyFile, ivyFile)
 
-        val excludedBinaryModules : List[GroupAndArtifact] = project.allDeps.map(_.moduleId) ::: project.allDeps.flatMap(_.additionalExcludedLibs.map(_.toGroupAndArtifact))
-        val excludes = excludedBinaryModules.map(e => <exclude org={e.groupId.id} module={e.artifactId.id} />.toString)
+        val includes : List[NodeSeq] = project.allDeps.flatMap(_.additionalLibs).map(_.toIvyInclude)
+        val excludes : List[NodeSeq] = project.allDeps.map(_.moduleId.toIvyExclude) ::: project.allDeps.flatMap(_.additionalExcludedLibs.map(_.toIvyExclude))
 
-        replaceInFile(ivyFile, "${maker.module.excluded.libs}", excludes.mkString("\n"))
+        replaceInFile(ivyFile, "${maker.module.excluded.libs}", (includes ::: excludes).mkString("\n"))
+
         ivy.configure(ivyFile)
 
         val report = ivy.resolve(ivyFile.toURI().toURL(), resolveOptions)

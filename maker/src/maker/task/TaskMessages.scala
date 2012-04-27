@@ -45,6 +45,7 @@ case class BuildResult[+A](res : Either[TaskFailed, A],
   import maker.graphviz.GraphVizUtils._
 
   def stats : List[String] = projectAndTasks.map(_.allStats).toList
+  def linearTime : Long = projectAndTasks.map(_.runTimeMs).toList.sum
 
   def resultTree(pt : ProjectAndTask = originalProjectAndTask) =
     pt.getTaskTree.map(p => (projectAndTasks.find(_ == p._1).get, p._2.map(pt => projectAndTasks.find(_ == pt).get)))
@@ -54,6 +55,8 @@ case class BuildResult[+A](res : Either[TaskFailed, A],
       case Nil | null => Log.info("No project results to graph"); None
       case r => Some(showGraph(makeDotFromProjectAndTask(r)))
     }
+
+  def filterByTask(t : Task) = projectAndTasks.filter(p => p == ProjectAndTask(p.project, t))
 
   override def toString = res.toString
 

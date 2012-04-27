@@ -2,6 +2,7 @@ package maker.utils
 
 import org.apache.ivy.ant.IvyMakePom
 import org.apache.ivy.plugins.parser.m2.PomWriterOptions
+import xml.Elem
 
 // mvn group -> artifact -> version <-> ivy org -> name -> rev
 object ModuleId {
@@ -19,6 +20,9 @@ trait GAV {
   val version : Option[Version] = None
   def toGroupAndArtifact = GroupAndArtifact(groupId, artifactId)
   def toGroupArtifactAndVersion = GroupArtifactAndVersion(groupId, artifactId, None)
+
+  def toIvyInclude : Elem = <dependency org={groupId.id} name={artifactId.id} rev={version.map(v => xml.Text(v.version))} />
+  def toIvyExclude : Elem = <exclude org={groupId.id} module={artifactId.id} />
 }
 case class GroupAndArtifact(groupId : GroupId, artifactId : ArtifactId) extends GAV {
   def %(version : String) = GroupArtifactAndVersion(groupId, artifactId, Some(Version(version)))
@@ -41,7 +45,7 @@ case class DependencyLib(
   val classifier = classifierOpt.getOrElse("")
   val version = gav.version.map(_.version).getOrElse("")
 
-  override def toString = "Name: %s Version: %s Org: %s Classifier: %s".format(name, gav, classifier)
+  override def toString = "Name: %s, GAV: %s, Classifier: %s".format(name, gav.toString, classifier)
 
   def toIvyMavenDependency : IvyMakePom#Dependency = {
     val ivyMakePom : IvyMakePom = new IvyMakePom
