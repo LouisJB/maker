@@ -67,12 +67,23 @@ class RTM_Actor(remoteActor : ActorRef) extends Actor {
   }
 }
 
-class RemoteTaskManager() {
+class RemoteTaskManager(classpath : String) {
   import RemoteTaskManager._
   var system : ActorSystem = null
   var remoteActor : ActorRef = null
   var actor : ActorRef = null
-  val cmd = Command("/usr/local/scala/bin/scala", "maker.task.RemoteApplication")
+  val args = List(
+    "/usr/local/jdk/bin/java",
+    "-Dscala.usejavacp=true",
+    "-classpath",
+   classpath,
+    "scala.tools.nsc.MainGenericRunner",
+    "maker.task.RemoteApplication")
+    
+
+  val cmd = Command(args: _*)
+  println(cmd)
+//val cmd = Command("/usr/local/scala/bin/scala", "maker.task.RemoteApplication")
   var remoteProcessID : ProcessID = null
   var proc : Process = null
 
@@ -96,7 +107,7 @@ class RemoteTaskManager() {
 
   def initialise{
     proc = cmd.execAsync
-    Thread.sleep(1000)
+    Thread.sleep(3000)
     system = ActorSystem("RemoteCreation", ConfigFactory.load.getConfig("remotecreation"))
     remoteActor = system.actorOf(AkkaProps[MyTaskManager], "taskManager")
     actor = system.actorOf(AkkaProps(new RTM_Actor(remoteActor)), "localActor")
