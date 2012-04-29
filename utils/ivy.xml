@@ -2,6 +2,8 @@
   <info organisation="${group_id}" module="utils" revision="${maker.module.version}" />
   <configurations>
     <conf name="default" transitive="false"/>
+    <conf name="compile" transitive="false"/>
+    <conf name="test" transitive="false"/>
   </configurations>
 
   <publications>

@@ -15,7 +15,12 @@
     <JAVADOC />
     <SOURCES>
       <root url="jar://$PROJECT_DIR$/libs/ivy-2.2.0-sources.jar!/" />
-      <root url="jar://$PROJECT_DIR$/maker-lib/scalatest_2.9.1-1.7.1-sources.jar!/" />
+      <root url="jar://$PROJECT_DIR$/.maker/lib/akka-actor-1.3.1-sources.jar!/" />
+      <root url="jar://$PROJECT_DIR$/.maker/lib/commons-io-2.1-sources.jar!/" />
+      <root url="jar://$PROJECT_DIR$/.maker/lib/log4j-1.2.16-sources.jar!/" />
+      <root url="jar://$PROJECT_DIR$/.maker/lib/scalatest_2.9.1-1.7.1-sources.jar!/" />
+      <root url="jar://$PROJECT_DIR$/.maker/lib/slf4j-api-1.6.1-sources.jar!/" />
+      <root url="jar://$PROJECT_DIR$/.maker/lib/slf4j-log4j12-1.6.1-sources.jar!/" />
     </SOURCES>
     <jarDirectory url="file://$PROJECT_DIR$/lib/resources" recursive="false" />
   </library>

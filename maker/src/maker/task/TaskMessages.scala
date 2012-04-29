@@ -60,19 +60,22 @@ case class BuildResult[+A](res : Either[TaskFailed, A],
 
   override def toString = res.toString
 
-  @inline final def flatMap[B](f : A => BuildResult[B]) : BuildResult[B] = {
+  @inline
+  final def flatMap[B](f : A => BuildResult[B]) : BuildResult[B] = {
     res match {
-      case l: Left[_, _] => BuildResult(l.asInstanceOf[Either[TaskFailed, B]], projectAndTasks, originalProjectAndTask)
+      case Left(l) =>
+        BuildResult(Left(l) : Either[TaskFailed, B], projectAndTasks, originalProjectAndTask)
       case Right(a) => {
-        val z: BuildResult[B] = f(a)
-        z.copy(projectAndTasks = projectAndTasks ++ z.projectAndTasks)
+        val br : BuildResult[B] = f(a)
+        br.copy(projectAndTasks = projectAndTasks ++ br.projectAndTasks)
       }
     }
   }
 
-  @inline final def map[B](f: A => B): BuildResult[B] = {
+  @inline
+  final def map[B](f: A => B): BuildResult[B] = {
     val mappedRes = res match {
-      case l: Left[_, _] => l.asInstanceOf[Either[TaskFailed, B]]
+      case Left(l) => Left(l) : Either[TaskFailed, B]
       case Right(_) => res.right.map(f)
     }
     BuildResult(mappedRes, projectAndTasks, originalProjectAndTask)
