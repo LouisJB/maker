@@ -3,7 +3,6 @@ package maker.project
 import java.io.File
 import java.lang.System
 import maker.task._
-import maker.utils.FileUtils._
 import maker.Props
 import java.util.Properties
 import java.net.URLClassLoader
@@ -13,6 +12,9 @@ import maker.utils._
 import maker.utils.Utils._
 import tasks._
 import maker.utils.ModuleId._
+import maker.utils.FileUtils._
+import org.apache.commons.io.FileUtils._
+import xml.NodeSeq
 
 trait ProjectDef {
   def name : String
@@ -50,6 +52,17 @@ case class Project(
   val packageDir = file(root, "package")
   val managedLibDir = file(root, managedLibDirName)
   val ivyFile = new File(root, ivyFileRel)
+  def ivyGeneratedFile : Option[File] = {
+    val genFile = file(root, nameAndExt(ivyFile)._1 + "-dynamic.ivy")
+    if (ivyFile.exists) {
+      copyFile(ivyFile, genFile)
+      val includes : List[NodeSeq] = allDeps.flatMap(_.additionalLibs).map(_.toIvyInclude)
+      val excludes : List[NodeSeq] = allDeps.map(_.moduleId.toIvyExclude) ::: allDeps.flatMap(_.additionalExcludedLibs.map(_.toIvyExclude))
+      replaceInFile(genFile, "${maker.module.excluded.libs}", (includes ::: excludes).mkString("\n"))
+      Some(genFile)
+    }
+    else None
+  }
   val makerDirectory = mkdirs(new File(root, ".maker"))
 
   val srcDirs : List[File] = if (sourceDirs.isEmpty) List(file(root, "src")) else sourceDirs

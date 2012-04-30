@@ -28,8 +28,13 @@ case object PublishLocalTask extends Task {
         .copy(gav = moduleDef.projectDef.moduleLibDef.gav.copy(version = Some(Version(v))))))
       case None => moduleDef
     }
-    PomWriter.writePom(project.ivyFile, project.ivySettingsFile, pomFile, confs, md, project.props.PomTemplateFile())
-    copyFileToDirectory(project.outputArtifact, moduleJarDir)
+    project.ivyGeneratedFile match {
+      case Some(ivyFile) => {
+        PomWriter.writePom(ivyFile, project.ivySettingsFile, pomFile, confs, md, project.props.PomTemplateFile())
+        copyFileToDirectory(project.outputArtifact, moduleJarDir)
+      }
+      case None => Log.info("No Ivy file, can't create a pom")
+    }
 
     Right("OK")
   }
