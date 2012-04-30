@@ -8,13 +8,13 @@ import java.io.File
 object Maker{
   val ivyFileName = "ivy.xml"
   val ivySettingsFile_ = file("ivysettings.xml")
-  val propsFile = Props(file("Maker.conf"))
+  val props = Props(file("Maker.conf"))
 
   def mkProject(name : String, libs : List[File] = Nil) = new Project(
     name, file(name),
     libDirs=libs,
     resourceDirs = List(file(name + "/resources")),
-    props = propsFile,
+    props = props,
     ivySettingsFile = ivySettingsFile_,
     ivyFileRel = ivyFileName
   )

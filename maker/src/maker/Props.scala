@@ -63,6 +63,7 @@ case class Props(private val overrides : Map[String, String] = Map()) {
   val scalaHomeEnv = Option(System.getenv("SCALA_HOME"))
   object ScalaHome extends FileProperty(scalaHomeEnv.getOrElse("/usr/local/scala/"))
   object JavaHome extends FileProperty(javaHomeEnv.getOrElse("/usr/local/jdk/"))
+  object Java extends FileProperty(JavaHome() + "/bin/java")
   object IvyJar extends FileProperty(
     MakerHome() + "/libs/ivy-2.2.0.jar"
   )

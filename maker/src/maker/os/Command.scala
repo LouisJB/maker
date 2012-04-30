@@ -92,3 +92,16 @@ object Command{
   def apply(file : File, args : String*) : Command = Command(TeeToFileOutputStream(file), true, None, args : _*)
   def apply(pwd : Option[File], args : String*) : Command = Command(System.out, false, pwd, args : _*)
 }
+
+object ScalaCommand{
+  def apply(classpath : String, klass : String, args : String*) : Command = {
+    val allArgs : List[String] = List(
+      maker.Maker.props.Java().getAbsolutePath,
+      "-Dscala.usejavacp=true",
+      "-classpath",
+      classpath,
+      "scala.tools.nsc.MainGenericRunner",
+      klass) ::: args.toList
+    Command(allArgs :_*)
+  }
+}
