@@ -99,7 +99,7 @@ case class Project(
   val compilers = ProjectCompilers(this)
   val dependencies = ProjectDependencies(this)
 
-  def projectAndDescendents = dependencies.descendents.toList
+  def projectAndDescendents = this :: dependencies.descendents.toList
 
   /**********************
     Tasks
