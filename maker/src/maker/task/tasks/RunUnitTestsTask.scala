@@ -71,7 +71,6 @@ case object RunUnitTestsTask extends Task {
         "org.scalatest.tools.Runner") ::: (List("-c", "-o", "-p", project.scalatestRunpath) ::: suiteParameters)
 
       val cmd = Command(args: _*)
-      println(cmd)
       val (result, msg) = cmd.exec()
 
       if (result == 0)

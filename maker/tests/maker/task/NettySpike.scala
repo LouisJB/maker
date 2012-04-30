@@ -30,6 +30,7 @@ import java.util.concurrent.atomic.AtomicReference
 import org.jboss.netty.channel.ExceptionEvent
 import java.util.concurrent.atomic.AtomicBoolean
 import maker.utils.Log
+import java.net.ConnectException
 
 case class Foo(
   x : AtomicReference[Any]
@@ -50,18 +51,10 @@ object NettySpike extends App{
     }
 
     override def exceptionCaught(ctx : ChannelHandlerContext, e : ExceptionEvent){
-      println("NettyClientHandler received exception " + e)
-      def printTraces(t : Throwable){
-        Option(t).foreach{
-          th ⇒ 
-            println("\nCaused by")
-            th.printStackTrace
-            printTraces(th.getCause)
-        }
+      e.getCause match {
+        case _ : ConnectException ⇒ // retries will be done
+        case _ ⇒ super.exceptionCaught(ctx, e)
       }
-      //printTraces(e.getCause)
-      ctx.sendUpstream(e)
-      //super.exceptionCaught(ctx, e)
     }
   }
 
@@ -123,8 +116,8 @@ object NettySpike extends App{
           Channels.pipeline(
             dummyDownstream,
             encoder,
-            dummyUpstream,
-            new NettyClientHandler(bootstrap, 10000)
+            new NettyClientHandler(bootstrap, 10000),
+            dummyUpstream
           )
         }
     })
@@ -147,6 +140,7 @@ object NettySpike extends App{
         println("Have connected")
         channelFuture
       } else{
+        println("Connection failed - will retry")
         Thread.sleep(500)
         openConnection(numTries + 1)
       }

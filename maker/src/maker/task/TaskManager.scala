@@ -15,101 +15,7 @@ import akka.util.Duration
 import akka.pattern.ask
 import akka.util.duration._
 
-//<<<<<<< HEAD
-//trait TaskResult
-//case object TaskSuccess extends TaskResult { 
-  //override def toString = "OK"
-  //}
-  //case class TaskError(reason : String, exception : Option[Throwable]) extends TaskResult {
-    //override def toString = "Task error, reason: " + reason + exception.map(e => ", exception " + e.getMessage).getOrElse("")
-  //}
-  //
-  //sealed trait BuildMessage
-  //case class ExecTaskMessage(projectTask : ProjectAndTask,
-    //acc : Map[Task, List[AnyRef]],
-    //parameters : Map[String, String] = Map()) extends BuildMessage
-  //case class TaskResultMessage(projectTask : ProjectAndTask, result : Either[TaskFailed, AnyRef]) extends BuildMessage
-  //case object StartBuild extends BuildMessage
-  //class Worker() extends Actor{
-    //def receive = {
-      //case ExecTaskMessage(projectTask : ProjectAndTask, acc : Map[Task, List[AnyRef]], parameters : Map[String, String]) => sender ! {
-        //try {
-          //TaskResultMessage(projectTask, projectTask.exec(acc, parameters))
-          //} catch {
-            //case e =>
-            //TaskResultMessage(projectTask, Left(TaskFailed(projectTask, e.getMessage)))
-            //}
-            //}
-            //}
-            //}
-            //
-            //case class BuildResult(res : Either[TaskFailed, AnyRef], projectAndTasks : Set[ProjectAndTask], originalProjectAndTask : ProjectAndTask) extends BuildMessage {
-              //import maker.graphviz.GraphVizDiGrapher._
-              //import maker.graphviz.GraphVizUtils._
-              //def stats = projectAndTasks.map(_.allStats).mkString("\n")
-              // 
-              //def resultTree(pt : ProjectAndTask = originalProjectAndTask) =
-              //pt.getTaskTree.map(p => (projectAndTasks.find(_ == p._1).get, p._2.map(pt => projectAndTasks.find(_ == pt).get)))
-              // 
-              //def showBuildGraph() : Option[File] =
-              //resultTree() match {
-                //case Nil | null => Log.info("No project results to graph"); None
-                //case r => Some(showGraph(makeDotFromProjectAndTask(r)))
-                //}
-                //
-                //override def toString = res.toString
-                //}
-                //
-                //class QueueManager(projectTasks : Set[ProjectAndTask], router : ActorRef,
-                  //||||||| merged common ancestors
-                  //trait TaskResult
-                  //case object TaskSuccess extends TaskResult { 
-                    //override def toString = "OK"
-                    //}
-                    //case class TaskError(reason : String, exception : Option[Throwable]) extends TaskResult {
-                      //override def toString = "Task error, reason: " + reason + exception.map(e => ", exception " + e.getMessage).getOrElse("")
-                    //}
-                    //
-                    //sealed trait BuildMessage
-                    //case class ExecTaskMessage(projectTask : ProjectAndTask,
-                      //acc : Map[Task, List[AnyRef]],
-                      //parameters : Map[String, String] = Map()) extends BuildMessage
-                    //case class TaskResultMessage(projectTask : ProjectAndTask, result : Either[TaskFailed, AnyRef]) extends BuildMessage
-                    //case object StartBuild extends BuildMessage
-                    //class Worker() extends Actor{
-                      //def receive = {
-                        //case ExecTaskMessage(projectTask : ProjectAndTask, acc : Map[Task, List[AnyRef]], parameters : Map[String, String]) => self reply {
-                          //try {
-                            //TaskResultMessage(projectTask, projectTask.exec(acc, parameters))
-                            //} catch {
-                              //case e =>
-                              //TaskResultMessage(projectTask, Left(TaskFailed(projectTask, e.getMessage)))
-                              //}
-                              //}
-                              //}
-                              //}
-                              //
-                              //case class BuildResult(res : Either[TaskFailed, AnyRef], projectAndTasks : Set[ProjectAndTask], originalProjectAndTask : ProjectAndTask) extends BuildMessage {
-                                //import maker.graphviz.GraphVizDiGrapher._
-                                //import maker.graphviz.GraphVizUtils._
-                                //def stats = projectAndTasks.map(_.allStats).mkString("\n")
-                                // 
-                                //def resultTree(pt : ProjectAndTask = originalProjectAndTask) =
-                                //pt.getTaskTree.map(p => (projectAndTasks.find(_ == p._1).get, p._2.map(pt => projectAndTasks.find(_ == pt).get)))
-                                // 
-                                //def showBuildGraph() : Option[File] =
-                                //resultTree() match {
-                                  //case Nil | null => Log.info("No project results to graph"); None
-                                  //case r => Some(showGraph(makeDotFromProjectAndTask(r)))
-                                  //}
-                                  //
-                                  //override def toString = res.toString
-                                  //}
-                                  //
-                                  //class QueueManager(projectTasks : Set[ProjectAndTask], router : ActorRef,
-                                    //=======
 class TaskManager(projectTasks : Set[ProjectAndTask], router : ActorRef,
-  //>>>>>>> origin/master
                    originalProjectAndTask : ProjectAndTask,
                    parameters : Map[String, String] = Map()) extends Actor {
 
@@ -181,22 +87,16 @@ object TaskManager{
 
   def apply(projectTasks : Set[ProjectAndTask], originalProjectAndTask : ProjectAndTask, parameters : Map[String, String]) : BuildResult[AnyRef] = {
     val system = ActorSystem("QueueManager")
-    Log.info("Queue manager - tasks = " + projectTasks.mkString(", "))
     val sw = Stopwatch()
     implicit val timeout = Timeout(1000000)
     def nWorkers = (Runtime.getRuntime.availableProcessors / 2) max 1
 
     Log.debug("Running with " + nWorkers + " workers")
     val router = system.actorOf(Props[Worker].withRouter(SmallestMailboxRouter(nWorkers)))
-      //val router = Routing.loadBalancerActor(CyclicIterator(workers)).start()
     val qm = system.actorOf(Props(new TaskManager(projectTasks, router, originalProjectAndTask, parameters)))
     val future = qm ? StartBuild
     val result = Await.result(future, Duration.Inf).asInstanceOf[BuildResult[AnyRef]]
 
-    //import akka.actor.PoisonPill
-    //qm ! PoisonPill
-    ////workers.foreach(_ ! PoisonPill)
-    //router ! PoisonPill
     system.shutdown()
     Log.debug("Stats: \n" + projectTasks.map(_.runStats).mkString("\n"))
     Log.info("Completed " + originalProjectAndTask + ", took" + sw + ", result " + result)

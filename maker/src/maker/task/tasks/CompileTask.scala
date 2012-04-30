@@ -35,9 +35,7 @@ abstract class CompileTask extends Task{
         classFiles =>
           if (classFiles.size > 0){
             info("Deleting " + classFiles.size + " class files")
-            classFiles.foreach(println)
             info("as they are associated with the deleted src files")
-            deletedSrcFiles_.foreach(println)
           }
           classFiles.foreach(_.delete)
       }

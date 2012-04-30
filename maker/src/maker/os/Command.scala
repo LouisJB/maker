@@ -52,7 +52,7 @@ case class Command(os : OutputStream, closeStream : Boolean, pwd : Option[File],
     try {
       val br = new BufferedReader(new InputStreamReader(proc.getInputStream))
       ps = new PrintWriter(os, true)
-      if (closeStream) ps.println("Executing command:\n%s\n".format(asString)) 
+    //if (closeStream) ps.println("Executing command:\n%s\n".format(asString)) 
       var line : String = null
   } finally {
       if (ps != null) {
@@ -63,7 +63,7 @@ case class Command(os : OutputStream, closeStream : Boolean, pwd : Option[File],
     (proc.waitFor, buf.toString)
   }
   def exec() : (Int, String) = {
-    Log.info("Executing cmd (async = " + false + ") - " + toString)
+    //Log.info("Executing cmd (async = " + false + ") - " + toString)
     val procBuilder = new ProcessBuilder(args : _*)
     procBuilder.redirectErrorStream(true)
     val proc = procBuilder.start
