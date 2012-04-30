@@ -149,6 +149,7 @@ bootstrap() {
 
   pushd $MAKER_OWN_ROOT_DIR  # Shouldn't be necessary to change dir, but get weird compilation errors otherwise
   MAKER_OWN_CLASS_OUTPUT_DIR=$MAKER_OWN_ROOT_DIR/out
+  MAKER_OWN_RESOURCES_DIR=$MAKER_OWN_ROOT_DIR/utils/resources
   MAKER_OWN_JAR=$MAKER_OWN_ROOT_DIR/maker.jar
 
   rm -rf $MAKER_OWN_CLASS_OUTPUT_DIR
@@ -163,7 +164,7 @@ bootstrap() {
   echo "Compiling"
   $SCALA_HOME/bin/fsc -classpath $(external_jars) -d $MAKER_OWN_CLASS_OUTPUT_DIR $SRC_FILES | tee $MAKER_OWN_ROOT_DIR/vim-compile-output ; test ${PIPESTATUS[0]} -eq 0 || exit -1
   echo "Building jar"
-  run_command "$JAVA_HOME/bin/jar cf $MAKER_OWN_JAR -C $MAKER_OWN_CLASS_OUTPUT_DIR ." || exit -1
+  run_command "$JAVA_HOME/bin/jar cf $MAKER_OWN_JAR -C $MAKER_OWN_CLASS_OUTPUT_DIR . -C $MAKER_OWN_RESOURCES_DIR ." || exit -1
   if [ ! -e $MAKER_OWN_ROOT_DIR/maker.jar ];
   then
 	  echo "Maker jar failed to be created"
