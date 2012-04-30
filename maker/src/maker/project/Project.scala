@@ -10,9 +10,19 @@ import java.net.URLClassLoader
 import maker.graphviz.GraphVizUtils._
 import maker.graphviz.GraphVizDiGrapher._
 import maker.utils._
+import maker.utils.Utils._
 import tasks._
 import maker.utils.ModuleId._
 
+trait ProjectDef {
+  def name : String
+  def root : File
+}
+
+/**
+ * Main maker project, defines a software build module.
+ *   most params have default values and can be omitted as necessary
+ */
 case class Project(
       name: String,
       root: File,
@@ -32,7 +42,7 @@ case class Project(
       moduleIdentity : Option[GroupAndArtifact] = None,
       additionalLibs : List[GAV] = Nil,
       additionalExcludedLibs : List[GAV] = Nil,
-      providedLibs : List[String] = Nil) {
+      providedLibs : List[String] = Nil) extends ProjectDef {
 
   val outputDir = file(root, "classes")
   val javaOutputDir = file(root, "java-classes")
@@ -47,8 +57,8 @@ case class Project(
   val jarDirs : List[File] = if (libDirs.isEmpty) List(file(root, "lib"), managedLibDir) else libDirs
   val moduleId : GroupAndArtifact = if (moduleIdentity.isEmpty) name % name else moduleIdentity.get
 
+  // convenience copy functions
   def dependsOn(projects: Project*) = copy(children = children ::: projects.toList)
- 
   def withResourceDirs(dirs : List[File]) : Project = copy(resourceDirs = dirs)
   def withResourceDirs(dirs : String*) : Project = withResourceDirs(dirs.map(d => file(root, d)).toList)
   def withAdditionalSourceDirs(dirs : String*) = copy(sourceDirs = dirs.toList.map(d => file(root, d)) ::: this.sourceDirs)
@@ -57,21 +67,6 @@ case class Project(
   def withProvidedLibDirs(dirs : String*) = copy(providedLibDirs = dirs.toList.map(d => file(root, d)) ::: this.providedLibDirs)
   def setAdditionalExcludedLibs(libs : GAV*) = copy(additionalExcludedLibs = libs.toList)
   def withProvidedLibs(libNames : String*) = copy(providedLibs = libNames.toList ::: this.providedLibs)
-
-  def allDeps : List[Project] = this :: children.flatMap(_.allDeps).sortWith(_.name < _.name)
-  def isDependentOn(project : Project) = allDeps.exists(p => p == project)
-  def dependsOnPaths(project : Project) : List[List[Project]] = {
-    def depends(currentProject : Project, currentPath : List[Project], allPaths : List[List[Project]]) : List[List[Project]] = {
-      if (project == currentProject) (currentProject :: currentPath).reverse :: allPaths
-      else {
-        currentProject.children match {
-          case Nil => Nil
-          case ps => ps.flatMap(p => depends(p, currentProject :: currentPath, allPaths))
-        }
-      }
-    }
-    depends(this, Nil, Nil)
-  }
 
   def srcFiles() = findSourceFiles(srcDirs: _*)
   def testSrcFiles() = findSourceFiles(testDirs: _*)
@@ -92,7 +87,6 @@ case class Project(
 
   def classLoader = {
     val urls = classpathDirectoriesAndJars.map(_.toURI.toURL).toArray
-    //urls.foreach(println)
     new URLClassLoader(urls, null)
   }
 
@@ -105,24 +99,33 @@ case class Project(
   val compilers = ProjectCompilers(this)
   val dependencies = ProjectDependencies(this)
 
+  def projectAndDescendents = dependencies.descendents.toList
+
   /**********************
     Tasks
   **********************/
-  def projectAndDescendents = this::dependencies.descendents.toList
+  def mkTask(t : Task) = ProjectAndTask(this, t)
+
   def clean = TaskManager(projectAndDescendents, CleanTask)
   def cleanOnly = TaskManager(List(this), CleanTask)
+
   def compile = TaskManager(projectAndDescendents, CompileSourceTask)
-//  def javaCompile = TaskManager(projectAndDescendents, CompileSourceTask)
+
   def testCompile = TaskManager(projectAndDescendents, CompileTestsTask)
   def test = TaskManager(projectAndDescendents, RunUnitTestsTask)
   def testOnly = TaskManager(List(this), RunUnitTestsTask)
   def testClassOnly(testClassNames : String*) = TaskManager(List(this), RunUnitTestsTask, Map("testClassOrSuiteName" -> testClassNames.mkString(":")))
+
   def pack = TaskManager(projectAndDescendents, PackageTask)
   def packOnly = TaskManager(List(this), PackageTask)
-  def update = TaskManager(projectAndDescendents, UpdateTask)
-  def updateOnly = TaskManager(List(this), UpdateTask)
 
-  // work in progress - incomplete tasks
+  def withDefaultConfig = withNelDefault("default") _
+
+  def update : BuildResult[AnyRef] = update("default")
+  def update(configurations : String*) = TaskManager(projectAndDescendents, UpdateTask, Map("configurations" -> withDefaultConfig(configurations.toList).mkString(":")))
+  def updateOnly : BuildResult[AnyRef] = updateOnly("default")
+  def updateOnly(configurations : String*) = TaskManager(List(this), UpdateTask, Map("configurations" -> withDefaultConfig(configurations.toList).mkString(":")))
+
   def publishLocal : BuildResult[AnyRef] = publishLocal()
   def publishLocal(configurations : String = "default", version : String = props.Version()) =
     publishLocal_(projectAndDescendents, configurations, version)
@@ -147,6 +150,17 @@ case class Project(
     r
   }
 
+  def cleanManagedLibs =
+    Option(managedLibDir.listFiles).map(_.foreach(_.delete))
+
+  def cleanAllManagedLibs =
+    (this :: projectAndDescendents).map(_.cleanManagedLibs)
+
+  def delete = recursiveDelete(root)
+
+  def findLibs(libName : String) =
+    classpathDirectoriesAndJars.filter(f => f.getName.contains(libName)).foreach(println)
+
   def ~ (task : () => BuildResult[AnyRef]) {
     var lastTaskTime : Option[Long] = None
     def printWaitingMessage = println("\nWaiting for source file changes (press 'enter' to interrupt)")
@@ -167,27 +181,34 @@ case class Project(
       projectAndDescendents.map{proj => proj.state.lastModificationTime(proj.srcFiles ++ proj.testSrcFiles ++ proj.javaSrcFiles)}.max
     }
     printWaitingMessage
-    while (true){
+    while (true) {
       Thread.sleep(1000)
-      if (System.in.available  > 0 && System.in.read == 10)
-        return;
-
-      if (anySourceFileHasChanged){
+      if (System.in.available  > 0 && System.in.read == 10) return
+      if (anySourceFileHasChanged) {
         (lastTaskTime,  lastSrcModificationTime) match {
-          // Task has never been run
-          case (None, _) => { rerunTask }
-
-          // Code has changed since task last run
-          case (Some(t1), Some(t2)) if t1 < t2 => { rerunTask }
-
-          // Either no code yet or code has not changed
-          case _ =>
+          case (None, _) => { rerunTask }                       // Task has never been run
+          case (Some(t1), Some(t2)) if t1 < t2 => { rerunTask } // Code has changed since task last run
+          case _ =>                                             // Either no code yet or code has not changed
         }
       }
     }
   }
 
-  def mkTask(t : Task) = ProjectAndTask(this, t)
+  // utils and project / dependency related queries
+  def allDeps : List[Project] = this :: children.flatMap(_.allDeps).sortWith(_.name < _.name)
+  def isDependentOn(project : Project) = allDeps.exists(p => p == project)
+  def dependsOnPaths(project : Project) : List[List[Project]] = {
+    def depends(currentProject : Project, currentPath : List[Project], allPaths : List[List[Project]]) : List[List[Project]] = {
+      if (project == currentProject) (currentProject :: currentPath).reverse :: allPaths
+      else {
+        currentProject.children match {
+          case Nil => Nil
+          case ps => ps.flatMap(p => depends(p, currentProject :: currentPath, allPaths))
+        }
+      }
+    }
+    depends(this, Nil, Nil)
+  }
 
   def showDependencyProjectGraph(depth : Int = 100, showLibDirs : Boolean = false, showLibs : Boolean = false) = {
     def dependentProjects(project : Project, depth : Int) : List[(Project, List[Project])] = {
@@ -201,6 +222,7 @@ case class Project(
     showGraph(makeDotFromString(dependentLibs))
   }
 
+  // some ivy/maven related utils
   import maker.utils.maven._
   import maker.utils.ivy.IvyReader
   def readIvyDependencies() : List[DependencyLib] = {
@@ -220,11 +242,6 @@ case class Project(
       Nil
     }
   }
-
-  def delete = recursiveDelete(root)
-
-  def findLibs(libName : String) = 
-    classpathDirectoriesAndJars.filter(f => f.getName.contains(libName)).foreach(println)
 
   // maven / ivy integration
   import maker.utils.maven._
