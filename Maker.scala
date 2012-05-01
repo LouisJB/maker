@@ -9,8 +9,8 @@ val MAKER_VERSION = ".1"
 System.setProperty("scala.usejavacp", "false")
 System.setProperty("log4j.ignoreTCL", "true")
 
-val ivyFileName = "ivy.xml"
-val ivySettingsFile_ = file("ivysettings.xml")
+val ivyFileName = "maker-ivy.xml"
+val ivySettingsFile_ = file("maker-ivysettings.xml")
 val propsFile = Props(file("Maker.conf"))
 
 def mkProject(name : String, libs : List[File] = Nil) = new Project(

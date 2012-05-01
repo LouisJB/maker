@@ -271,7 +271,7 @@ ivy_command(){
     command="$command -Dhttp.nonProxyHosts=$MAKER_IVY_NON_PROXY_HOSTS"
   fi
   command="$command -jar $MAKER_IVY_JAR -ivy $ivy_file"
-  command="$command -settings $MAKER_OWN_ROOT_DIR/ivysettings.xml "
+  command="$command -settings $MAKER_OWN_ROOT_DIR/maker-ivysettings.xml "
   command="$command -retrieve $lib_dir/[artifact]-[revision](-[classifier]).[ext] "
   echo $command
 }
@@ -279,7 +279,7 @@ ivy_command(){
 
 ivy_update() {
   echo "Updating ivy"
-  MAKER_IVY_FILE="$MAKER_OWN_ROOT_DIR/ivy.xml"
+  MAKER_IVY_FILE="$MAKER_OWN_ROOT_DIR/maker-ivy.xml"
   run_command "$(ivy_command $MAKER_IVY_FILE $MAKER_OWN_LIB_DIR) -types jar -sync"
   run_command "$(ivy_command $MAKER_IVY_FILE $MAKER_OWN_LIB_DIR) -types bundle"
   run_command "$(ivy_command $MAKER_IVY_FILE $MAKER_OWN_LIB_DIR) -types source "

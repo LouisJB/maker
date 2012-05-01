@@ -38,8 +38,8 @@ case class Project(
       props : Props = Props(),
       unmanagedProperties : Properties = new Properties(),
       description : Option[String] = None,
-      ivySettingsFile : File = file("maker-ivysettings.xml"), // assumption this is typically absolute and module ivy is relative, this might be invalid?
-      ivyFileRel : String = "maker-ivy.xml",
+      ivySettingsFile : File = file("ivysettings.xml"), // assumption this is typically absolute and module ivy is relative, this might be invalid?
+      ivyFileRel : String = "ivy.xml",
       webAppDir : Option[File] = None,
       moduleIdentity : Option[GroupAndArtifact] = None,
       additionalLibs : List[GAV] = Nil,
