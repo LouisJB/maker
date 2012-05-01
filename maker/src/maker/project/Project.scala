@@ -158,7 +158,7 @@ case class Project(
     TaskManager(projects, PublishTask, Map("publishResolver" -> resolver, "version" -> version))
 
   def runMain(className : String)(opts : String*)(args : String*) = {
-    val r = TaskManager(List(this), RunMainTask, Map("mainClassName" -> className, "opts" -> opts.mkString("|") , "args" -> args.mkString("|")))
+    val r = TaskManager(List(this), RunMainTask, Map("mainClassName" -> className, "opts" -> opts.mkString(":") , "args" -> args.mkString("|")))
     println("runMain task completed for class: " + className)
     r
   }
@@ -167,7 +167,7 @@ case class Project(
     Option(managedLibDir.listFiles).map(_.foreach(_.delete))
 
   def cleanAllManagedLibs =
-    (this :: projectAndDescendents).map(_.cleanManagedLibs)
+    projectAndDescendents.map(_.cleanManagedLibs)
 
   def delete = recursiveDelete(root)
 
