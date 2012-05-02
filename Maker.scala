@@ -21,7 +21,7 @@ def mkProject(name : String, libs : List[File] = Nil) = new Project(
   ivyFileRel = ivyFileName
 )
 
-lazy val utils = mkProject("utils", List(file("utils/maker-lib"), file("libs/")))
+lazy val utils = mkProject("utils", List(file("utils/lib_managed"), file("libs/")))
 lazy val plugin = mkProject("plugin") dependsOn utils
 lazy val makerProj = mkProject("maker") dependsOn plugin
 

@@ -32,7 +32,7 @@ case class Project(
       tstDirs: List[File] = Nil,
       libDirs: List[File] = Nil,
       providedLibDirs: List[File] = Nil, // compile time only, don't add to runtime classpath or any packaging
-      managedLibDirName : String = "maker-lib",
+      managedLibDirName : String = "lib_managed",
       resourceDirs : List[File] = Nil,
       children: List[Project] = Nil,
       props : Props = Props(),
