@@ -68,7 +68,7 @@ case class Project(
   val srcDirs : List[File] = if (sourceDirs.isEmpty) List(file(root, "src")) else sourceDirs
   val testDirs : List[File] = if (tstDirs.isEmpty) List(file(root, "tests")) else tstDirs
   val jarDirs : List[File] = if (libDirs.isEmpty) List(file(root, "lib"), managedLibDir) else libDirs
-  val moduleId : GroupAndArtifact = if (moduleIdentity.isEmpty) name % name else moduleIdentity.get
+  val moduleId : GroupAndArtifact = if (moduleIdentity.isEmpty) props.GroupId() % name else moduleIdentity.get
 
   // convenience copy functions
   def dependsOn(projects: Project*) = copy(children = children ::: projects.toList)

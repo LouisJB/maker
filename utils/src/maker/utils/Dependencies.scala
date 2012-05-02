@@ -4,6 +4,16 @@ import org.apache.ivy.ant.IvyMakePom
 import org.apache.ivy.plugins.parser.m2.PomWriterOptions
 import xml.Elem
 
+trait Scope
+case object Compile extends Scope
+case object Test extends Scope
+case object Provided extends Scope
+
+case class ScalaVersion(version : Version)
+object ScalaVersion {
+  def apply(version : String) : ScalaVersion = ScalaVersion(Version(version))
+}
+
 // mvn group -> artifact -> version <-> ivy org -> name -> rev
 object ModuleId {
   implicit def toGroupId(id : String) : GroupId = new GroupId(id)
@@ -12,6 +22,7 @@ object ModuleId {
 }
 case class GroupId(id : String) {
   def %(artifactId : String) = GroupAndArtifact(this, ArtifactId(artifactId))
+  def %%(artifactId : String)(implicit scalaVersion : ScalaVersion) = GroupAndArtifact(this, ArtifactId(artifactId + "_" + scalaVersion.version.version))
 }
 case class ArtifactId(id : String)
 trait GAV {
@@ -20,6 +31,7 @@ trait GAV {
   val version : Option[Version] = None
   def toGroupAndArtifact = GroupAndArtifact(groupId, artifactId)
   def toGroupArtifactAndVersion = GroupArtifactAndVersion(groupId, artifactId, None)
+  def withVersion(version : Version) = GroupArtifactAndVersion(groupId, artifactId, Some(version))
 
   def toIvyInclude : Elem = <dependency org={groupId.id} name={artifactId.id} rev={version.map(v => xml.Text(v.version))} />
   def toIvyExclude : Elem = <exclude org={groupId.id} module={artifactId.id} />
