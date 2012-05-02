@@ -40,6 +40,7 @@ object PomWriter {
     ivy.configure(ivySettingsFile)
     val moduleVersion = moduleDef.projectDef.moduleLibDef.version
     ivy.setVariable("maker.module.version", moduleVersion)
+    ivy.setVariable("maker.module.groupid", moduleDef.projectDef.moduleLibDef.gav.groupId.id)
     // add necessary 'context' variables for an OSS compliant POM, todo - make all actual properties...
     val contextSettings = IvyContext.getContext().getSettings()
     contextSettings.setVariable("maker.licenses", moduleDef.licenses, true)
