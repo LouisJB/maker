@@ -2,7 +2,7 @@ package maker.task.tasks
 
 import maker.project.Project
 import maker.utils.Log
-import maker.utils.FileUtils
+import maker.utils.FileUtils._
 import maker.task.Task
 
 case object CleanTask extends Task {
@@ -12,7 +12,8 @@ case object CleanTask extends Task {
     project.testClassFiles.foreach(_.delete)
     project.javaClassFiles.foreach(_.delete)
     project.outputArtifact.delete
-    FileUtils.recursiveDelete(project.makerDirectory)
+    recursiveDelete(project.packagingRoot)
+    recursiveDelete(project.makerDirectory)
     Right(Unit)
   }
 }

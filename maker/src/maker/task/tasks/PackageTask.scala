@@ -4,14 +4,14 @@ import maker.project.Project
 import maker.utils.FileUtils._
 import maker.os.Command
 import maker.utils.Log
-import org.apache.commons.io.FileUtils._
 import maker.utils.Utils._
 import maker.task.{ProjectAndTask, TaskFailed, Task}
+import org.apache.commons.io.FileUtils._
 
 /**
  * Packages this project and its children
  * handles jars and wars, war is triggered by the presence of a web app directory (which is presumed contains the
- * WEB-INF/web.xml and other essential webapp content)
+ *   WEB-INF/web.xml and other essential webapp content)
  */
 case object PackageTask extends Task {
   def exec(project: Project, acc: List[AnyRef], parameters: Map[String, String] = Map()) = {
@@ -55,7 +55,7 @@ case object PackageTask extends Task {
         Log.info("Packaging web app, web app dir = " + webAppDir.getAbsolutePath)
 
         // build up the war structure image so we can make a web archive from it...
-        val warImage = file(project.root, "package/webapp")
+        val warImage = file(project.packagingRoot, "webapp")
 
         doPackage {
           Log.info("Making war image..." + warImage.getAbsolutePath)
