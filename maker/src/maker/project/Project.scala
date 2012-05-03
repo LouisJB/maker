@@ -276,9 +276,9 @@ case class Project(
   def moduleDef : ModuleDef = {
     val deps : List[DependencyLib] = readIvyDependencies()
     val repos : List[MavenRepository] = readIvyResolvers()
-    val moduleLibDef = DependencyLib(name, props.GroupId() % name % props.Version(), "compile", None)
+    val moduleLibDef = DependencyLib(name, moduleId % props.Version(), "compile", None)
     val moduleDeps = {
-      val childLibs = children.map(c => DependencyLib(name, props.GroupId() % c.name % props.Version(), "compile", None))
+      val childLibs = children.map(c => DependencyLib(name, c.moduleId % props.Version(), "compile", None))
       if (hasScala)
         DependencyLib(name, "org.scala-lang" % "scala-library" % props.ScalaVersion(), "compile", None) :: childLibs
       else

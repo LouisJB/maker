@@ -3,18 +3,20 @@ package maker.task.tasks
 import maker.utils.FileUtils._
 import maker.project._
 import maker.utils.Log
+import maker.task.{ProjectAndTask, TaskFailed, Task}
 import java.util.Date
 import org.apache.ivy.core.publish.PublishOptions
 import org.apache.ivy.util.filter.FilterHelper
 import org.apache.ivy.core.resolve.ResolveOptions
 import org.apache.ivy.Ivy
-import maker.task.{ProjectAndTask, TaskFailed, Task}
+
 
 case object PublishTask extends Task {
   def exec(project: Project, acc: List[AnyRef], parameters: Map[String, String] = Map()) = {
 
     val homeDir = project.props.HomeDir()
-    val moduleLocal = file(homeDir, ".ivy2/maker-local/" + project.name)
+    val moduleLocal = file(homeDir, ".ivy2/maker-local/" + project.moduleDef.projectDef.moduleLibDef.gav.toPath)
+    Log.debug("moduleLocal is: " + moduleLocal.getAbsolutePath)
 
     // paceholder, todo, implement some automation equivalent to:
     // $ java -Dhttp.proxyHost=host -Dhttp.proxyPort=port -Dhttp.nonProxyHosts=
@@ -32,6 +34,9 @@ case object PublishTask extends Task {
           val settings = ivy.getSettings
           settings.addAllVariables(System.getProperties)
           ivy.configure(project.ivySettingsFile)
+
+          ivy.setVariable("maker.module.groupid", project.moduleDef.projectDef.moduleLibDef.gav.groupId.id)
+
           settings.setVariable("maker.ivy.publish.username", project.props.Username(), true)
           settings.setVariable("maker.ivy.publish.password", project.props.Password(), true)
           val report = ivy.resolve(ivyFile.toURI().toURL(), resolveOptions)
@@ -39,20 +44,26 @@ case object PublishTask extends Task {
 
           val resolverName = parameters.getOrElse("publishResolver", project.props.DefaultPublishResolver().getOrElse("default"))
           val version = parameters.getOrElse("version", project.props.Version())
-          //project.managedLibDir.getPath + "/[artifact]-[revision](-[classifier]).[ext]",
+
           import scala.collection.JavaConversions._
+
+          val po = new PublishOptions()
+                        .setConfs(confs).setOverwrite(true)
+                        .setPubrevision(version)
+                        .setPubdate(new Date())
+
           val srcArtifactPattern = List(
-            moduleLocal.getAbsolutePath + "/poms/pom.xml",
-            moduleLocal.getAbsolutePath + "/jars/" + project.name + ".jar")
+            moduleLocal.getAbsolutePath + "/[type]s/pom.xml",
+            moduleLocal.getAbsolutePath + "/[type]s/" + project.moduleId.artifactId.id + ".jar")
+
           Log.info("Publish for project" + project.name)
+
           ivy.publish(
             md.getModuleRevisionId(),
             srcArtifactPattern,
             resolverName,
-            new PublishOptions()
-              .setConfs(confs).setOverwrite(true)
-              .setPubrevision(version)
-              .setPubdate(new Date()))
+            po)
+
           Right("OK")
         }
         case _ => {
