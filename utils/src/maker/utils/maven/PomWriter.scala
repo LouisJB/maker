@@ -52,6 +52,7 @@ object PomWriter {
     Log.debug("In writePom using ivy " + moduleVersion)
     val pomWriterOptions : PomWriterOptions = {
       val deps : List[PomWriterOptions.ExtraDependency] = moduleDef.projectDef.dependencyModules.map(_.toIvyPomWriterExtraDependencies)
+      Log.debug("deps:\n" + deps.map(d ⇒ d.getGroup + ":" + d.getArtifact + ":" + d.isOptional.toString).mkString(", "))
       val pwo = ((new PomWriterOptions)
         .setConfs(confs.split(",").map(_.trim))
         .setArtifactName(moduleDef.projectDef.moduleLibDef.name)

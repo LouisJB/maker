@@ -6,7 +6,6 @@ import maker.utils.maven._
 import maker.project._
 import maker.utils.{Version, Log}
 import maker.task.Task
-import java.io.File
 
 case object PublishLocalTask extends Task {
   def exec(project: Project, acc: List[AnyRef], parameters: Map[String, String] = Map()) = {
