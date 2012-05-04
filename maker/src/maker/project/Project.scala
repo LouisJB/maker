@@ -164,6 +164,13 @@ case class Project(
     r
   }
 
+  def runJetty : BuildResult[AnyRef] = runJetty()
+  def runJetty(portNo : Int = 8080) = {
+    val r = TaskManager(List(this), RunJettyTask, Map("portNo" -> portNo.toString))
+    println("runJetty task completed")
+    r
+  }
+
   def cleanManagedLibs = {
     Option(managedLibDir.listFiles).map(_.foreach(_.delete))
     ivyGeneratedFile.map(f => if (f.exists) f.delete) // delete this as well since it's regenerated on the fly during update

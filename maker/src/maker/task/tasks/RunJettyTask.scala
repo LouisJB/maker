@@ -15,21 +15,36 @@ case object RunJettyTask extends Task {
       case Some(webAppDir) => {
         Log.info("running webapp of project " + project.name)
 
-        val httpPort = parameters.get("portNo").map(_.toInt).getOrElse(8080)
+        val httpPort = parameters.getOrElse("portNo", "8080").toInt
         val warFile = project.outputArtifact
         val server = new Server(httpPort)
+
+        val contextPath = "/" + project.name
+        val webAppCtx = new WebAppContext(warFile.getAbsolutePath, contextPath)
+        webAppCtx.setServer(server)
+
+        // run a standard java-ee classloader strategy, maker env provides suitable container classpath for servlets etc
+        webAppCtx.setParentLoaderPriority(false)
+        server.setHandler(webAppCtx)
 
         Log.info("Starting HTTP on port: " + httpPort)
         server.start()
 
-        val contextPath = "/" + warFile.getName.split('.').init.mkString(".")
-        val webAppCtx = new WebAppContext(warFile.getAbsolutePath, contextPath)
+        //Log.info("Starting war context at " + contextPath + ", from " + warFile.getAbsolutePath)
+        //webAppCtx.start()
 
-        webAppCtx.setParentLoaderPriority(false)
+        Log.info("Press ctrl-] to end...")
 
-        Log.info("Starting war context at " + contextPath + ", from " + warFile.getAbsolutePath)
-        webAppCtx.start()
-
+        def wait() {
+          while (server.isRunning) {
+            Thread.sleep(1000)
+            if (System.in.available  > 0 && System.in.read == 29 /* ctrl-] */) {
+              server.stop()
+              return
+            }
+          }
+        }
+        wait()
         Right("OK")
       }
       case None => {

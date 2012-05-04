@@ -31,8 +31,13 @@
     <dependency org="org.eclipse.jetty" name="jetty-security" rev="${jetty_version}" />
     <dependency org="org.eclipse.jetty" name="jetty-http" rev="${jetty_version}" />
     <dependency org="org.eclipse.jetty" name="jetty-io" rev="${jetty_version}" />
-    
+    <dependency org="org.eclipse.jetty" name="jetty-xml" rev="${jetty_version}" />
+    <dependency org="org.eclipse.jetty" name="jetty-continuation" rev="${jetty_version}" />
+    <dependency org="org.eclipse.jetty" name="jetty-jsp" rev="${jetty_version}" />
+
+    <dependency org="org.mortbay.jetty" name="jsp-2.1-glassfish" rev="2.1.v20100127" />
     <dependency org="javax.servlet" name="servlet-api" rev="2.5" />
+    <dependency org="org.apache.tomcat" name="jsp-api" rev="6.0.20" />
 
   </dependencies>
 </ivy-module>

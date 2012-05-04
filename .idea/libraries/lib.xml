@@ -19,6 +19,7 @@
       <root url="jar://$PROJECT_DIR$/.maker/lib/jetty-io-7.6.3.v20120416.jar!/" />
       <root url="jar://$PROJECT_DIR$/.maker/lib/jetty-security-7.6.3.v20120416.jar!/" />
       <root url="jar://$PROJECT_DIR$/.maker/lib/jetty-servlet-7.6.3.v20120416.jar!/" />
+      <root url="jar://$PROJECT_DIR$/.maker/lib/jsp-2.1-glassfish-2.1.v20100127.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES>
