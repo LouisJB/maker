@@ -11,4 +11,4 @@ GTAGS
 maker.jar
 vim-compile-output
 lib_managed
-maker-ivy-dynamic.ivy
+*ivy-dynamic.ivy

@@ -11,6 +11,14 @@
       <root url="jar://$PROJECT_DIR$/libs/ivy-2.2.0.jar!/" />
       <root url="jar://$PROJECT_DIR$/.maker/lib/scalatest_2.9.1-1.7.1.jar!/" />
       <root url="jar://$PROJECT_DIR$/.maker/lib/ant-1.8.2.jar!/" />
+      <root url="jar://$PROJECT_DIR$/.maker/lib/jetty-server-7.6.3.v20120416.jar!/" />
+      <root url="jar://$PROJECT_DIR$/.maker/lib/jetty-webapp-7.6.3.v20120416.jar!/" />
+      <root url="jar://$PROJECT_DIR$/.maker/lib/jetty-util-7.6.3.v20120416.jar!/" />
+      <root url="jar://$PROJECT_DIR$/.maker/lib/servlet-api-2.5.jar!/" />
+      <root url="jar://$PROJECT_DIR$/.maker/lib/jetty-http-7.6.3.v20120416.jar!/" />
+      <root url="jar://$PROJECT_DIR$/.maker/lib/jetty-io-7.6.3.v20120416.jar!/" />
+      <root url="jar://$PROJECT_DIR$/.maker/lib/jetty-security-7.6.3.v20120416.jar!/" />
+      <root url="jar://$PROJECT_DIR$/.maker/lib/jetty-servlet-7.6.3.v20120416.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES>
@@ -21,6 +29,14 @@
       <root url="jar://$PROJECT_DIR$/.maker/lib/scalatest_2.9.1-1.7.1-sources.jar!/" />
       <root url="jar://$PROJECT_DIR$/.maker/lib/slf4j-api-1.6.1-sources.jar!/" />
       <root url="jar://$PROJECT_DIR$/.maker/lib/slf4j-log4j12-1.6.1-sources.jar!/" />
+      <root url="jar://$PROJECT_DIR$/.maker/lib/jetty-server-7.6.3.v20120416-sources.jar!/" />
+      <root url="jar://$PROJECT_DIR$/.maker/lib/jetty-webapp-7.6.3.v20120416-sources.jar!/" />
+      <root url="jar://$PROJECT_DIR$/.maker/lib/jetty-util-7.6.3.v20120416-sources.jar!/" />
+      <root url="jar://$PROJECT_DIR$/.maker/lib/servlet-api-2.5-sources.jar!/" />
+      <root url="jar://$PROJECT_DIR$/.maker/lib/jetty-http-7.6.3.v20120416-sources.jar!/" />
+      <root url="jar://$PROJECT_DIR$/.maker/lib/jetty-io-7.6.3.v20120416-sources.jar!/" />
+      <root url="jar://$PROJECT_DIR$/.maker/lib/jetty-security-7.6.3.v20120416-sources.jar!/" />
+      <root url="jar://$PROJECT_DIR$/.maker/lib/jetty-servlet-7.6.3.v20120416-sources.jar!/" />
     </SOURCES>
     <jarDirectory url="file://$PROJECT_DIR$/lib/resources" recursive="false" />
   </library>
