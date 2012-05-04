@@ -3,6 +3,7 @@ package maker.utils
 import org.apache.ivy.ant.IvyMakePom
 import org.apache.ivy.plugins.parser.m2.PomWriterOptions
 import xml.Elem
+import java.io.File
 
 trait Scope
 case object Compile extends Scope
@@ -43,6 +44,7 @@ case class GroupAndArtifact(groupId : GroupId, artifactId : ArtifactId) extends 
 case class Version(version : String)
 case class GroupArtifactAndVersion(groupId : GroupId, artifactId : ArtifactId, override val version : Option[Version]) extends GAV {
   override def toString = groupId.id + ":" + artifactId.id + ":" + version.map(_.version).getOrElse("")
+  def toPath = groupId.id + File.separator + artifactId.id
 }
 
 /**

@@ -2,17 +2,17 @@ package maker.project
 
 import java.io.File
 import java.lang.System
-import maker.task._
-import maker.Props
 import java.util.Properties
 import java.net.URLClassLoader
+import maker.task._
+import maker.Props
 import maker.graphviz.GraphVizUtils._
 import maker.graphviz.GraphVizDiGrapher._
 import maker.utils._
 import maker.utils.Utils._
-import tasks._
 import maker.utils.ModuleId._
 import maker.utils.FileUtils._
+import tasks._
 import org.apache.commons.io.FileUtils._
 import xml.NodeSeq
 
@@ -69,6 +69,7 @@ case class Project(
   val testDirs : List[File] = if (tstDirs.isEmpty) List(file(root, "tests")) else tstDirs
   val jarDirs : List[File] = if (libDirs.isEmpty) List(file(root, "lib"), managedLibDir) else libDirs
   val moduleId : GroupAndArtifact = if (moduleIdentity.isEmpty) props.GroupId() % name else moduleIdentity.get
+  val packagingRoot = file(root, "package")
 
   // convenience copy functions
   def dependsOn(projects: Project*) = copy(children = children ::: projects.toList)
@@ -158,16 +159,28 @@ case class Project(
     TaskManager(projects, PublishTask, Map("publishResolver" -> resolver, "version" -> version))
 
   def runMain(className : String)(opts : String*)(args : String*) = {
-    val r = TaskManager(List(this), RunMainTask, Map("mainClassName" -> className, "opts" -> opts.mkString(":") , "args" -> args.mkString("|")))
+    val r = TaskManager(List(this), RunMainTask, Map("mainClassName" -> className, "opts" -> opts.mkString("|") , "args" -> args.mkString("|")))
     println("runMain task completed for class: " + className)
     r
   }
 
-  def cleanManagedLibs =
+  def cleanManagedLibs = {
     Option(managedLibDir.listFiles).map(_.foreach(_.delete))
+    ivyGeneratedFile.map(f => if (f.exists) f.delete) // delete this as well since it's regenerated on the fly during update
+  }
 
   def cleanAllManagedLibs =
     projectAndDescendents.map(_.cleanManagedLibs)
+
+  def cleanAllOnly = {
+    cleanManagedLibs
+    cleanOnly
+  }
+
+  def cleanAll = {
+    cleanAllManagedLibs
+    clean
+  }
 
   def delete = recursiveDelete(root)
 
@@ -263,9 +276,9 @@ case class Project(
   def moduleDef : ModuleDef = {
     val deps : List[DependencyLib] = readIvyDependencies()
     val repos : List[MavenRepository] = readIvyResolvers()
-    val moduleLibDef = DependencyLib(name, props.GroupId() % name % props.Version(), "compile", None)
+    val moduleLibDef = DependencyLib(name, moduleId % props.Version(), "compile", None)
     val moduleDeps = {
-      val childLibs = children.map(c => DependencyLib(name, props.GroupId() % c.name % props.Version(), "compile", None))
+      val childLibs = children.map(c => DependencyLib(name, c.moduleId % props.Version(), "compile", None))
       if (hasScala)
         DependencyLib(name, "org.scala-lang" % "scala-library" % props.ScalaVersion(), "compile", None) :: childLibs
       else
