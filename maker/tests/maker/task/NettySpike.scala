@@ -1,36 +1,16 @@
 package maker.task
 
-import org.scalatest.FunSuite
-import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory
+import java.net.{ConnectException, InetSocketAddress}
 import java.util.concurrent.Executors
-import org.jboss.netty.bootstrap.ServerBootstrap
-import org.jboss.netty.channel.Channels
-import org.jboss.netty.channel.ChannelPipeline
-import org.jboss.netty.channel.ChannelPipelineFactory
-import org.jboss.netty.channel.SimpleChannelUpstreamHandler
-import org.jboss.netty.channel.MessageEvent
-import org.jboss.netty.channel.ChannelHandlerContext
-import java.net.InetSocketAddress
-import org.jboss.netty.handler.codec.serialization.ObjectDecoder
-import org.jboss.netty.handler.codec.serialization.ObjectEncoder
-import org.jboss.netty.channel.ChannelStateEvent
-import org.jboss.netty.bootstrap.ClientBootstrap
-import org.jboss.netty.channel.socket.nio.NioClientSocketChannelFactory
-import org.jboss.netty.handler.codec.serialization.ClassResolver
-import org.jboss.netty.handler.codec.serialization.ClassResolvers
-import org.jboss.netty.channel.ChannelFuture
-import org.jboss.netty.channel.Channel
-import org.jboss.netty.channel.group.ChannelGroup
-import org.jboss.netty.channel.group.DefaultChannelGroup
-import org.jboss.netty.channel.ChannelFutureListener
-import org.jboss.netty.channel.ChannelEvent
-import org.jboss.netty.channel.SimpleChannelDownstreamHandler
-import java.util.concurrent.atomic.AtomicInteger
-import java.util.concurrent.atomic.AtomicReference
-import org.jboss.netty.channel.ExceptionEvent
-import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.{AtomicBoolean, AtomicInteger, AtomicReference}
 import maker.utils.Log
-import java.net.ConnectException
+import org.jboss.netty.bootstrap.{ClientBootstrap, ServerBootstrap}
+import org.jboss.netty.channel.{Channel, ChannelEvent, ChannelFuture, ChannelFutureListener, ChannelHandlerContext, ChannelPipeline, ChannelPipelineFactory, ChannelStateEvent, Channels, ExceptionEvent, MessageEvent, SimpleChannelDownstreamHandler, SimpleChannelUpstreamHandler}
+import org.jboss.netty.channel.group.{ChannelGroup, DefaultChannelGroup}
+import org.jboss.netty.channel.socket.nio.{NioClientSocketChannelFactory, NioServerSocketChannelFactory}
+import org.jboss.netty.handler.codec.serialization.{ClassResolver, ClassResolvers, ObjectDecoder, ObjectEncoder}
+import org.scalatest.FunSuite
+
 
 case class Foo(
   x : AtomicReference[Any]
@@ -85,39 +65,12 @@ object NettySpike extends App{
       Executors.newCachedThreadPool())
     val bootstrap = new ClientBootstrap(channelFactory)
     
-    val encoder = new ObjectEncoder(){
-      override def handleDownstream(ctx : ChannelHandlerContext, e : ChannelEvent){
-        //setMessage(e, "Encoding")
-        super.handleDownstream(ctx, e)
-      }
-    }
-    val dummyDownstream = new SimpleChannelDownstreamHandler{
-      override def handleDownstream(ctx : ChannelHandlerContext, e : ChannelEvent){
-        //setMessage(e, "Dummy down")
-        super.handleDownstream(ctx, e)
-      }
-    }
-    val dummyUpstream = new SimpleChannelUpstreamHandler{
-      override def handleUpstream(ctx : ChannelHandlerContext, e : ChannelEvent){
-        //setMessage(e, "Dummy UP")
-        super.handleUpstream(ctx, e)
-      }
-      override def exceptionCaught(ctx : ChannelHandlerContext, e : ExceptionEvent){
-        println("Dummy received exception " + e)
-        super.exceptionCaught(ctx, e)
-        //ctx.sendUpstream(e)
-      }
-      override def toString = "Dummy upstream"
-    }
-    
     // Set up the pipeline factory.
     bootstrap.setPipelineFactory(new ChannelPipelineFactory() {
         def getPipeline : ChannelPipeline = {
           Channels.pipeline(
-            dummyDownstream,
-            encoder,
-            new NettyClientHandler(bootstrap, 10000),
-            dummyUpstream
+            new ObjectEncoder,
+            new NettyClientHandler(bootstrap, 10000)
           )
         }
     })
@@ -179,7 +132,6 @@ object NettySpike extends App{
         def getPipeline : ChannelPipeline = {
           //Channels.pipeline(new ServerHandler)
           Channels.pipeline(
-            //new ObjectEncoder, 
             objectDecoder,
             new ServerHandler
           )
