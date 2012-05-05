@@ -17,7 +17,8 @@ object Task {
     PublishLocalTask -> Set(PackageTask),
     PublishTask -> Set(PublishLocalTask),
     RunUnitTestsTask -> Set(CompileTestsTask),
-    RunMainTask -> Set(CompileSourceTask)
+    RunMainTask -> Set(CompileSourceTask),
+    RunJettyTask -> Set(PackageTask)
   )
 
   lazy val standardWithinProjectDependencies : Project => Map[Task, Set[Task]] = Memoize1((project : Project) => {

@@ -1,0 +1,49 @@
+<ivy-module version="1.0" xmlns:e="http://ant.apache.org/ivy/extra">
+  <info organisation="${group_id}" module="utils" revision="${maker.module.version}" />
+  <configurations>
+    <conf name="default" transitive="false"/>
+    <conf name="compile" transitive="false"/>
+    <conf name="test" transitive="false"/>
+  </configurations>
+
+  <publications>
+    <artifact name="utils" type="pom"/>
+    <artifact name="utils" type="jar" ext="jar" conf="default" />
+    <artifact name="utils-sources" type="jar" ext="jar" conf="default" />
+    <artifact name="utils-docs" type="jar" ext="jar" conf="default" />
+  </publications>
+
+  <dependencies defaultconfmapping="*->default,sources">
+    <dependency org="log4j" name="log4j" rev="1.2.16" />
+    <dependency org="commons-io" name="commons-io" rev="2.1"/>
+    <dependency org="com.typesafe.akka" name="akka-actor" rev="2.0"/>
+    <dependency org="com.typesafe.akka" name="akka-remote" rev="2.0"/>
+    <dependency org="com.typesafe.akka" name="akka-kernel" rev="2.0"/>
+    <dependency org="org.scala-tools.testing" name="scalacheck_2.9.1" rev="1.9"/>
+    <dependency org="org.scalatest" name="scalatest_2.9.1" rev="1.7.1"/>
+    <dependency org="org.scalaz" name="scalaz-core_2.9.1" rev="6.0.4"/>
+    <dependency org="org.slf4j" name="slf4j-api" rev="1.6.1"/>
+    <dependency org="org.slf4j" name="slf4j-log4j12" rev="1.6.1" />
+    <dependency org="org.apache.ant" name="ant" rev="1.8.2"/>
+    <dependency org="io.netty" name="netty" rev="3.4.2.Final"/>
+    <dependency org="com.google.protobuf" name="protobuf-java" rev="2.4.1"/>
+    <dependency org="net.debasishg" name="sjson_2.9.1" rev="0.15"/>
+    <dependency org="voldemort.store.compress"  name="h2-lzf" rev="1.0"/>
+    <dependency org="org.eclipse.jetty" name="jetty-server" rev="${jetty_version}" />
+    <dependency org="org.eclipse.jetty" name="jetty-webapp" rev="${jetty_version}" />
+    <dependency org="org.eclipse.jetty" name="jetty-util" rev="${jetty_version}" />
+    <dependency org="org.eclipse.jetty" name="jetty-servlet" rev="${jetty_version}" />
+    <dependency org="org.eclipse.jetty" name="jetty-security" rev="${jetty_version}" />
+    <dependency org="org.eclipse.jetty" name="jetty-http" rev="${jetty_version}" />
+    <dependency org="org.eclipse.jetty" name="jetty-io" rev="${jetty_version}" />
+    <dependency org="org.eclipse.jetty" name="jetty-xml" rev="${jetty_version}" />
+    <dependency org="org.eclipse.jetty" name="jetty-continuation" rev="${jetty_version}" />
+    <dependency org="org.eclipse.jetty" name="jetty-jsp" rev="${jetty_version}" />
+
+    <dependency org="org.mortbay.jetty" name="jsp-2.1-glassfish" rev="2.1.v20100127" />
+    <dependency org="javax.servlet" name="servlet-api" rev="2.5" />
+    <dependency org="org.apache.tomcat" name="jsp-api" rev="6.0.20" />
+
+  </dependencies>
+</ivy-module>
+

@@ -11,6 +11,7 @@ import org.apache.ivy.Ivy
 import org.apache.ivy.plugins.parser.xml.XmlModuleDescriptorParser
 import org.apache.ivy.core.module.descriptor.ModuleDescriptor
 import org.apache.ivy.core.IvyContext
+import org.apache.ivy.plugins.parser.m2.PomWriterOptions.ConfigurationScopeMapping
 
 case class ScmDef(url : String, connection : String)
 case class MavenRepository(id : String, name : String, url : String, layout : String)
@@ -40,6 +41,7 @@ object PomWriter {
     ivy.configure(ivySettingsFile)
     val moduleVersion = moduleDef.projectDef.moduleLibDef.version
     ivy.setVariable("maker.module.version", moduleVersion)
+    ivy.setVariable("maker.module.groupid", moduleDef.projectDef.moduleLibDef.gav.groupId.id)
     // add necessary 'context' variables for an OSS compliant POM, todo - make all actual properties...
     val contextSettings = IvyContext.getContext().getSettings()
     contextSettings.setVariable("maker.licenses", moduleDef.licenses, true)
@@ -48,11 +50,15 @@ object PomWriter {
     contextSettings.setVariable("maker.developers", moduleDef.developers, true)
     val settings = ivy.getSettings
     settings.addAllVariables(System.getProperties)
-    Log.debug("In writePom using ivy " + moduleVersion)
+    Log.debug("In writePom using ivy, module version: " + moduleVersion)
     val pomWriterOptions : PomWriterOptions = {
+      val csm = new ConfigurationScopeMapping(Map("default" -> "compile"))
+      Log.debug("***** csm:\n" + csm.getScope(Array("default")).toString)
       val deps : List[PomWriterOptions.ExtraDependency] = moduleDef.projectDef.dependencyModules.map(_.toIvyPomWriterExtraDependencies)
+      Log.debug("deps:\n" + deps.map(d ⇒ d.getGroup + ":" + d.getArtifact + ":" + d.isOptional.toString).mkString(", "))
       val pwo = ((new PomWriterOptions)
         .setConfs(confs.split(",").map(_.trim))
+        .setMapping(csm)
         .setArtifactName(moduleDef.projectDef.moduleLibDef.name)
         .setArtifactPackaging("jar")
         .setDescription(moduleDef.projectDef.description)
@@ -61,7 +67,8 @@ object PomWriter {
       pomTemplateFile.map(pt => pwo.setTemplate(pt)).getOrElse(pwo)
     }
     try {
-      var md: ModuleDescriptor = XmlModuleDescriptorParser.getInstance.parseDescriptor(settings, ivyFile.toURI.toURL, false)
+      Log.debug("***** pwo confs: " + pomWriterOptions.getConfs.toList.mkString(", "))
+      val md: ModuleDescriptor = XmlModuleDescriptorParser.getInstance.parseDescriptor(settings, ivyFile.toURI.toURL, false)
       Log.debug("about to exec pomModuleDescriptorWriter")
       PomModuleDescriptorWriter.write(md, pomFile, pomWriterOptions)
     }

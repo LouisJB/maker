@@ -90,7 +90,8 @@ case class Props(private val overrides : Map[String, String] = Map()) {
     }
   }
 
-  object Organisation extends StringProperty("org.acme")
+  object Organisation extends StringProperty("The Acme Org")
+  object GroupId extends StringProperty("org.acme")
   object Version extends StringProperty("1.0-SNAPSHOT")
   object DefaultPublishResolver extends OptionalStringProperty
   object PomTemplateFile extends OptionalFileProperty
