@@ -1,26 +1,41 @@
 package maker.task
 
-import org.jboss.netty.channel.SimpleChannelUpstreamHandler
-import org.jboss.netty.channel.ChannelHandlerContext
-import org.jboss.netty.channel.ExceptionEvent
-import java.net.ConnectException
-import maker.os.ScalaCommand
-import org.jboss.netty.channel.socket.nio.NioClientSocketChannelFactory
-import org.jboss.netty.bootstrap.ClientBootstrap
-import org.jboss.netty.handler.codec.serialization.ObjectEncoder
-import org.jboss.netty.channel.ChannelEvent
-import org.jboss.netty.channel.ChannelPipelineFactory
-import org.jboss.netty.channel.ChannelPipeline
+import java.net.{ConnectException, InetSocketAddress}
 import java.util.concurrent.Executors
-import maker.utils.Log
-import org.jboss.netty.channel.ChannelFuture
-import maker.Maker
-import org.jboss.netty.channel.Channels
 import java.util.concurrent.atomic.AtomicBoolean
-import org.jboss.netty.channel.ChannelFutureListener
-import org.jboss.netty.channel.MessageEvent
-import org.jboss.netty.handler.codec.serialization.ObjectDecoder
-import org.jboss.netty.handler.codec.serialization.ClassResolvers
+import maker.utils.os.ScalaCommand
+import maker.utils.Log
+import org.jboss.netty.bootstrap.ClientBootstrap
+import org.jboss.netty.channel.{ChannelEvent, ChannelFuture, ChannelFutureListener, ChannelHandlerContext, ChannelPipeline, ChannelPipelineFactory, ChannelStateEvent, Channels, ExceptionEvent, MessageEvent, SimpleChannelUpstreamHandler}
+import org.jboss.netty.channel.socket.nio.NioClientSocketChannelFactory
+import org.jboss.netty.handler.codec.serialization.{ClassResolvers, ObjectDecoder, ObjectEncoder}
+import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory
+import maker.Maker
+
+
+object TaskManagement{
+  val address = new InetSocketAddress(8080)
+
+  def encoder(localRemote : String) = new ObjectEncoder(){
+    override def handleDownstream(ctx : ChannelHandlerContext, e : ChannelEvent){
+      Log.info(localRemote + " - encoding " + e)
+      super.handleDownstream(ctx, e)
+    }
+  }
+
+  def objectDecoder(localRemote : String) = new ObjectDecoder(ClassResolvers.softCachingResolver(getClass.getClassLoader)){
+    override def handleUpstream(ctx : ChannelHandlerContext, e : ChannelEvent){
+      Log.info(localRemote + " - decoding " + e)
+      super.handleUpstream(ctx, e)
+    }
+  }
+  def makeClientChannelFactory() = new NioClientSocketChannelFactory(
+    Executors.newCachedThreadPool(),
+    Executors.newCachedThreadPool())
+  def makeServerChannelFactory() = new NioServerSocketChannelFactory(
+    Executors.newCachedThreadPool(),
+    Executors.newCachedThreadPool())
+}
 
 class LocalTaskManagerHandler extends SimpleChannelUpstreamHandler{
     override def exceptionCaught(ctx : ChannelHandlerContext, e : ExceptionEvent){
@@ -30,53 +45,33 @@ class LocalTaskManagerHandler extends SimpleChannelUpstreamHandler{
       }
     }
   override def messageReceived(ctx : ChannelHandlerContext, e : MessageEvent){
-    println("Local manager received " + e.getMessage)
+    Log.info("LOCAL manager received " + e.getMessage)
   }
-  //override def channelConnected(ctx : ChannelHandlerContext, e : ChannelStateEvent){
-    //Log.info("channelConnected " + e.getState + ", " + e.getValue)
-    //val msg = TellMeYourProcessID
-    //Log.info("Sending message " + msg)
-    //val future = e.getChannel.write(msg)
-    //future.addListener(ChannelFutureListener.CLOSE)
-    //}
+  override def channelConnected(ctx : ChannelHandlerContext, e : ChannelStateEvent){
+    Log.info("LOCAL channelConnected " + e.getState + ", " + e.getValue)
+  }
 }
+
 
 
 class LocalTaskManager {
 
-  import RemoteConfig._
+  import TaskManagement._
   def launchRemote{
-    val cmd = ScalaCommand(Maker.mkr.runClasspath, "maker.task.RemoteTaskManager")
+    val cmd = ScalaCommand(Maker.mkr.props.Java().getAbsolutePath, Maker.mkr.runClasspath, "maker.task.RemoteTaskManager")
     cmd.execAsync
   }
   launchRemote
 
-  val channelFactory  = new NioClientSocketChannelFactory(
-    Executors.newCachedThreadPool(),
-    Executors.newCachedThreadPool())
+  val channelFactory = makeClientChannelFactory
   val bootstrap = new ClientBootstrap(channelFactory)
   
-  val encoder = new ObjectEncoder(){
-    override def handleDownstream(ctx : ChannelHandlerContext, e : ChannelEvent){
-      Log.info("LOCAL - encoding " + e)
-      //setMessage(e, "Encoding")
-      super.handleDownstream(ctx, e)
-    }
-  }
-  
-  def objectDecoder = new ObjectDecoder(ClassResolvers.softCachingResolver(getClass.getClassLoader)){
-    override def handleUpstream(ctx : ChannelHandlerContext, e : ChannelEvent){
-      Log.info("LOCAL - decoding " + e)
-      //setMessage(e, "Decoding")
-      super.handleUpstream(ctx, e)
-    }
-  }
   // Set up the pipeline factory.
   bootstrap.setPipelineFactory(new ChannelPipelineFactory() {
       def getPipeline : ChannelPipeline = {
         Channels.pipeline(
-          encoder,
-          objectDecoder,
+          encoder("LOCAL"),
+          objectDecoder("LOCAL"),
           new LocalTaskManagerHandler
         )
       }
@@ -85,7 +80,7 @@ class LocalTaskManager {
   import RemoteTaskManager._
 
   def openConnection(numTries : Int = 0) : ChannelFuture = {
-    Log.info("Trying to open connection")
+    Log.info("LOCAL Trying to open connection")
     val maxretries = 5
     if (numTries > maxretries)
       throw new Exception("Can't connect to server")
@@ -100,20 +95,20 @@ class LocalTaskManager {
     )
     channelFuture.awaitUninterruptibly
     if (haveConnected.get){
-      Log.info("Have connected")
+      Log.info("LOCAL Have connected")
       channelFuture
     } else{
-      Log.info("Connection failed - will retry")
-      Thread.sleep(2000)
+      Log.info("LOCAL Connection failed - will retry")
+      Thread.sleep(500)
       openConnection(numTries + 1)
     }
   }
 
   val channelFuture = openConnection()
   channelFuture.awaitUninterruptibly
-  println("Have created channel future")
-  val msg = TellMeYourProcessID
-  Log.info("Sending message " + msg)
+  Log.info("LOCAL Have created channel future")
+  val msg = (0, TellMeYourProcessID)
+  Log.info("LOCAL Sending message " + msg)
   val future = channelFuture.getChannel.write(msg)
   future.awaitUninterruptibly
   def close{
@@ -126,4 +121,8 @@ class LocalTaskManager {
     channelFactory.releaseExternalResources
   }
 
+}
+
+object LocalTaskManager extends App{
+  new LocalTaskManager
 }

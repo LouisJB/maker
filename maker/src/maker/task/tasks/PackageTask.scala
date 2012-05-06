@@ -2,7 +2,7 @@ package maker.task.tasks
 
 import maker.project.Project
 import maker.utils.FileUtils._
-import maker.os.Command
+import maker.utils.os.Command
 import maker.utils.Log
 import maker.utils.Utils._
 import maker.task.{ProjectAndTask, TaskFailed, Task}

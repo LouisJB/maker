@@ -3,7 +3,7 @@ package maker.task.tasks
 import maker.project.Project
 import maker.task.{TaskFailed, Task, ProjectAndTask}
 import maker.utils.Log
-import maker.os.Command
+import maker.utils.os.Command
 import java.io.File
 import tools.nsc.Global
 import scalaz.Scalaz._

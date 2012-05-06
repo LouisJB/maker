@@ -1,15 +1,20 @@
-package maker.os
+package maker.utils.os
 
 import maker.utils.{TeeToFileOutputStream, Log}
 import java.lang.ProcessBuilder
 import java.io.{File, OutputStream, InputStreamReader, BufferedReader, PrintWriter}
 import actors.Future
 import actors.Futures._
+import org.apache.commons.io.output.NullOutputStream
 
 
-case class Command(os : OutputStream, closeStream : Boolean, pwd : Option[File], args : String*) {
+case class Command(outputStream : OutputStream, closeStream : Boolean, pwd : Option[File], args : String*) {
 
-  def redirectOutputRunnable(proc : Process, handleLine : String ⇒ Unit) = new Runnable(){
+  import Command._
+
+  def withNullOutput = Command(new NullOutputStream, closeStream, pwd, args : _*)
+
+  private def redirectOutputRunnable(proc : Process, handleLine : String ⇒ Unit) = new Runnable(){
     def run(){
       val br = new BufferedReader(new InputStreamReader(proc.getInputStream))
       var line : String =null;
@@ -21,10 +26,10 @@ case class Command(os : OutputStream, closeStream : Boolean, pwd : Option[File],
     }
   }
 
-  def startProc() : Process = {
+  private def startProc() : Process = {
     val procBuilder = new ProcessBuilder(args : _*)
     procBuilder.redirectErrorStream(true)
-    pwd.map(procBuilder.directory(_))
+    pwd.foreach(procBuilder.directory(_))
     procBuilder.start
   }
 
@@ -32,38 +37,11 @@ case class Command(os : OutputStream, closeStream : Boolean, pwd : Option[File],
     Log.debug("Executing cmd - " + toString)
     val proc = startProc()
     (proc, future {
-      waitFor(os, closeStream, proc)
+      waitFor(outputStream, closeStream, proc)
     })
   }
 
-  def exec(async : Boolean = false) : (Int, String) = {
-    Log.debug("Executing cmd (async = " + async + ") - " + toString)
-    val f = execProc()
-    if (!async) {
-      if (!f._2.isSet) awaitAll(Long.MaxValue/2, f._2)
-      f._2()
-    }
-    else (0, "")
-  }
-
-  def waitFor(os : OutputStream, closeStream : Boolean, proc : Process) = {
-    val buf = new StringBuffer()
-    var ps : PrintWriter = null
-    try {
-      val br = new BufferedReader(new InputStreamReader(proc.getInputStream))
-      ps = new PrintWriter(os, true)
-    //if (closeStream) ps.println("Executing command:\n%s\n".format(asString)) 
-      var line : String = null
-  } finally {
-      if (ps != null) {
-        ps.flush
-        if (closeStream) ps.close()
-      }
-    }
-    (proc.waitFor, buf.toString)
-  }
   def exec() : (Int, String) = {
-    //Log.info("Executing cmd (async = " + false + ") - " + toString)
     val procBuilder = new ProcessBuilder(args : _*)
     procBuilder.redirectErrorStream(true)
     val proc = procBuilder.start
@@ -91,12 +69,34 @@ object Command{
   def apply(args : String*) : Command = Command(System.out, false, None, args : _*)
   def apply(file : File, args : String*) : Command = Command(TeeToFileOutputStream(file), true, None, args : _*)
   def apply(pwd : Option[File], args : String*) : Command = Command(System.out, false, pwd, args : _*)
+
+  private def waitFor(outputStream : OutputStream, closeStream : Boolean, proc : Process) = {
+    val buf = new StringBuffer()
+    var ps : PrintWriter = null
+    try {
+      val br = new BufferedReader(new InputStreamReader(proc.getInputStream))
+      ps = new PrintWriter(outputStream, true)
+      var line : String = null
+      line = br.readLine()
+      while (line != null) {
+        ps.println(line)
+        line = br.readLine()
+        buf.append(line)
+      }
+    } finally {
+      if (ps != null) {
+        ps.flush
+        if (closeStream) ps.close()
+      }
+    }
+    (proc.waitFor, buf.toString)
+  }
 }
 
 object ScalaCommand{
-  def apply(classpath : String, klass : String, args : String*) : Command = {
+  def apply(java : String, classpath : String, klass : String, args : String*) : Command = {
     val allArgs : List[String] = List(
-      maker.Maker.props.Java().getAbsolutePath,
+      java,
       "-Dscala.usejavacp=true",
       "-classpath",
       classpath,

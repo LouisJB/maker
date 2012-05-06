@@ -1,7 +1,7 @@
 package maker.graphviz
 
 import maker.project.Project
-import maker.os.Command
+import maker.utils.os.Command
 import maker.utils.os.OsUtils._
 import maker.task.ProjectAndTask
 import maker.task.tasks.CompileJavaSourceTask

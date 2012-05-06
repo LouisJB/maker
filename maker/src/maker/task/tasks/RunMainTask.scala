@@ -1,11 +1,12 @@
 package maker.task.tasks
 
+import annotation.tailrec
 import maker.project.Project
+import maker.task.{ProjectAndTask, Task, TaskFailed}
 import maker.utils.Log
 import maker.utils.FileUtils._
-import maker.os.Command
-import annotation.tailrec
-import maker.task.{ProjectAndTask, TaskFailed, Task}
+import maker.utils.os.Command
+
 
 /**
  * run a class main in a separate JVM instance (but currently synchronously to maker repl)

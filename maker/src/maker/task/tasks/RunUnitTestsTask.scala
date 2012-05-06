@@ -4,7 +4,7 @@ import maker.project.Project
 import maker.utils.Log
 import java.lang.reflect.Modifier
 import maker.utils.FileUtils
-import maker.os.{ScalaCommand, Command}
+import maker.utils.os.{ScalaCommand, Command}
 import maker.task.{ProjectAndTask, TaskFailed, Task}
 
 case object RunUnitTestsTask extends Task {
@@ -63,7 +63,7 @@ case object RunUnitTestsTask extends Task {
       Log.info("Tests to run: ")
       suiteParameters.foreach(Log.debug(_)  )
       val args = List("-c", "-o", "-p", project.scalatestRunpath) ::: suiteParameters
-      val cmd = ScalaCommand(project.runClasspath, "org.scalatest.tools.Runner", args : _*)
+      val cmd = ScalaCommand(project.props.Java().getAbsolutePath, project.runClasspath, "org.scalatest.tools.Runner", args : _*)
       val (result, msg) = cmd.exec()
 
       if (result == 0)
