@@ -53,7 +53,7 @@ object CommandOutputHandler{
   val NULL = new CommandOutputHandler(writer = None)
 }
   
-case class Command(outputHandler : CommandOutputHandler, args : String*) {
+case class Command(outputHandler : CommandOutputHandler, workingDirectory : Option[File], args : String*) {
 
   def savedOutput = outputHandler.savedOutput
   import Command._
@@ -62,6 +62,7 @@ case class Command(outputHandler : CommandOutputHandler, args : String*) {
   private def startProc() : Process = {
     val procBuilder = new ProcessBuilder(args : _*)
     procBuilder.redirectErrorStream(true)
+    workingDirectory.map(procBuilder.directory(_))
     procBuilder.start
   }
 
@@ -84,7 +85,7 @@ case class Command(outputHandler : CommandOutputHandler, args : String*) {
 }
 
 object Command{
-  def apply(args : String*) : Command = new Command(CommandOutputHandler(), args : _*)
+  def apply(args : String*) : Command = new Command(CommandOutputHandler(), None, args : _*)
 }
 
 object ScalaCommand{
@@ -96,6 +97,6 @@ object ScalaCommand{
       classpath,
       "scala.tools.nsc.MainGenericRunner",
       klass) ::: args.toList
-    Command(outputHandler, allArgs :_*)
+    Command(outputHandler, None, allArgs :_*)
   }
 }
