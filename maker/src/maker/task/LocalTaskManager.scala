@@ -12,6 +12,8 @@ import org.jboss.netty.handler.codec.serialization.{ClassResolvers, ObjectDecode
 import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory
 import maker.Maker
 import maker.utils.os.CommandOutputHandler
+import TaskManagement._
+import RemoteTaskManager._
 
 
 object TaskManagement{
@@ -19,14 +21,14 @@ object TaskManagement{
 
   def encoder(localRemote : String) = new ObjectEncoder(){
     override def handleDownstream(ctx : ChannelHandlerContext, e : ChannelEvent){
-      Log.info(localRemote + " - encoding " + e)
+      Log.debug(localRemote + " - encoding " + e)
       super.handleDownstream(ctx, e)
     }
   }
 
   def objectDecoder(localRemote : String) = new ObjectDecoder(ClassResolvers.softCachingResolver(getClass.getClassLoader)){
     override def handleUpstream(ctx : ChannelHandlerContext, e : ChannelEvent){
-      Log.info(localRemote + " - decoding " + e)
+      Log.debug(localRemote + " - decoding " + e)
       super.handleUpstream(ctx, e)
     }
   }
@@ -46,10 +48,10 @@ class LocalTaskManagerHandler extends SimpleChannelUpstreamHandler{
       }
     }
   override def messageReceived(ctx : ChannelHandlerContext, e : MessageEvent){
-    Log.info("LOCAL manager received " + e.getMessage)
+    Log.debug("LOCAL manager received " + e.getMessage)
   }
   override def channelConnected(ctx : ChannelHandlerContext, e : ChannelStateEvent){
-    Log.info("LOCAL channelConnected " + e.getState + ", " + e.getValue)
+    Log.debug("LOCAL channelConnected " + e.getState + ", " + e.getValue)
   }
 }
 
@@ -57,7 +59,6 @@ class LocalTaskManagerHandler extends SimpleChannelUpstreamHandler{
 
 class LocalTaskManager {
 
-  import TaskManagement._
   def launchRemote{
     val cmd = ScalaCommand(CommandOutputHandler(), Maker.mkr.props.Java().getAbsolutePath, Maker.mkr.runClasspath, "maker.task.RemoteTaskManager")
     cmd.execAsync
@@ -67,7 +68,6 @@ class LocalTaskManager {
   val channelFactory = makeClientChannelFactory
   val bootstrap = new ClientBootstrap(channelFactory)
   
-  // Set up the pipeline factory.
   bootstrap.setPipelineFactory(new ChannelPipelineFactory() {
       def getPipeline : ChannelPipeline = {
         Channels.pipeline(
@@ -78,10 +78,9 @@ class LocalTaskManager {
       }
   })
 
-  import RemoteTaskManager._
 
   def openConnection(numTries : Int = 0) : ChannelFuture = {
-    Log.info("LOCAL Trying to open connection")
+    Log.debug("LOCAL Trying to open connection")
     val maxretries = 5
     if (numTries > maxretries)
       throw new Exception("Can't connect to server")
@@ -96,22 +95,24 @@ class LocalTaskManager {
     )
     channelFuture.awaitUninterruptibly
     if (haveConnected.get){
-      Log.info("LOCAL Have connected")
+      Log.debug("LOCAL Have connected")
       channelFuture
     } else{
-      Log.info("LOCAL Connection failed - will retry")
+      Log.debug("LOCAL Connection failed - will retry")
       Thread.sleep(500)
       openConnection(numTries + 1)
     }
   }
 
   val channelFuture = openConnection()
+
   channelFuture.awaitUninterruptibly
-  Log.info("LOCAL Have created channel future")
+  Log.debug("LOCAL Have created channel future")
   val msg = (0, TellMeYourProcessID)
-  Log.info("LOCAL Sending message " + msg)
+  Log.debug("LOCAL Sending message " + msg)
   val future = channelFuture.getChannel.write(msg)
   future.awaitUninterruptibly
+
   def close{
     channelFuture.awaitUninterruptibly
     if (! channelFuture.isSuccess){

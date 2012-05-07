@@ -15,7 +15,11 @@ case class CommandOutputHandler(writer : Option[PrintWriter] = Some(new PrintWri
   def withSavedOutput = copy(buffer = Some(new StringBuffer()))
   def savedOutput = buffer.fold(_.toString, "")
   def processLine(line : String){
-    writer.foreach(_.println(line))
+    writer.foreach{
+      w ⇒
+        w.println(line)
+        w.flush
+    }
     buffer.foreach(_.append(line))
   }
   def close {

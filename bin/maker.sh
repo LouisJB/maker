@@ -69,11 +69,14 @@ maker_internal_classpath(){
   if [ $MAKER_DEVELOPER_MODE ];
   then
     for module in utils plugin maker; do
-      cp="$cp:$MAKER_OWN_ROOT_DIR/$module/classes:$MAKER_OWN_ROOT_DIR/$module/test-classes/:$MAKER_OWN_ROOT_DIR/$module/resources/"
+      cp="$cp:$MAKER_OWN_ROOT_DIR/$module/classes:$MAKER_OWN_ROOT_DIR/$module/test-classes/"
     done
   else
     cp=$MAKER_OWN_ROOT_DIR/maker.jar
   fi
+  for module in utils plugin maker; do
+    cp="$cp:$MAKER_OWN_ROOT_DIR/$module/resources/"
+  done
   echo $cp
 }
 
