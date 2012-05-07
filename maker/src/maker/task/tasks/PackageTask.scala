@@ -7,6 +7,7 @@ import maker.utils.Log
 import maker.utils.Utils._
 import maker.task.{ProjectAndTask, TaskFailed, Task}
 import org.apache.commons.io.FileUtils._
+import maker.utils.os.CommandOutputHandler
 
 /**
  * Packages this project and its children
@@ -84,7 +85,7 @@ case object PackageTask extends Task {
           })
 
           Log.info("Packaging artifact " + project.outputArtifact.getAbsolutePath)
-          Command(List(jar, "cf", project.outputArtifact.getAbsolutePath, "-C", warImage.getAbsolutePath, "."): _*) :: Nil
+          Command(CommandOutputHandler().withSavedOutput, List(jar, "cf", project.outputArtifact.getAbsolutePath, "-C", warImage.getAbsolutePath, "."): _*) :: Nil
         }
       }
     }
@@ -92,8 +93,8 @@ case object PackageTask extends Task {
     fix[List[Command], Either[TaskFailed, AnyRef]](exec => cs => {
       cs match {
         case cmd :: rs => cmd.exec() match {
-          case (0, _) => exec(rs)
-          case (errNo, errMessage) => Left(TaskFailed(ProjectAndTask(project, this), errMessage))
+          case 0 => exec(rs)
+          case errNo => Left(TaskFailed(ProjectAndTask(project, this), cmd.savedOutput))
         }
         case Nil => Right(Unit)
       }

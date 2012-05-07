@@ -11,6 +11,7 @@ import org.jboss.netty.channel.socket.nio.NioClientSocketChannelFactory
 import org.jboss.netty.handler.codec.serialization.{ClassResolvers, ObjectDecoder, ObjectEncoder}
 import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory
 import maker.Maker
+import maker.utils.os.CommandOutputHandler
 
 
 object TaskManagement{
@@ -58,7 +59,7 @@ class LocalTaskManager {
 
   import TaskManagement._
   def launchRemote{
-    val cmd = ScalaCommand(Maker.mkr.props.Java().getAbsolutePath, Maker.mkr.runClasspath, "maker.task.RemoteTaskManager")
+    val cmd = ScalaCommand(CommandOutputHandler(), Maker.mkr.props.Java().getAbsolutePath, Maker.mkr.runClasspath, "maker.task.RemoteTaskManager")
     cmd.execAsync
   }
   launchRemote

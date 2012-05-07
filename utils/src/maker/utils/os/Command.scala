@@ -6,95 +6,85 @@ import java.io.{File, OutputStream, InputStreamReader, BufferedReader, PrintWrit
 import actors.Future
 import actors.Futures._
 import org.apache.commons.io.output.NullOutputStream
+import java.io.Writer
+import java.io.FileWriter
+import scalaz.Scalaz._
 
 
-case class Command(outputStream : OutputStream, closeStream : Boolean, pwd : Option[File], args : String*) {
+case class CommandOutputHandler(writer : Option[PrintWriter] = Some(new PrintWriter(System.out)), buffer : Option[StringBuffer] = None, closeWriter : Boolean = false){
+  def withSavedOutput = copy(buffer = Some(new StringBuffer()))
+  def savedOutput = buffer.fold(_.toString, "")
+  def processLine(line : String){
+    writer.foreach(_.println(line))
+    buffer.foreach(_.append(line))
+  }
+  def close {
+    writer.foreach{
+      w =>
+        w.flush
+        if (closeWriter)
+          w.close
+    }
+  }
 
-  import Command._
-
-  def withNullOutput = Command(new NullOutputStream, closeStream, pwd, args : _*)
-
-  private def redirectOutputRunnable(proc : Process, handleLine : String ⇒ Unit) = new Runnable(){
+  def redirectOutputRunnable(proc : Process) = new Runnable(){
     def run(){
       val br = new BufferedReader(new InputStreamReader(proc.getInputStream))
       var line : String =null;
       line = br.readLine()
       while (line != null) {
-        handleLine(line)
+        processLine(line)
         line = br.readLine()
       }
+      close
     }
   }
+}
+
+object CommandOutputHandler{
+  def apply(file : File) : CommandOutputHandler = new CommandOutputHandler(
+    writer = Some(new PrintWriter(new FileWriter(file))),
+    closeWriter = true
+  )
+  val NULL = new CommandOutputHandler(writer = None)
+}
+  
+case class Command(outputHandler : CommandOutputHandler, args : String*) {
+
+  def savedOutput = outputHandler.savedOutput
+  import Command._
+
 
   private def startProc() : Process = {
     val procBuilder = new ProcessBuilder(args : _*)
     procBuilder.redirectErrorStream(true)
-    pwd.foreach(procBuilder.directory(_))
     procBuilder.start
   }
 
-  def execProc() : (Process, Future[(Int,  String)]) = {
+  def execAsync() : (Process, Future[Int]) = {
     Log.debug("Executing cmd - " + toString)
     val proc = startProc()
-    (proc, future {
-      waitFor(outputStream, closeStream, proc)
-    })
+    val outputThread = new Thread(outputHandler.redirectOutputRunnable(proc))
+    outputThread.start
+    (proc, future {outputThread.join; proc.waitFor})
   }
 
-  def exec() : (Int, String) = {
-    val procBuilder = new ProcessBuilder(args : _*)
-    procBuilder.redirectErrorStream(true)
-    val proc = procBuilder.start
-    val buf = new StringBuffer()
-    redirectOutputRunnable(proc, {line : String ⇒ buf.append(line); System.out.println(line)}).run
-    (proc.waitFor, buf.toString)
+  def exec() : Int = {
+    val proc = startProc
+    outputHandler.redirectOutputRunnable(proc).run
+    proc.waitFor
   }
 
-
-  def execAsync : Process = {
-    Log.debug("Executing cmd (async = " + true + ") - " + toString)
-    val procBuilder = new ProcessBuilder(args : _*)
-    procBuilder.redirectErrorStream(true)
-    val proc = procBuilder.start
-    val redirectOutput = redirectOutputRunnable(proc, {line : String ⇒ System.out.println(line)})
-    new Thread(redirectOutput).start
-    proc
-  }
   def asString = args.mkString(" ")
   override def toString = "Command: " + asString
 }
 
 object Command{
-  def apply(os : OutputStream, args : String*) : Command = Command(os, false, None, args : _*)
-  def apply(args : String*) : Command = Command(System.out, false, None, args : _*)
-  def apply(file : File, args : String*) : Command = Command(TeeToFileOutputStream(file), true, None, args : _*)
-  def apply(pwd : Option[File], args : String*) : Command = Command(System.out, false, pwd, args : _*)
-
-  private def waitFor(outputStream : OutputStream, closeStream : Boolean, proc : Process) = {
-    val buf = new StringBuffer()
-    var ps : PrintWriter = null
-    try {
-      val br = new BufferedReader(new InputStreamReader(proc.getInputStream))
-      ps = new PrintWriter(outputStream, true)
-      var line : String = null
-      line = br.readLine()
-      while (line != null) {
-        ps.println(line)
-        line = br.readLine()
-        buf.append(line)
-      }
-    } finally {
-      if (ps != null) {
-        ps.flush
-        if (closeStream) ps.close()
-      }
-    }
-    (proc.waitFor, buf.toString)
-  }
+  def apply(args : String*) : Command = new Command(CommandOutputHandler(), args : _*)
 }
 
 object ScalaCommand{
-  def apply(java : String, classpath : String, klass : String, args : String*) : Command = {
+  def apply(outputHandler : CommandOutputHandler, java : String, classpath : String, klass : String, args : String*) : Command = {
     val allArgs : List[String] = List(
       java,
       "-Dscala.usejavacp=true",
@@ -102,6 +92,6 @@ object ScalaCommand{
       classpath,
       "scala.tools.nsc.MainGenericRunner",
       klass) ::: args.toList
-    Command(allArgs :_*)
+    Command(outputHandler, allArgs :_*)
   }
 }

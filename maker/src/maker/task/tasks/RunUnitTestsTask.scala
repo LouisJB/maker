@@ -6,6 +6,7 @@ import java.lang.reflect.Modifier
 import maker.utils.FileUtils
 import maker.utils.os.{ScalaCommand, Command}
 import maker.task.{ProjectAndTask, TaskFailed, Task}
+import maker.utils.os.CommandOutputHandler
 
 case object RunUnitTestsTask extends Task {
 
@@ -63,13 +64,12 @@ case object RunUnitTestsTask extends Task {
       Log.info("Tests to run: ")
       suiteParameters.foreach(Log.debug(_)  )
       val args = List("-c", "-o", "-p", project.scalatestRunpath) ::: suiteParameters
-      val cmd = ScalaCommand(project.props.Java().getAbsolutePath, project.runClasspath, "org.scalatest.tools.Runner", args : _*)
-      val (result, msg) = cmd.exec()
-
-      if (result == 0)
-        Right(Unit)
-      else
-        Left(TaskFailed(ProjectAndTask(project, this), "Test failed in " + project))
+      val cmd = ScalaCommand(CommandOutputHandler(), project.props.Java().getAbsolutePath, project.runClasspath, "org.scalatest.tools.Runner", args : _*)
+      cmd.exec match {
+        case 0 ⇒ Right(Unit)
+        case _ ⇒ 
+          Left(TaskFailed(ProjectAndTask(project, this), "Test failed in " + project))
+      }
     }
   }
 
