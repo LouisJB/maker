@@ -18,6 +18,7 @@ object Maker {
       root,
       sourceDirs = file(root, "src") :: Nil,
       tstDirs = file(root, "tests") :: Nil,
+      resourceDirs = file(root, "resources") :: Nil,
       libDirs=libs,
       props = props,
       ivySettingsFile = ivySettingsFile_,

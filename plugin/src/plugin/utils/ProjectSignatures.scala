@@ -13,27 +13,22 @@ case class ProjectSignatures(persistFile: File, private var sigs: Map[File, Set[
 
     val SourceFile = "([^\t]*)".r
     val Line = "\t([^\t]*)".r
-    withFileReader(persistFile) {
-      in: BufferedReader => {
-        var line = in.readLine()
-        while (line != null) {
-          line match {
-            case SourceFile(fileName) => {
-              if (sourceFile != null) {
-                sigs = sigs.updated(sourceFile, lines)
-                lines = Set[String]()
-              }
-              sourceFile = new File(fileName)
+    withFileLineReader(persistFile) {
+      line : String ⇒ 
+        line match {
+          case SourceFile(fileName) => {
+            if (sourceFile != null) {
+              sigs = sigs.updated(sourceFile, lines)
+              lines = Set[String]()
             }
-            case Line(line) => lines += line
-            case _ => throw new Exception("Don't understand line " + line + " when parsing project signatures file")
+            sourceFile = new File(fileName)
           }
-          line = in.readLine()
+          case Line(line) => lines += line
+          case _ => throw new Exception("Don't understand line " + line + " when parsing project signatures file")
         }
-        if (sourceFile != null) {
-          sigs = sigs.updated(sourceFile, lines)
-        }
-      }
+    }
+    if (sourceFile != null) {
+      sigs = sigs.updated(sourceFile, lines)
     }
   }
 
@@ -62,10 +57,10 @@ case class ProjectSignatures(persistFile: File, private var sigs: Map[File, Set[
       writer: BufferedWriter =>
         sigs.foreach {
           case (sourceFile, sig) =>
-            writer.write(sourceFile.getPath + "\n")
+            writer.println(sourceFile.getPath)
             sig.foreach {
               case sigLine =>
-                writer.write("\t" + sigLine + "\n")
+                writer.println("\t" + sigLine)
             }
         }
     }

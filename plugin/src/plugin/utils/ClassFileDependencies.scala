@@ -9,20 +9,16 @@ import scala.collection.mutable.Map
 case class ClassFileDependencies(persistFile: File, var deps: Map[File, Set[File]] = Map[File, Set[File]]()) {
 
   if (deps.isEmpty && persistFile.exists) {
-    withFileReader(persistFile) {
-      in: BufferedReader =>
-        var line = in.readLine
-        while (line != null) {
-          line.split(":").toList match {
-            case sourceFile :: Nil => deps = deps.updated(new File(sourceFile), Set[File]())
-            case sourceFile :: itsDependenciesAsString :: Nil =>
-              val itsDependencies: Set[File] = itsDependenciesAsString.toString.split(",").toSet.map {
-                s: String => new File(s)
-              }
-              deps = deps.updated(new File(sourceFile), itsDependencies)
-            case _ => throw new Exception("Unexpected line in deps file " + persistFile)
-          }
-          line = in.readLine
+    withFileLineReader(persistFile) {
+      line : String ⇒ 
+        line.split(":").toList match {
+          case sourceFile :: Nil => deps = deps.updated(new File(sourceFile), Set[File]())
+          case sourceFile :: itsDependenciesAsString :: Nil =>
+            val itsDependencies: Set[File] = itsDependenciesAsString.toString.split(",").toSet.map {
+              s: String => new File(s)
+            }
+            deps = deps.updated(new File(sourceFile), itsDependencies)
+          case _ => throw new Exception("Unexpected line in deps file " + persistFile)
         }
     }
   }

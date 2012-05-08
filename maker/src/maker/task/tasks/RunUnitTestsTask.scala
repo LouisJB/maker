@@ -7,6 +7,7 @@ import maker.utils.FileUtils
 import maker.utils.os.{ScalaCommand, Command}
 import maker.task.{ProjectAndTask, TaskFailed, Task}
 import maker.utils.os.CommandOutputHandler
+import maker.utils.FileUtils._
 
 case object RunUnitTestsTask extends Task {
 
@@ -61,31 +62,17 @@ case object RunUnitTestsTask extends Task {
       Right(Unit)
     }
     else {
-      Log.info("Tests to run: ")
+      Log.debug("Tests to run: ")
       suiteParameters.foreach(Log.debug(_)  )
-      val args = List("-c", "-o", "-p", project.scalatestRunpath) ::: suiteParameters
+      val testOutputDir = mkdirs(file(project.root, ".maker/test-results"))
+      Log.info("Output is to " + testOutputDir)
+      val args = List("-c", "-o", "-u", testOutputDir.getAbsolutePath, "-p", project.scalatestRunpath) ::: suiteParameters
       val cmd = ScalaCommand(CommandOutputHandler(), project.props.Java().getAbsolutePath, project.runClasspath, "org.scalatest.tools.Runner", args : _*)
       cmd.exec match {
         case 0 ⇒ Right(Unit)
         case _ ⇒ 
           Left(TaskFailed(ProjectAndTask(project, this), "Test failed in " + project))
       }
-    }
-  }
-
-  def exec_old(project: Project, acc: List[AnyRef], parameters: Map[String, String] = Map()) = {
-    Log.info("Testing " + project)
-    val suiteParameters = suiteClassNames(project).map(List("-s", _)).flatten
-    if (suiteParameters.isEmpty) {
-      Right(Unit)
-    } else {
-      val (runner, method) = runnerClassAndMethod(project)
-      val pars = List("-c", "-o", "-p", project.scalatestRunpath) ::: suiteParameters
-      val result = method.invoke(runner, pars.toArray).asInstanceOf[Boolean]
-      if (result)
-        Right(Unit)
-      else
-        Left(TaskFailed(ProjectAndTask(project, this), "Test failed in " + project))
     }
   }
 }

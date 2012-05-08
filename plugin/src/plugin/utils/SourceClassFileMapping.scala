@@ -2,19 +2,14 @@ package plugin.utils
 
 import scala.collection.mutable.{Set => MSet, Map => MMap}
 import java.io.{BufferedReader, BufferedWriter, File}
-import maker.utils.FileUtils
+import maker.utils.FileUtils._
 
 case class SourceClassFileMapping(persistFile: File, private var mapping: Map[File, Set[File]] = Map[File, Set[File]]()) {
   if (mapping.isEmpty && persistFile.exists) {
-    FileUtils.withFileReader(persistFile) {
-      in: BufferedReader => {
-        var line = in.readLine
-        while (line != null) {
-          val sourceFile :: classFiles = line.split(":").toList.map(new File(_))
-          ++=(sourceFile, classFiles)
-          line = in.readLine
-        }
-      }
+    withFileLineReader(persistFile) {
+      line : String ⇒ 
+        val sourceFile :: classFiles = line.split(":").toList.map(new File(_))
+        ++=(sourceFile, classFiles)
     }
   }
 
@@ -27,11 +22,11 @@ case class SourceClassFileMapping(persistFile: File, private var mapping: Map[Fi
   }
 
   def persist() {
-    FileUtils.withFileWriter(persistFile) {
-      writer: BufferedWriter =>
+    withFileWriter(persistFile) {
+      writer : BufferedWriter =>
         mapping.foreach {
           case (sourceFile, classFiles) =>
-            writer.write((sourceFile :: classFiles.toList).map(_.getPath).mkString(":") + "\n")
+            writer.println((sourceFile :: classFiles.toList).map(_.getPath).mkString(":"))
         }
     }
   }

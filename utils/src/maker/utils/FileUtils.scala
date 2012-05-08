@@ -8,6 +8,7 @@ import java.io.FileReader
 
 object FileUtils {
 
+
   def file(f : String) : File = new File(f)
   def file(f : File, d : String) : File = new File(f, d)
   def file(base : String, file : String) : File = new File(base, file)
@@ -93,6 +94,17 @@ object FileUtils {
   def findSourceFiles(dirs : File*) = findFilesWithExtensions("scala" :: "java" :: Nil, dirs : _*)
   def findJavaSourceFiles(dirs : File*) = findFilesWithExtension("java", dirs : _*)
 
+  /**
+   * Don't want to use PrintWriter as that swallows exceptions
+   */
+  case class RichBufferedWriter(writer : BufferedWriter){
+    def println(text : String){
+      writer.write(text)
+      writer.newLine
+    }
+  }
+  implicit def toRichBufferedWriter(writer : BufferedWriter) = RichBufferedWriter(writer)
+
   def withFileWriter(file : File)(f : BufferedWriter => _){
     if (file.getParentFile != null && !file.getParentFile.exists)
       file.getParentFile.mkdirs
@@ -109,11 +121,15 @@ object FileUtils {
     out.close()
   }
 
-  def withFileReader(file : File)(f : BufferedReader => _){
+  def withFileLineReader(file : File)(f : String => _){
     if (file.exists()) {
       val fstream = new FileReader(file)
       val in = new BufferedReader(fstream)
-      f(in)
+      var line = in.readLine
+      while (line != null) {
+        f(line)
+        line = in.readLine
+      }
       in.close()
     }
   }
@@ -180,13 +196,9 @@ object FileUtils {
     Log.debug("Extracting from " + file)
     var map = Map[K, V]()
     if (file.exists) {
-      withFileReader(file) {
-        in: BufferedReader =>
-          var line = in.readLine
-          while (line != null) {
-            map += extractor(line)
-            line = in.readLine
-          }
+      withFileLineReader(file) {
+        line : String ⇒ 
+          map += extractor(line)
       }
     }
     map
@@ -197,8 +209,7 @@ object FileUtils {
       out: BufferedWriter =>
         map.foreach {
           case (key, value) =>
-            out.write(fn(key, value))
-            out.write("\n")
+            out.println(fn(key, value))
         }
     }
   }
