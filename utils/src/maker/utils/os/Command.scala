@@ -1,12 +1,10 @@
 package maker.utils.os
 
-import maker.utils.{TeeToFileOutputStream, Log}
+import maker.utils.Log
 import java.lang.ProcessBuilder
-import java.io.{File, OutputStream, InputStreamReader, BufferedReader, PrintWriter}
+import java.io.{File, InputStreamReader, BufferedReader, PrintWriter}
 import actors.Future
 import actors.Futures._
-import org.apache.commons.io.output.NullOutputStream
-import java.io.Writer
 import java.io.FileWriter
 import scalaz.Scalaz._
 
@@ -52,12 +50,10 @@ object CommandOutputHandler{
   )
   val NULL = new CommandOutputHandler(writer = None)
 }
-  
+
 case class Command(outputHandler : CommandOutputHandler, workingDirectory : Option[File], args : String*) {
 
   def savedOutput = outputHandler.savedOutput
-  import Command._
-
 
   private def startProc() : Process = {
     val procBuilder = new ProcessBuilder(args : _*)
@@ -86,6 +82,7 @@ case class Command(outputHandler : CommandOutputHandler, workingDirectory : Opti
 
 object Command{
   def apply(args : String*) : Command = new Command(CommandOutputHandler(), None, args : _*)
+  def apply(workingDirectory : Option[File], args : String*) : Command = new Command(CommandOutputHandler(), workingDirectory, args : _*)
 }
 
 object ScalaCommand{
