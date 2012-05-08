@@ -17,6 +17,7 @@ case object UpdateTask extends Task {
       project.ivyGeneratedFile match {
         case Some(ivyGeneratedFile) => {
           val confs : Array[String] = parameters.getOrElse("configurations", "default").split(":")
+          Log.debug("confs : " + confs.mkString(", "))
           val artifactFilter = FilterHelper.getArtifactTypeFilter(Array[String]("jar", "war", "bundle", "source"))
           val resolveOptions = new ResolveOptions().setConfs(confs)
             .setValidate(true)
