@@ -85,7 +85,7 @@ case object PackageTask extends Task {
           })
 
           Log.info("Packaging artifact " + project.outputArtifact.getAbsolutePath)
-          Command(CommandOutputHandler().withSavedOutput, List(jar, "cf", project.outputArtifact.getAbsolutePath, "-C", warImage.getAbsolutePath, "."): _*) :: Nil
+          Command(CommandOutputHandler().withSavedOutput, None, List(jar, "cf", project.outputArtifact.getAbsolutePath, "-C", warImage.getAbsolutePath, "."): _*) :: Nil
         }
       }
     }

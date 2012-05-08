@@ -104,7 +104,7 @@ case object CompileJavaSourceTask extends Task {
       Log.info("Compiling " + javaFilesToCompile.size + " java files")
       val javac = project.props.JavaHome().getAbsolutePath + "/bin/javac"
       val parameters = javac :: "-cp" :: compilationClasspath :: "-d" :: javaOutputDir.getAbsolutePath :: javaSrcFiles.toList.map(_.getAbsolutePath)
-      val cmd = Command(CommandOutputHandler().withSavedOutput, parameters : _*)
+      val cmd = Command(CommandOutputHandler().withSavedOutput, None, parameters : _*)
       cmd.exec() match {
         case 0 => Right(javaFilesToCompile)
         case error => Left(TaskFailed(ProjectAndTask(project, this), "Error " + error + ", output " + cmd.savedOutput))

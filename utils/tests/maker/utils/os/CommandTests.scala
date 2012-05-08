@@ -11,7 +11,7 @@ class CommandTests extends FunSuite{
       dir ⇒
         val f = file(dir, "foo")
         assert(! f.exists)
-        val cmd = Command(CommandOutputHandler.NULL, "touch", f.getAbsolutePath)
+        val cmd = Command(CommandOutputHandler.NULL, None, "touch", f.getAbsolutePath)
         cmd.exec
         assert(f.exists)
     }
@@ -22,7 +22,7 @@ class CommandTests extends FunSuite{
       dir ⇒
         val f = file(dir, "foo")
         assert(! f.exists)
-        val cmd = Command(CommandOutputHandler.NULL, "touch", f.getAbsolutePath)
+        val cmd = Command(CommandOutputHandler.NULL, None, "touch", f.getAbsolutePath)
         val (_, future) = cmd.execAsync
         val result = Futures.awaitAll(1000, future).head
         assert(f.exists)
@@ -35,7 +35,7 @@ class CommandTests extends FunSuite{
       dir ⇒
         val outputFile = file(dir, "output")
         assert(! outputFile.exists)
-        val cmd = Command(CommandOutputHandler(outputFile), "echo", "HELLO")
+        val cmd = Command(CommandOutputHandler(outputFile), None, "echo", "HELLO")
         cmd.exec
         assert(outputFile.exists)
         val lines = outputFile.read.toList
@@ -46,7 +46,7 @@ class CommandTests extends FunSuite{
   test("Output is saved"){
     withTempDir{
       dir ⇒
-        val cmd = Command(CommandOutputHandler.NULL.withSavedOutput, "echo", "HELLO")
+        val cmd = Command(CommandOutputHandler.NULL.withSavedOutput, None, "echo", "HELLO")
         cmd.exec
         assert(cmd.savedOutput === "HELLO")
     }

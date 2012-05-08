@@ -27,7 +27,7 @@ case object RunMainTask extends Task {
           project.runClasspath + ":" + project.scalaLibs.mkString(":")) :::
           opts ::: (className :: mainArgs)
 
-        val cmd = Command(CommandOutputHandler(file("runlog.out")).withSavedOutput, args: _*)
+        val cmd = Command(CommandOutputHandler(file("runlog.out")).withSavedOutput, None, args: _*)
         writeToFile(file("runcmd.sh"), "#!/bin/bash\n" + cmd.asString)
         Log.info("Running, press ctrl-] to terminate running process...")
 
