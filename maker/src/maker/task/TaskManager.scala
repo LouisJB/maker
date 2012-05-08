@@ -86,6 +86,7 @@ object TaskManager{
   }
 
   def apply(projectTasks : Set[ProjectAndTask], originalProjectAndTask : ProjectAndTask, parameters : Map[String, String]) : BuildResult[AnyRef] = {
+    Thread.currentThread.setContextClassLoader(TaskManager.getClass.getClassLoader)
     val system = ActorSystem("QueueManager")
     val sw = Stopwatch()
     implicit val timeout = Timeout(1000000)
