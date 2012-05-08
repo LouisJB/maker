@@ -2,10 +2,11 @@ package maker
 
 import maker.project.Project
 import maker.utils.FileUtils._
-import maker.utils.Log._
 import java.io.File
 
-object Maker{
+object Maker {
+  val MAKER_VERSION = ".1"
+
   val ivyFileName = "maker-ivy.xml"
   val ivySettingsFile_ = file("maker-ivysettings.xml")
   val props = Props(file("Maker.conf"))
@@ -29,5 +30,4 @@ object Maker{
   lazy val makerProj = mkProject("maker") dependsOn plugin
 
   lazy val mkr = makerProj
-
 }

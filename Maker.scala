@@ -4,11 +4,10 @@ import java.io.File
 import maker.utils.FileUtils._
 import maker.Maker._
 
-val MAKER_VERSION = ".1"
+:power 
 
 System.setProperty("scala.usejavacp", "false")
 System.setProperty("log4j.ignoreTCL", "true")
-
 
 def compileContinuously = mkr.~(mkr.testCompile _)
 def testContinuously(klass : String = "") = {
@@ -20,5 +19,6 @@ def testContinuously(klass : String = "") = {
   }
 }
 
-println("\nMaker v" + MAKER_VERSION)
+println("\nMaker v" + MAKER_VERSION + "\n")
+repl.setPrompt("maker v" + MAKER_VERSION + ">")
 
