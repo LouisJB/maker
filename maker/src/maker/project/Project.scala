@@ -56,6 +56,7 @@ case class Project(
       additionalExcludedLibs : List[GAV] = Nil,
       providedLibs : List[String] = Nil) extends ProjectDef {
 
+  val testResultsDir = file(root, ".maker/test-results")
   val outputDir = file(root, "classes")
   val javaOutputDir = file(root, "java-classes")
   val testOutputDir = file(root, "test-classes")
@@ -138,6 +139,7 @@ case class Project(
   def testOnly = TaskManager(List(this), RunUnitTestsTask)
   def testClassOnly(testClassNames : String*) = TaskManager(List(this), RunUnitTestsTask, Map("testClassOrSuiteName" -> testClassNames.mkString(":")))
 
+  def testResults = ScalatestResults(this)
   def pack = TaskManager(projectAndDescendents, PackageTask)
   def packOnly = TaskManager(List(this), PackageTask)
 
