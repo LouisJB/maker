@@ -19,6 +19,16 @@ import xml.NodeSeq
 trait ProjectDef {
   def name : String
   def root : File
+  def sourceDirs: List[File] = Nil
+  def tstDirs: List[File] = Nil
+
+  // use the standard maven convention dir structure as the defaults
+  val mainRoot = file(root, "src/main/")
+  val testRoot = file(root, "src/test/")
+  val defaultSrcDirNames = "scala" :: "java" :: Nil
+
+  val srcDirs : List[File] = if (sourceDirs.isEmpty) defaultSrcDirNames.map(file(mainRoot, _)) else sourceDirs
+  val testDirs : List[File] = if (tstDirs.isEmpty) defaultSrcDirNames.map(file(testRoot, _)) else tstDirs
 }
 
 /**
@@ -28,8 +38,8 @@ trait ProjectDef {
 case class Project(
       name: String,
       root: File,
-      sourceDirs: List[File] = Nil,
-      tstDirs: List[File] = Nil,
+      override val sourceDirs: List[File] = Nil,
+      override val tstDirs: List[File] = Nil,
       libDirs: List[File] = Nil,
       providedLibDirs: List[File] = Nil, // compile time only, don't add to runtime classpath or any packaging
       managedLibDirName : String = "lib_managed",
@@ -65,8 +75,6 @@ case class Project(
   }
   val makerDirectory = mkdirs(new File(root, ".maker"))
 
-  val srcDirs : List[File] = if (sourceDirs.isEmpty) List(file(root, "src")) else sourceDirs
-  val testDirs : List[File] = if (tstDirs.isEmpty) List(file(root, "tests")) else tstDirs
   val jarDirs : List[File] = if (libDirs.isEmpty) List(file(root, "lib"), managedLibDir) else libDirs
   val moduleId : GroupAndArtifact = if (moduleIdentity.isEmpty) props.GroupId() % name else moduleIdentity.get
   val packagingRoot = file(root, "package")
