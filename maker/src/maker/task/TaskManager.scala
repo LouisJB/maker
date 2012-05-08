@@ -4,9 +4,16 @@ import maker.project.Project
 import maker.utils.{Stopwatch, Log}
 import akka.actor.Actor._
 import akka.actor.ActorRef
-import akka.routing.{CyclicIterator, Routing}
-import akka.actor.{UntypedChannel, Actor}
-import akka.event.EventHandler
+import akka.actor.Actor
+import java.io.File
+import akka.util.Timeout
+import akka.actor.ActorSystem
+import akka.actor.Props
+import akka.routing.SmallestMailboxRouter
+import akka.dispatch.Await
+import akka.util.Duration
+import akka.pattern.ask
+import akka.util.duration._
 
 class TaskManager(projectTasks : Set[ProjectAndTask], router : ActorRef,
                    originalProjectAndTask : ProjectAndTask,
@@ -15,7 +22,7 @@ class TaskManager(projectTasks : Set[ProjectAndTask], router : ActorRef,
   var accumuland : Map[Task, List[AnyRef]] = Map[Task, List[AnyRef]]()
   var remainingProjectTasks = projectTasks
   var completedProjectTasks : Set[ProjectAndTask] = Set()
-  var originalCaller : UntypedChannel = _
+  var originalCaller : ActorRef = _
   var roundNo = 0
   private def execNextLevel{
     Log.debug("Remaining tasks are " + remainingProjectTasks)
@@ -49,12 +56,12 @@ class TaskManager(projectTasks : Set[ProjectAndTask], router : ActorRef,
         originalCaller ! BuildResult(Right(TaskSuccess), projectTasks, originalProjectAndTask)
       else {
         remainingProjectTasks = remainingProjectTasks.filterNot(_ == projectTask)
-        if (router.isRunning)
+        if (! router.isTerminated)
           execNextLevel
       }
     }
     case StartBuild => {
-      originalCaller = self.channel
+      originalCaller = sender
       execNextLevel
     }
   }
@@ -79,24 +86,18 @@ object TaskManager{
   }
 
   def apply(projectTasks : Set[ProjectAndTask], originalProjectAndTask : ProjectAndTask, parameters : Map[String, String]) : BuildResult[AnyRef] = {
-    Log.info("Queue manager - tasks = " + projectTasks.mkString(", "))
+    val system = ActorSystem("QueueManager")
     val sw = Stopwatch()
     implicit val timeout = Timeout(1000000)
     def nWorkers = (Runtime.getRuntime.availableProcessors / 2) max 1
 
-    val workers = (1 to nWorkers).map{i => actorOf(new Worker()).start}
     Log.debug("Running with " + nWorkers + " workers")
-    val router = Routing.loadBalancerActor(CyclicIterator(workers)).start()
-    val qm = actorOf(new TaskManager(projectTasks, router, originalProjectAndTask, parameters)).start
-    
+    val router = system.actorOf(Props[Worker].withRouter(SmallestMailboxRouter(nWorkers)))
+    val qm = system.actorOf(Props(new TaskManager(projectTasks, router, originalProjectAndTask, parameters)))
     val future = qm ? StartBuild
-    val result = future.get.asInstanceOf[BuildResult[AnyRef]]
+    val result = Await.result(future, Duration.Inf).asInstanceOf[BuildResult[AnyRef]]
 
-    import akka.actor.PoisonPill
-    qm ! PoisonPill
-    workers.foreach(_ ! PoisonPill)
-    router ! PoisonPill
-    EventHandler.shutdown()
+    system.shutdown()
     Log.debug("Stats: \n" + projectTasks.map(_.runStats).mkString("\n"))
     Log.info("Completed " + originalProjectAndTask + ", took" + sw + ", result " + result)
     result

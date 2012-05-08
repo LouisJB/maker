@@ -4,8 +4,9 @@ import maker.project.Project
 import maker.utils.Log
 import java.lang.reflect.Modifier
 import maker.utils.FileUtils
-import maker.os.Command
+import maker.utils.os.{ScalaCommand, Command}
 import maker.task.{ProjectAndTask, TaskFailed, Task}
+import maker.utils.os.CommandOutputHandler
 
 case object RunUnitTestsTask extends Task {
 
@@ -62,21 +63,13 @@ case object RunUnitTestsTask extends Task {
     else {
       Log.info("Tests to run: ")
       suiteParameters.foreach(Log.debug(_)  )
-      val args = List(
-        project.props.JavaHome() + "/bin/java",
-        "-Dscala.usejavacp=true",
-        "-classpath",
-        project.runClasspath,
-        "scala.tools.nsc.MainGenericRunner",
-        "org.scalatest.tools.Runner") ::: (List("-c", "-o", "-p", project.scalatestRunpath) ::: suiteParameters)
-
-      val cmd = Command(args: _*)
-      val (result, msg) = cmd.exec()
-
-      if (result == 0)
-        Right(Unit)
-      else
-        Left(TaskFailed(ProjectAndTask(project, this), "Test failed in " + project))
+      val args = List("-c", "-o", "-p", project.scalatestRunpath) ::: suiteParameters
+      val cmd = ScalaCommand(CommandOutputHandler(), project.props.Java().getAbsolutePath, project.runClasspath, "org.scalatest.tools.Runner", args : _*)
+      cmd.exec match {
+        case 0 ⇒ Right(Unit)
+        case _ ⇒ 
+          Left(TaskFailed(ProjectAndTask(project, this), "Test failed in " + project))
+      }
     }
   }
 

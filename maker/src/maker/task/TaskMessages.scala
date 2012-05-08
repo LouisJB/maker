@@ -25,7 +25,7 @@ case object StartBuild extends BuildMessage
 
 class Worker() extends Actor{
   def receive = {
-    case ExecTaskMessage(projectTask : ProjectAndTask, acc : Map[Task, List[AnyRef]], parameters : Map[String, String]) => self reply {
+    case ExecTaskMessage(projectTask : ProjectAndTask, acc : Map[Task, List[AnyRef]], parameters : Map[String, String]) => sender ! {
       try {
         TaskResultMessage(projectTask, projectTask.exec(acc, parameters))
       }

@@ -3,10 +3,11 @@ package maker.task.tasks
 import maker.project.Project
 import maker.task.{TaskFailed, Task, ProjectAndTask}
 import maker.utils.Log
-import maker.os.Command
+import maker.utils.os.Command
 import java.io.File
 import tools.nsc.Global
 import scalaz.Scalaz._
+import maker.utils.os.CommandOutputHandler
 
 abstract class CompileTask extends Task{
   def compiler(proj : Project) : Global
@@ -35,9 +36,7 @@ abstract class CompileTask extends Task{
         classFiles =>
           if (classFiles.size > 0){
             info("Deleting " + classFiles.size + " class files")
-            classFiles.foreach(println)
             info("as they are associated with the deleted src files")
-            deletedSrcFiles_.foreach(println)
           }
           classFiles.foreach(_.delete)
       }
@@ -105,9 +104,10 @@ case object CompileJavaSourceTask extends Task {
       Log.info("Compiling " + javaFilesToCompile.size + " java files")
       val javac = project.props.JavaHome().getAbsolutePath + "/bin/javac"
       val parameters = javac :: "-cp" :: compilationClasspath :: "-d" :: javaOutputDir.getAbsolutePath :: javaSrcFiles.toList.map(_.getAbsolutePath)
-      Command(parameters : _*).exec() match {
-        case (0, _) => Right(javaFilesToCompile)
-        case (_, error) => Left(TaskFailed(ProjectAndTask(project, this), error))
+      val cmd = Command(CommandOutputHandler().withSavedOutput, None, parameters : _*)
+      cmd.exec() match {
+        case 0 => Right(javaFilesToCompile)
+        case error => Left(TaskFailed(ProjectAndTask(project, this), "Error " + error + ", output " + cmd.savedOutput))
       }
     }
   }

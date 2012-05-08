@@ -1,7 +1,7 @@
 package maker.graphviz
 
 import maker.project.Project
-import maker.os.Command
+import maker.utils.os.Command
 import maker.utils.os.OsUtils._
 import maker.task.ProjectAndTask
 import maker.task.tasks.CompileJavaSourceTask
@@ -108,7 +108,7 @@ object GraphVizUtils {
 
   def showImage(f : File) = {
     if (isLinux)
-      Command("xdg-open", f.getAbsolutePath).exec(true)
+      Command("xdg-open", f.getAbsolutePath).execAsync
     else // assume OSX until we want to support other OSes such as windows
       Command("open", f.getAbsolutePath).exec()
     f

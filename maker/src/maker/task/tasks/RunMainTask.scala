@@ -1,11 +1,13 @@
 package maker.task.tasks
 
+import annotation.tailrec
 import maker.project.Project
+import maker.task.{ProjectAndTask, Task, TaskFailed}
 import maker.utils.Log
 import maker.utils.FileUtils._
-import maker.os.Command
-import annotation.tailrec
-import maker.task.{ProjectAndTask, TaskFailed, Task}
+import maker.utils.os.Command
+import maker.utils.os.CommandOutputHandler
+
 
 /**
  * run a class main in a separate JVM instance (but currently synchronously to maker repl)
@@ -25,11 +27,11 @@ case object RunMainTask extends Task {
           project.runClasspath + ":" + project.scalaLibs.mkString(":")) :::
           opts ::: (className :: mainArgs)
 
-        val cmd = Command(file("runlog.out"), args: _*)
+        val cmd = Command(CommandOutputHandler(file("runlog.out")).withSavedOutput, None, args: _*)
         writeToFile(file("runcmd.sh"), "#!/bin/bash\n" + cmd.asString)
         Log.info("Running, press ctrl-] to terminate running process...")
 
-        val procHandle = cmd.execProc()
+        val procHandle = cmd.execAsync()
         @tailrec
         def checkRunning(): Either[TaskFailed, AnyRef] = {
           if (!procHandle._2.isSet) {
@@ -44,8 +46,8 @@ case object RunMainTask extends Task {
           }
           else {
             procHandle._2() match {
-              case (0, _) => Right("Ok")
-              case (code, msg) => Left(TaskFailed(ProjectAndTask(project, this), "Run Main failed in " + project + ", " + msg))
+              case 0 => Right("Ok")
+              case code => Left(TaskFailed(ProjectAndTask(project, this), "Run Main failed in " + project + ", " + cmd.savedOutput))
             }
           }
         }
