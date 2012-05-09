@@ -54,7 +54,10 @@ case class Project(
       moduleIdentity : Option[GroupAndArtifact] = None,
       additionalLibs : List[GAV] = Nil,
       additionalExcludedLibs : List[GAV] = Nil,
-      providedLibs : List[String] = Nil) extends ProjectDef {
+      providedLibs : List[String] = Nil,
+      suppressTaskOutput : Boolean = false // needed to quieten maker unit tests
+    ) extends ProjectDef {
+
 
   val testResultsDir = file(root, ".maker/test-results")
   val outputDir = file(root, "classes")
@@ -90,6 +93,7 @@ case class Project(
   def withProvidedLibDirs(dirs : String*) = copy(providedLibDirs = dirs.toList.map(d => file(root, d)) ::: this.providedLibDirs)
   def setAdditionalExcludedLibs(libs : GAV*) = copy(additionalExcludedLibs = libs.toList)
   def withProvidedLibs(libNames : String*) = copy(providedLibs = libNames.toList ::: this.providedLibs)
+  def withTaskOutputSuppressed = copy(suppressTaskOutput = true)
 
   def srcFiles() = findSourceFiles(srcDirs: _*)
   def testSrcFiles() = findSourceFiles(testDirs: _*)
@@ -367,6 +371,7 @@ class TopLevelProject(name:String,
 
     null
   }
+
 }
 
 object Project {

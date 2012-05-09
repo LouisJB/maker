@@ -3,8 +3,19 @@ package maker.task
 import maker.project.Project
 import maker.utils.Memoize1
 import tasks._
+import maker.utils.RichString._
 
-case class TaskFailed(task : ProjectAndTask, reason : String)
+case class TaskFailed(task : ProjectAndTask, reason : String){
+  override def toString = { 
+"""Failure
+     Project: %s
+     Task   : %s
+
+     %s
+""" %(task.project, task.task, reason)
+}
+}
+  
 
 trait Task {
   def exec(project : Project, acc : List[AnyRef] = Nil, parameters : Map[String, String]) : Either[TaskFailed, AnyRef]

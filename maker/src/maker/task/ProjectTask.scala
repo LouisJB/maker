@@ -2,6 +2,7 @@ package maker.task
 
 import maker.project.Project
 import maker.utils.{Stopwatch, Log}
+import maker.Maker
 
 object ProjectAndTask {
   val lock = new Object
@@ -86,7 +87,7 @@ case class ProjectAndTask(project: Project, task: Task) {
     val totalTime = sw.ms()
     lastRunTimeMs_ = totalTime
     finishingTime_ = System.nanoTime
-    if (totalTime > 100)
+    if (totalTime > 100 && Maker.verboseTestOutput)
       Log.info("%s completed in %dms".format(this, totalTime))
     taskResult
   }

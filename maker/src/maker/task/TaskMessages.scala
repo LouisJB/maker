@@ -59,7 +59,10 @@ case class BuildResult[+A](res : Either[TaskFailed, A],
 
   def filterByTask(t : Task) = projectAndTasks.filter(p => p == ProjectAndTask(p.project, t))
 
-  override def toString = res.toString
+  override def toString = res match {
+    case Left(failure) ⇒  failure.toString
+    case Right(x) ⇒ x.toString
+  }
 
   @inline
   final def flatMap[B](f : A => BuildResult[B]) : BuildResult[B] = {

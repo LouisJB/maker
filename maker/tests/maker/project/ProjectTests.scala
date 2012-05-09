@@ -39,7 +39,7 @@ class ProjectTests extends FunSuite {
       List(new File(root, "src")), 
       Nil,
       libDirs=List(new File(".maker/lib"))
-    ) 
+    ).withTaskOutputSuppressed
     val files = new {
       val fooSrc = new File(root, "src/foo/Foo.scala")
       val barSrc = new File(root, "src/foo/bar/Bar.scala")

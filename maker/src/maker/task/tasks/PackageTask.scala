@@ -32,7 +32,8 @@ case object PackageTask extends Task {
 
     def doPackage(pack : => List[Command]) : List[Command] = {
       if (fileIsLaterThan(project.outputArtifact, dirsToPack)) {
-        Log.info("Packaging up to date for " + project.name + ", skipping...")
+        if (! project.suppressTaskOutput)
+          Log.info("Packaging up to date for " + project.name + ", skipping...")
         Nil
       }
       else pack
@@ -43,7 +44,8 @@ case object PackageTask extends Task {
         doPackage {
           val createCmd = Command(List(jar, "cf", project.outputArtifact.getAbsolutePath, "-C", dirsToPack.head.getAbsolutePath, "."): _*)
           val updateCmds = dirsToPack.tail.map(dir => List(jar, "uf", project.outputArtifact.getAbsolutePath, "-C", dir.getAbsolutePath, "."))
-          Log.info("Packaging artifact " + project.outputArtifact.getAbsolutePath)
+          if (! project.suppressTaskOutput)
+            Log.info("Packaging artifact " + project.outputArtifact.getAbsolutePath)
           createCmd :: updateCmds.map(args => Command(args: _*))
         }
       }
@@ -53,13 +55,15 @@ case object PackageTask extends Task {
         // WEB-INF/lib
         // WEB-INF/classes
         // META-INF/
-        Log.info("Packaging web app, web app dir = " + webAppDir.getAbsolutePath)
+        if (! project.suppressTaskOutput)
+          Log.info("Packaging web app, web app dir = " + webAppDir.getAbsolutePath)
 
         // build up the war structure image so we can make a web archive from it...
         val warImage = file(project.packagingRoot, "webapp")
 
         doPackage {
-          Log.info("Making war image..." + warImage.getAbsolutePath)
+          if (! project.suppressTaskOutput)
+            Log.info("Making war image..." + warImage.getAbsolutePath)
           if (warImage.exists) recursiveDelete(warImage)
           warImage.mkdirs()
 
@@ -84,7 +88,8 @@ case object PackageTask extends Task {
             copyFileToDirectory(f, file(warImage, "WEB-INF/lib"))
           })
 
-          Log.info("Packaging artifact " + project.outputArtifact.getAbsolutePath)
+          if (! project.suppressTaskOutput)
+            Log.info("Packaging artifact " + project.outputArtifact.getAbsolutePath)
           Command(CommandOutputHandler().withSavedOutput, None, List(jar, "cf", project.outputArtifact.getAbsolutePath, "-C", warImage.getAbsolutePath, "."): _*) :: Nil
         }
       }

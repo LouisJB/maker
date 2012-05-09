@@ -100,7 +100,8 @@ object TaskManager{
 
     system.shutdown()
     Log.debug("Stats: \n" + projectTasks.map(_.runStats).mkString("\n"))
-    Log.info("Completed " + originalProjectAndTask + ", took" + sw + ", result " + result)
+    if (! originalProjectAndTask.project.suppressTaskOutput)
+      Log.info("Completed " + originalProjectAndTask + ", took" + sw + "\n")
     result
   }
 }

@@ -67,7 +67,7 @@ class BuildTests extends FunSuite {
       List(new File(root, "src")), 
       List(new File(root, "tests")), 
       libDirs=List(new File(".maker/lib"))
-    )
+    ).withTaskOutputSuppressed
   }
   test("Build of single project"){
     val root = tempDir("fred")

@@ -31,4 +31,7 @@ object Maker {
   lazy val makerProj = mkProject("maker") dependsOn plugin
 
   lazy val mkr = makerProj
+
+  var verboseTestOutput : Boolean = true
+  var verboseTaskOutput : Boolean = true
 }

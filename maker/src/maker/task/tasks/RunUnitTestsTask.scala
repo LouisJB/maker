@@ -8,6 +8,7 @@ import maker.utils.os.{ScalaCommand, Command}
 import maker.task.{ProjectAndTask, TaskFailed, Task}
 import maker.utils.os.CommandOutputHandler
 import maker.utils.FileUtils._
+import maker.Maker
 
 case object RunUnitTestsTask extends Task {
 
@@ -51,7 +52,10 @@ case object RunUnitTestsTask extends Task {
   }
 
   def exec(project: Project, acc: List[AnyRef], parameters: Map[String, String] = Map()) = {
-    Log.info("Testing " + project)
+    if (Maker.verboseTaskOutput && ! project.suppressTaskOutput)
+      Log.info("Testing " + project)
+    else
+      print(".")
     recursiveDelete(project.testResultsDir)
     mkdirs(project.testResultsDir)
 
@@ -60,19 +64,24 @@ case object RunUnitTestsTask extends Task {
       case None ⇒ suiteClassNames(project)
     }
     if (classOrSuiteNames.isEmpty) {
-      Log.info("No tests found, nothing to do")
+      Log.debug("No tests found, nothing to do")
       Right(Unit)
     }
     else {
       val suiteParameters = classOrSuiteNames.map(List("-s", _)).flatten
       Log.debug("Tests to run: ")
       suiteParameters.foreach(Log.debug(_)  )
-      val args = List("-c", "-o", "-u", project.testResultsDir.getAbsolutePath, "-p", project.scalatestRunpath) ::: suiteParameters
+      var args = List("-c", "-u", project.testResultsDir.getAbsolutePath, "-p", project.scalatestRunpath) ::: suiteParameters
+      if (Maker.verboseTestOutput)
+        args = "-o" :: args
       val cmd = ScalaCommand(CommandOutputHandler(), project.props.Java().getAbsolutePath, project.runClasspath, "org.scalatest.tools.Runner", args : _*)
       cmd.exec match {
         case 0 ⇒ Right(Unit)
-        case _ ⇒ 
-          Left(TaskFailed(ProjectAndTask(project, this), "Test failed in " + project))
+        case _ ⇒ {
+          val failingTests = project.testResultsOnly.failed
+          val failingTestsText = failingTests.map{t ⇒ t.suite + " : " + t.testName}.mkString("\n\t", "\n\t", "\n")
+          Left(TaskFailed(ProjectAndTask(project, this), "Test failed in " + project + failingTestsText))
+        }
       }
     }
   }

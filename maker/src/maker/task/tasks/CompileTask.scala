@@ -8,6 +8,7 @@ import java.io.File
 import tools.nsc.Global
 import scalaz.Scalaz._
 import maker.utils.os.CommandOutputHandler
+import maker.Maker
 
 abstract class CompileTask extends Task{
   def compiler(proj : Project) : Global
@@ -31,12 +32,15 @@ abstract class CompileTask extends Task{
     if (modifiedSrcFiles.isEmpty && deletedSrcFiles_.isEmpty) {
       Right((Set[File](), Set[File]()))
     } else {
-      Log.info("Compiling " + proj)
+      if (Maker.verboseTaskOutput && ! proj.suppressTaskOutput)
+        Log.info("Compiling " + proj)
+      else
+        print(".")
       proj.state.sourceToClassFiles.classFilesFor(deletedSrcFiles_).filter(_.exists) |> {
         classFiles =>
           if (classFiles.size > 0){
-            info("Deleting " + classFiles.size + " class files")
-            info("as they are associated with the deleted src files")
+            debug("Deleting " + classFiles.size + " class files")
+            debug("as they are associated with the deleted src files")
           }
           classFiles.foreach(_.delete)
       }
@@ -101,7 +105,7 @@ case object CompileJavaSourceTask extends Task {
     if (javaFilesToCompile.isEmpty)
       Right(Set())
     else {
-      Log.info("Compiling " + javaFilesToCompile.size + " java files")
+      Log.debug("Compiling " + javaFilesToCompile.size + " java files")
       val javac = project.props.JavaHome().getAbsolutePath + "/bin/javac"
       val parameters = javac :: "-cp" :: compilationClasspath :: "-d" :: javaOutputDir.getAbsolutePath :: javaSrcFiles.toList.map(_.getAbsolutePath)
       val cmd = Command(CommandOutputHandler().withSavedOutput, None, parameters : _*)
