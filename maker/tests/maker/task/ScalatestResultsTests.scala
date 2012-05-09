@@ -24,7 +24,7 @@ case class ScalatestResultsTests extends FunSuite{
       List(new File(root, "src")), 
       List(new File(root, "tests")), 
       libDirs=List(new File(".maker/lib"))
-    )
+    ).withTaskOutputSuppressed
   }
   test("Errors are correctly counted"){
     withTempDir{

@@ -72,7 +72,7 @@ case object RunUnitTestsTask extends Task {
       Log.debug("Tests to run: ")
       suiteParameters.foreach(Log.debug(_)  )
       var args = List("-c", "-u", project.testResultsDir.getAbsolutePath, "-p", project.scalatestRunpath) ::: suiteParameters
-      if (Maker.verboseTestOutput)
+      if (Maker.verboseTestOutput && !project.suppressTaskOutput)
         args = "-o" :: args
       val cmd = ScalaCommand(CommandOutputHandler(), project.props.Java().getAbsolutePath, project.runClasspath, "org.scalatest.tools.Runner", args : _*)
       cmd.exec match {

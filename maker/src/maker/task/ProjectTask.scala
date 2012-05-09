@@ -87,7 +87,7 @@ case class ProjectAndTask(project: Project, task: Task) {
     val totalTime = sw.ms()
     lastRunTimeMs_ = totalTime
     finishingTime_ = System.nanoTime
-    if (totalTime > 100 && Maker.verboseTestOutput)
+    if (totalTime > 100 && Maker.verboseTestOutput && ! project.suppressTaskOutput)
       Log.info("%s completed in %dms".format(this, totalTime))
     taskResult
   }
