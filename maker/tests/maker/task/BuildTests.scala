@@ -4,6 +4,7 @@ import org.scalatest.FunSuite
 import maker.utils.FileUtils._
 import maker.project.Project
 import java.io.File
+import maker.utils.Log
 
 class BuildTests extends FunSuite {
 
@@ -70,9 +71,9 @@ class BuildTests extends FunSuite {
   }
   test("Build of single project"){
     val root = tempDir("fred")
-    val proj = makeProject("foox", root)
+      val proj = makeProject("foox", root)
 
-    writeToFile(new File(root, "src/foo/Foo.scala"), fooContent)
+      writeToFile(new File(root, "src/foo/Foo.scala"), fooContent)
     assert(proj.compile.res.isRight)
     proj.delete
   }
@@ -85,17 +86,15 @@ class BuildTests extends FunSuite {
 
     writeToFile(new File(root1, "src/foo/Foo.scala"), fooContent)
     writeToFile(new File(root2, "src/bar/Bar.scala"), barContent)
-    //assert(false, "***FALSE*****")
-    //assert(!proj1.compile.res.isRight)
     proj1.delete
     proj2.delete
   }
 
   test("Build of dependent projects with compilation error fails"){
     val root1 = tempDir("fred")
-    val root2 = tempDir("fred")
-    val proj1 = makeProject("1", root1)
-    val proj2 = makeProject("2", root2) dependsOn proj1
+      val root2 = tempDir("fred")
+      val proj1 = makeProject("1", root1)
+      val proj2 = makeProject("2", root2) dependsOn proj1
 
     writeToFile(new File(root1, "src/foo/Foo.scala"), fooContent)
     writeToFile(new File(root2, "src/bar/Bar.scala"), barContentWithError)
@@ -109,14 +108,14 @@ class BuildTests extends FunSuite {
 
   test("Unit test runs"){
     val root = tempDir("fred")
-    val proj = makeProject("foo_with_test", root)
-    writeToFile(new File(root, "src/foo/Foo.scala"), fooContent)
+      val proj = makeProject("foo_with_test", root)
+      writeToFile(new File(root, "src/foo/Foo.scala"), fooContent)
     writeToFile(new File(root, "tests/foo/FooTest.scala"), fooTestContent)
     proj.compile
     val fooClass = proj.classLoader.loadClass("foo.Foo")
 
 
-    assert(
+      assert(
       proj.test.res.isRight 
     )
 
@@ -125,12 +124,84 @@ class BuildTests extends FunSuite {
 
   test("Failing test fails"){
     val root = tempDir("fred")
-    val proj = makeProject("with_failing_test", root)
-    writeToFile(new File(root, "tests/foo/FooTest.scala"), failingTestContent)
+      val proj = makeProject("with_failing_test", root)
+      writeToFile(new File(root, "tests/foo/FooTest.scala"), failingTestContent)
     proj.test match {
       case BuildResult(Left(_), _, _) =>
       case r => fail("Expected test to fail, got " + r)
     }
+    proj.delete
+  }
+
+  test("Can re-run failing tests"){
+    val root = tempDir("fred")
+    val proj = makeProject("rerun_failing_test", root)
+    writeToFile(
+      new File(root, "tests/foo/GoodTest.scala"), 
+      """
+        package foo
+        import org.scalatest.FunSuite
+        class GoodTest extends FunSuite{
+          test("test foo"){
+            assert(1 === 1)
+          }
+        }
+      """
+    )
+    writeToFile(
+      new File(root, "tests/foo/BadTest.scala"), 
+      """
+        package foo
+        import org.scalatest.FunSuite
+        class BadTest extends FunSuite{
+          test("test foo"){
+            assert(1 === 2)
+          }
+        }
+      """
+    )
+    proj.test
+    assert(proj.testResults.failed.size == 1)
+    assert(proj.testResults.passed.size == 1)
+
+    // This time we should only run the failed test
+    // so there should be no passing tests
+    proj.testFailingSuites
+    assert(proj.testResults.failed.size == 1)
+    assert(proj.testResults.passed.size == 0)
+
+    // Repair the broken test, check there is one passing test
+    writeToFile(
+      new File(root, "tests/foo/BadTest.scala"), 
+      """
+        package foo
+        import org.scalatest.FunSuite
+        class BadTest extends FunSuite{
+          test("test foo"){
+            assert(1 === 1)
+          }
+        }
+      """
+    )
+    proj.testFailingSuites
+    assert(proj.testResults.failed.size == 0)
+    assert(proj.testResults.passed.size == 1)
+
+    // Run failed tests - should have no results at all
+    proj.testFailingSuites
+    assert(proj.testResults.failed.size == 0)
+    assert(proj.testResults.passed.size == 0)
+
+    // Run failed tests - should have no results at all
+    proj.testFailingSuites
+    assert(proj.testResults.failed.size == 0)
+    assert(proj.testResults.passed.size == 0)
+
+    // Run all tests - should have two passes
+    proj.test
+    assert(proj.testResults.failed.size == 0)
+    assert(proj.testResults.passed.size == 2)
+
     proj.delete
   }
 }

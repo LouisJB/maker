@@ -56,6 +56,7 @@ case class Project(
       additionalExcludedLibs : List[GAV] = Nil,
       providedLibs : List[String] = Nil) extends ProjectDef {
 
+  val testResultsDir = file(root, ".maker/test-results")
   val outputDir = file(root, "classes")
   val javaOutputDir = file(root, "java-classes")
   val testOutputDir = file(root, "test-classes")
@@ -137,6 +138,26 @@ case class Project(
   def test = TaskManager(projectAndDescendents, RunUnitTestsTask)
   def testOnly = TaskManager(List(this), RunUnitTestsTask)
   def testClassOnly(testClassNames : String*) = TaskManager(List(this), RunUnitTestsTask, Map("testClassOrSuiteName" -> testClassNames.mkString(":")))
+  def testResults = ScalatestResults(this)
+
+  def failingTests = projectAndDescendents.flatMap(_.testResults.failed)
+
+  /*
+   * Will re-test anything that failed in this or any dependencies
+   */
+  def testFailingSuites = {
+    TaskManager(List(this), RunUnitTestsTask, Map("testClassOrSuiteName" → failingTests.map(_.suite).mkString(":")))
+  }
+
+  // Only prints the first, for any more look in testResults.failed
+  def showFailingTest{
+   failingTests.headOption.foreach{ 
+      res ⇒ 
+        println("Test failed")
+        println(res.suite + " : " + res.testName)
+        println("\n" + res.error)
+    }
+  }
 
   def pack = TaskManager(projectAndDescendents, PackageTask)
   def packOnly = TaskManager(List(this), PackageTask)
