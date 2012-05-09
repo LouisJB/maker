@@ -54,6 +54,11 @@ object CommandOutputHandler{
 case class Command(outputHandler : CommandOutputHandler, workingDirectory : Option[File], args : String*) {
 
   def savedOutput = outputHandler.savedOutput
+  def withSavedOutput = new Command(
+    outputHandler = outputHandler.withSavedOutput,
+      workingDirectory,
+      args : _*
+  )
 
   private def startProc() : Process = {
     val procBuilder = new ProcessBuilder(args : _*)
