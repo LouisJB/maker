@@ -41,6 +41,7 @@ case class BuildResult[+A](res : Either[TaskFailed, A],
                        projectAndTasks : Set[ProjectAndTask],
                        originalProjectAndTask : ProjectAndTask) extends BuildMessage {
 
+  self =>
   import maker.graphviz.GraphVizDiGrapher._
   import maker.graphviz.GraphVizUtils._
 
@@ -80,4 +81,27 @@ case class BuildResult[+A](res : Either[TaskFailed, A],
     }
     BuildResult(mappedRes, projectAndTasks, originalProjectAndTask)
   }
+
+  def filter(f: A => Boolean): BuildResult[A] = this
+
+  class WithFilter(p: A => Boolean) {
+    println("with filter!")
+    def map[B](f: A => B): BuildResult[B] = self.filter(p).map(f)
+    def flatMap[B](f: A => BuildResult[B]): BuildResult[B] = self.filter(p).flatMap(f)
+   // def foreach[U](f: A => U): Unit = self.filter(p).foreach(f)
+    def withFilter(q: A => Boolean): WithFilter =
+      new WithFilter(x => p(x) && q(x))
+  }
+  /** called with conditional statement in for comprehension */
+  def withFilter(p: A => Boolean): WithFilter = new WithFilter(p)
+
+/*
+  @inline
+  def withFilter(f: A => Boolean) = {
+    res match {
+      case Left(l) => false
+      case Right(a) => f(a)
+    }
+  }
+*/
 }
