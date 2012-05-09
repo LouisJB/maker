@@ -17,6 +17,7 @@ object Task {
     PublishLocalTask -> Set(PackageTask),
     PublishTask -> Set(PublishLocalTask),
     RunUnitTestsTask -> Set(CompileTestsTask),
+    RunFailingTestsTask -> Set(CompileTestsTask),
     RunMainTask -> Set(CompileSourceTask),
     RunJettyTask -> Set(PackageTask)
   )

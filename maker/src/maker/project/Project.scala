@@ -138,20 +138,16 @@ case class Project(
   def test = TaskManager(projectAndDescendents, RunUnitTestsTask)
   def testOnly = TaskManager(List(this), RunUnitTestsTask)
   def testClassOnly(testClassNames : String*) = TaskManager(List(this), RunUnitTestsTask, Map("testClassOrSuiteName" -> testClassNames.mkString(":")))
-  def testResults = ScalatestResults(this)
+  def testResultsOnly = ScalatestResults(this)
+  def testResults = projectAndDescendents.map(ScalatestResults(_)).reduce(_++_)
 
-  def failingTests = projectAndDescendents.flatMap(_.testResults.failed)
 
-  /*
-   * Will re-test anything that failed in this or any dependencies
-   */
-  def testFailingSuites = {
-    TaskManager(List(this), RunUnitTestsTask, Map("testClassOrSuiteName" → failingTests.map(_.suite).mkString(":")))
-  }
+  def testFailingSuites = TaskManager(projectAndDescendents, RunFailingTestsTask)
+  def testFailingSuitesOnly = TaskManager(List(this), RunFailingTestsTask)
 
   // Only prints the first, for any more look in testResults.failed
   def showFailingTest{
-   failingTests.headOption.foreach{ 
+   testResults.failed.headOption.foreach{ 
       res ⇒ 
         println("Test failed")
         println(res.suite + " : " + res.testName)

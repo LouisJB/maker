@@ -4,7 +4,6 @@ import java.io.File
 import maker.utils.FileUtils._
 import maker.Maker._
 
-:power 
 
 System.setProperty("scala.usejavacp", "false")
 System.setProperty("log4j.ignoreTCL", "true")
@@ -20,5 +19,7 @@ def testContinuously(klass : String = "") = {
 }
 
 println("\nMaker v" + MAKER_VERSION + "\n")
-repl.setPrompt("maker v" + MAKER_VERSION + ">")
 
+// turned off for the moment as auto complet in power mode is extremely slow
+//:power
+//repl.setPrompt("maker v" + MAKER_VERSION + "> ")
