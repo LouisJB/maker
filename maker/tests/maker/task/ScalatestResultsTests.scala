@@ -16,29 +16,6 @@ case class ScalatestResultsTests extends FunSuite{
       case a : Attribute ⇒ metadataToMap(md.next, acc ++ Map(a.key → a.value.toString))
     }
   }
-  //test("real case"){
-    //import maker.utils.FileUtils._
-    //val xmlFile = file("test.xml")
-    //val node = XML.loadFile(xmlFile)
-    //println(node.getClass)
-    //val tests = (node \ "testcase").toList
-    //assert(tests.size === 5)
-    //tests.foreach{
-      //test ⇒ 
-      //val attributes = metadataToMap(test.attributes)
-      //val failures = (test \\ "failure").toList.map(_.toString)
-      //assert(failures.size <= 1)
-      //TestResult(
-        //suite = attributes("classname"), 
-        //testName = attributes("name"),
-        //time = attributes("time").toDouble,
-        //error = failures.headOption
-        //)
-      //println(attributes)
-      //println(failures.size)
-      // 
-      //}
-      //}
 
   def makeProject(name : String, root : File) = {
     Project(

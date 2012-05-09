@@ -52,21 +52,22 @@ case object RunUnitTestsTask extends Task {
 
   def exec(project: Project, acc: List[AnyRef], parameters: Map[String, String] = Map()) = {
     Log.info("Testing " + project)
-    val classOrSuiteNames = parameters.get("testClassOrSuiteName").map(_.split(":").toList.filter(_.size > 0)).getOrElse(Nil)
-    val suiteParameters = classOrSuiteNames match {
-      case Nil => suiteClassNames(project).map(List("-s", _)).flatten
-      case _ => classOrSuiteNames.map(List("-s", _)).flatten
+    recursiveDelete(project.testResultsDir)
+    mkdirs(project.testResultsDir)
+
+    val classOrSuiteNames = parameters.get("testClassOrSuiteName") match {
+      case Some(names) ⇒ names.split(":").toList.filter(_.size > 0)
+      case None ⇒ suiteClassNames(project)
     }
-    if (suiteParameters.isEmpty) {
+    if (classOrSuiteNames.isEmpty) {
       Log.info("No tests found, nothing to do")
       Right(Unit)
     }
     else {
+      val suiteParameters = classOrSuiteNames.map(List("-s", _)).flatten
       Log.debug("Tests to run: ")
       suiteParameters.foreach(Log.debug(_)  )
-      val testOutputDir = mkdirs(file(project.root, ".maker/test-results"))
-      Log.info("Output is to " + testOutputDir)
-      val args = List("-c", "-o", "-u", testOutputDir.getAbsolutePath, "-p", project.scalatestRunpath) ::: suiteParameters
+      val args = List("-c", "-o", "-u", project.testResultsDir.getAbsolutePath, "-p", project.scalatestRunpath) ::: suiteParameters
       val cmd = ScalaCommand(CommandOutputHandler(), project.props.Java().getAbsolutePath, project.runClasspath, "org.scalatest.tools.Runner", args : _*)
       cmd.exec match {
         case 0 ⇒ Right(Unit)

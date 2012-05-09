@@ -24,12 +24,11 @@ object ScalatestResults extends App{
     }
   }
   def apply(project : Project) : ScalatestResults = {
-    val xmlFiles = findFilesWithExtension("xml", project.testResultsDir)
-    val xmlNodes = xmlFiles.map(XML.loadFile).flatten.toSet
+    val xmlFiles = findFilesWithExtension("xml", project.testResultsDir).toList
+    val xmlNodes = xmlFiles.map(XML.loadFile).flatten \\ "testcase"
     val results = xmlNodes.map{
       node ⇒ 
         val attributes = metadataToMap(node.attributes)
-        Log.info(attributes)
         val failures = (node \\ "failure").toList.map(_.toString)
         assert(failures.size <= 1)
         TestResult(
@@ -39,6 +38,6 @@ object ScalatestResults extends App{
           error = failures.headOption
         )
     }
-    ScalatestResults(results)
+    ScalatestResults(results.toSet)
   }
 }
