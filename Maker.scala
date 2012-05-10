@@ -13,13 +13,13 @@ def testContinuously(klass : String = "") = {
   if (klass == "")
     mkr.~(mkr.test _)
   else{
-    val test = () ⇒ mkr.testClassOnly(klass)
+    val test = () => mkr.testClassOnly(klass)
     mkr.~(test)
   }
 }
 
 println("\nMaker v" + MAKER_VERSION + "\n")
 
-// turned off for the moment as auto complet in power mode is extremely slow
+// turned off for the moment as auto complete in power mode is extremely slow
 //:power
 //repl.setPrompt("maker v" + MAKER_VERSION + "> ")
