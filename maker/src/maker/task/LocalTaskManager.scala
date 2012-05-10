@@ -14,6 +14,12 @@ import maker.Maker
 import maker.utils.os.CommandOutputHandler
 import TaskManagement._
 import RemoteTaskManager._
+import java.util.concurrent.atomic.AtomicReference
+import java.util.concurrent.atomic.AtomicInteger
+import maker.utils.os.ProcessID
+import scalaz.Scalaz._
+import scala.actors.Future
+import scala.actors.Futures
 
 
 object TaskManagement{
@@ -57,13 +63,7 @@ class LocalTaskManagerHandler extends SimpleChannelUpstreamHandler{
 
 
 
-class LocalTaskManager {
-
-  def launchRemote{
-    val cmd = ScalaCommand(CommandOutputHandler(), Maker.mkr.props.Java().getAbsolutePath, Maker.mkr.runClasspath, "maker.task.RemoteTaskManager")
-    cmd.execAsync
-  }
-  launchRemote
+case class LocalTaskManager(retryTime : Int = 500, maxRetries : Int = 5) {
 
   val channelFactory = makeClientChannelFactory
   val bootstrap = new ClientBootstrap(channelFactory)
@@ -78,11 +78,46 @@ class LocalTaskManager {
       }
   })
 
+  val channelFuture : AtomicReference[Option[ChannelFuture]] = new AtomicReference(None)
+  val nextMessagNo = new AtomicInteger(0)
+  val remoteProcess : AtomicReference[Option[Process]] = new AtomicReference(None)
+
+  def remoteProcessID : Option[ProcessID] = remoteProcess.get.map(ProcessID(_))
+
+  val isRemoteRunning = remoteProcessID.fold(_.isRunning, false)
+
+  def connectToRemote{
+    channelFuture.set(Some(openConnection()))
+  }
+
+  def sendMessage(message : AnyRef) = {
+    channelFuture.get match {
+      case Some(cf) ⇒ 
+        cf.getChannel.write((nextMessagNo.getAndIncrement, message)).awaitUninterruptibly
+      case None ⇒ 
+        throw new Exception("Have no channel")
+    }
+  }
+
+  def launchRemote : Future[Int] = {
+    val cmd = ScalaCommand(CommandOutputHandler(), Maker.mkr.props.Java().getAbsolutePath, Maker.mkr.runClasspath, "maker.task.RemoteTaskManager")
+    val (proc, res) = cmd.execAsync
+    remoteProcess.set(Some(proc))
+    res
+  }
+
+  //def launchRemoteWaiting : Int = Futures.awaitAll{
+    //val fut : Future[Int] = launchRemote
+    //Futures.awaitAll(10000, fut) match {
+      //case List(Some(i))  ⇒ i.toString.toInt
+      //case _ ⇒ throw new Exception("couldn't launch remote")
+      //}
+      //7
+      //}
 
   def openConnection(numTries : Int = 0) : ChannelFuture = {
     Log.debug("LOCAL Trying to open connection")
-    val maxretries = 5
-    if (numTries > maxretries)
+    if (numTries > maxRetries)
       throw new Exception("Can't connect to server")
     val channelFuture = bootstrap.connect(address)
     val haveConnected = new AtomicBoolean(false)
@@ -99,27 +134,22 @@ class LocalTaskManager {
       channelFuture
     } else{
       Log.debug("LOCAL Connection failed - will retry")
-      Thread.sleep(500)
+      Thread.sleep(retryTime)
       openConnection(numTries + 1)
     }
   }
 
-  val channelFuture = openConnection()
-
-  channelFuture.awaitUninterruptibly
-  Log.debug("LOCAL Have created channel future")
-  val msg = (0, TellMeYourProcessID)
-  Log.debug("LOCAL Sending message " + msg)
-  val future = channelFuture.getChannel.write(msg)
-  future.awaitUninterruptibly
 
   def close{
-    channelFuture.awaitUninterruptibly
-    if (! channelFuture.isSuccess){
-      channelFuture.getCause.printStackTrace
-      System.exit(-1)
+    channelFuture.get.foreach{
+      cf ⇒ 
+        cf.awaitUninterruptibly
+      if (! cf.isSuccess){
+        cf.getCause.printStackTrace
+        System.exit(-1)
+      }
+      cf.getChannel.getCloseFuture.awaitUninterruptibly
     }
-    channelFuture.getChannel.getCloseFuture.awaitUninterruptibly
     channelFactory.releaseExternalResources
   }
 
