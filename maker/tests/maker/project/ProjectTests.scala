@@ -2,9 +2,10 @@ package maker.project
 
 import org.scalatest.FunSuite
 import java.io.File
-import _root_.maker.utils.FileUtils._
-import _root_.maker._
-import _root_.maker.project._
+import maker.utils.FileUtils._
+import maker._
+import maker.project._
+import maker.project.Project._
 import scalaz.Scalaz._
 
 class ProjectTests extends FunSuite {
@@ -32,14 +33,8 @@ class ProjectTests extends FunSuite {
 
   def simpleProject = {
     val root = tempDir("fred")
+    val proj : Project = makeTestProject("foox", root)
     val outputDir = file(root, "classes")
-    val proj = Project(
-      "foox", 
-      root, 
-      List(new File(root, "src")), 
-      Nil,
-      libDirs=List(new File(".maker/lib"))
-    ).withTaskOutputSuppressed
     val files = new {
       val fooSrc = new File(root, "src/foo/Foo.scala")
       val barSrc = new File(root, "src/foo/bar/Bar.scala")
@@ -50,7 +45,8 @@ class ProjectTests extends FunSuite {
       def barObject = new File(outputDir, "foo/bar/Bar$.class")
     }
     import files._
-    writeToFile(fooSrc, originalFooContent)
+    proj.writeSrc("foo/Foo.scala", originalFooContent)
+    //writeToFile(fooSrc, originalFooContent)
     writeToFile(barSrc, originalBarContent)
     writeToFile(bazSrc, originalBazContent)
     (proj, files)

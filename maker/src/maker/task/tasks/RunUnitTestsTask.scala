@@ -27,8 +27,8 @@ case object RunUnitTestsTask extends Task {
   }
 
   private def isAccessibleSuite(className: String, loader: ClassLoader): Boolean = {
+    val suiteClass = loader.loadClass("org.scalatest.Suite")
     try {
-      val suiteClass = loader.loadClass("org.scalatest.Suite")
       isAccessibleSuite(suiteClass, loader.loadClass(className))
     }
     catch {
@@ -74,7 +74,7 @@ case object RunUnitTestsTask extends Task {
       var args = List("-c", "-u", project.testResultsDir.getAbsolutePath, "-p", project.scalatestRunpath) ::: suiteParameters
       if (Maker.verboseTestOutput && !project.suppressTaskOutput)
         args = "-o" :: args
-      val cmd = ScalaCommand(CommandOutputHandler(), project.props.Java().getAbsolutePath, project.runClasspath, "org.scalatest.tools.Runner", args : _*)
+      val cmd = ScalaCommand(CommandOutputHandler(), project.props.Java().getAbsolutePath, Nil, project.runClasspath, "org.scalatest.tools.Runner", args : _*)
       cmd.exec match {
         case 0 ⇒ Right(Unit)
         case _ ⇒ {

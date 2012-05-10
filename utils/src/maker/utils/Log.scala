@@ -64,4 +64,6 @@ case class Log(logger: Logger) {
    def info(msg: => AnyRef, t: => Throwable) = logger.info(msg, t)
 
    def warn(msg: => AnyRef, t: => Throwable) = logger.warn(msg, t)
+
+   def warn(msg: => AnyRef) = logger.warn(msg)
 }

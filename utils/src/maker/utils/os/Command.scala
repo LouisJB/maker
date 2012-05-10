@@ -61,6 +61,8 @@ case class Command(outputHandler : CommandOutputHandler, workingDirectory : Opti
   )
 
   private def startProc() : Process = {
+    if (args.exists(_.trim == ""))
+      Log.warn("Passed an empty argument in command \n" + this + "\nyou probably didn't wan't this")
     val procBuilder = new ProcessBuilder(args : _*)
     procBuilder.redirectErrorStream(true)
     workingDirectory.map(procBuilder.directory(_))
@@ -91,13 +93,13 @@ object Command{
 }
 
 object ScalaCommand{
-  def apply(outputHandler : CommandOutputHandler, java : String, classpath : String, klass : String, args : String*) : Command = {
+  def apply(outputHandler : CommandOutputHandler, java : String, opts : List[String], classpath : String, klass : String, args : String*) : Command = {
     val allArgs : List[String] = List(
       java,
       "-Dscala.usejavacp=true",
       "-classpath",
-      classpath,
-      "scala.tools.nsc.MainGenericRunner",
+      classpath) ::: opts :::
+      List("scala.tools.nsc.MainGenericRunner",
       klass) ::: args.toList
     Command(outputHandler, None, allArgs :_*)
   }

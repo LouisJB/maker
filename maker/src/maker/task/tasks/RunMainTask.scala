@@ -9,6 +9,7 @@ import maker.utils.os.Command
 import java.io.PrintWriter
 import maker.utils.TeeToFileOutputStream
 import maker.utils.os.CommandOutputHandler
+import maker.utils.os.ScalaCommand
 
 
 /**
@@ -23,15 +24,17 @@ case object RunMainTask extends Task {
         val className = parameters("mainClassName")
         val opts: List[String] = parameters.get("opts").map(_.split("\\|").toList).getOrElse(Nil)
         val mainArgs: List[String] = parameters.get("args").map(_.split("\\|").toList).getOrElse(Nil)
-        val args = List(
-          project.props.JavaHome() + "/bin/java",
-          "-Dscala.usejavacp=true",
-          "-classpath",
-          project.runClasspath + ":" + project.scalaLibs.mkString(":")) :::
-          opts ::: (className :: mainArgs)
 
         val writer = new PrintWriter(new TeeToFileOutputStream(runLogFile))
-        val cmd = Command(new CommandOutputHandler(Some(writer)).withSavedOutput, None, args: _*)
+        val cmd = ScalaCommand(
+          new CommandOutputHandler(Some(writer)).withSavedOutput,
+          project.props.JavaHome() + "/bin/java",
+          opts,
+          project.runClasspath,
+          className,
+          mainArgs : _*
+        )
+
         writeToFile(file("runcmd.sh"), "#!/bin/bash\n" + cmd.asString)
         Log.info("Running, press ctrl-] to terminate running process...")
 

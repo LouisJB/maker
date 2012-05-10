@@ -13,7 +13,7 @@ def testContinuously(klass : String = "") = {
   if (klass == "")
     mkr.~(mkr.test _)
   else{
-    val test = () => mkr.testClassOnly(klass)
+    val test = () => mkr.testClass(klass)
     mkr.~(test)
   }
 }

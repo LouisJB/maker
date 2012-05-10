@@ -100,7 +100,7 @@ case class LocalTaskManager(retryTime : Int = 500, maxRetries : Int = 5) {
   }
 
   def launchRemote : Future[Int] = {
-    val cmd = ScalaCommand(CommandOutputHandler(), Maker.mkr.props.Java().getAbsolutePath, Maker.mkr.runClasspath, "maker.task.RemoteTaskManager")
+    val cmd = ScalaCommand(CommandOutputHandler(), Maker.mkr.props.Java().getAbsolutePath, Nil, Maker.mkr.runClasspath, "maker.task.RemoteTaskManager")
     val (proc, res) = cmd.execAsync
     remoteProcess.set(Some(proc))
     res

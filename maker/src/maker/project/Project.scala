@@ -137,11 +137,17 @@ case class Project(
   def cleanOnly = TaskManager(List(this), CleanTask)
 
   def compile = TaskManager(projectAndDescendents, CompileSourceTask)
+  def compileContinuously{ this.~(compile _) }
 
   def testCompile = TaskManager(projectAndDescendents, CompileTestsTask)
+  def testCompileContinuously{ this.~(testCompile _) }
   def test = TaskManager(projectAndDescendents, RunUnitTestsTask)
   def testOnly = TaskManager(List(this), RunUnitTestsTask)
-  def testClassOnly(testClassNames : String*) = TaskManager(List(this), RunUnitTestsTask, Map("testClassOrSuiteName" -> testClassNames.mkString(":")))
+  def testClass(testClassNames : String*) = TaskManager(List(this), RunUnitTestsTask, Map("testClassOrSuiteName" -> testClassNames.mkString(":")))
+  def testClassContinuously(testClassNames : String*) {
+    this.~(() ⇒ testClass(testClassNames : _*))
+  }
+
   def testResultsOnly = ScalatestResults(this)
   def testResults = projectAndDescendents.map(ScalatestResults(_)).reduce(_++_)
 
@@ -188,7 +194,13 @@ case class Project(
     TaskManager(projects, PublishTask, Map("publishResolver" -> resolver, "version" -> version))
 
   def runMain(className : String)(opts : String*)(args : String*) = {
-    val r = TaskManager(List(this), RunMainTask, Map("mainClassName" -> className, "opts" -> opts.mkString("|") , "args" -> args.mkString("|")))
+    var parameters = Map("mainClassName" -> className)
+    if (! opts.isEmpty)
+      parameters += ("opts" → opts.mkString("|"))
+    if (! args.isEmpty)
+      parameters += ("args" → args.mkString("|"))
+
+    val r = TaskManager(List(this), RunMainTask, parameters)
     println("runMain task completed for class: " + className)
     r
   }
@@ -324,6 +336,15 @@ case class Project(
     ModuleDef(projectDef, deps, repos, ScmDef(props.ScmUrl(), props.ScmConnection()), props.Licenses(), props.Developers())
   }
 
+  def writeClasspath{
+    val cp = compilationClasspath
+    writeToFile(file(name + "-classpath.sh"), "export CLASSPATH=" + cp)
+  }
+
+  def writeSrc(relativeSrcPath : String, code : String){
+    writeToFile(file(srcDirs.head, relativeSrcPath), code)
+  }
+
   override def toString = "Project " + moduleId.toString
 }
 
@@ -378,4 +399,12 @@ object Project {
   def apply(name : String) : Project = Project(name, file(name))
   def apply(name : String,  libDirectories : => List[File]) : Project = Project(name, file(name), libDirs = libDirectories, props = Props())
   def apply(name : String,  libDirectories : => List[File], props : Props) : Project = Project(name, file(name), libDirs = libDirectories, props = props)
+  def makeTestProject(name : String, root : File) : Project = new Project(
+    name, 
+    root, 
+    sourceDirs = List(file(root, "src")),
+    tstDirs = List(file(root, "tests")),
+    libDirs = List(file(".maker/lib"))
+  ).withTaskOutputSuppressed
 }
+
