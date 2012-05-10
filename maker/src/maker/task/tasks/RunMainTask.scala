@@ -6,7 +6,6 @@ import maker.task.{ProjectAndTask, Task, TaskFailed}
 import maker.utils.Log
 import maker.utils.FileUtils._
 import maker.utils.os.Command
-import maker.utils.os.CommandOutputHandler
 import java.io.PrintWriter
 import maker.utils.TeeToFileOutputStream
 import maker.utils.os.CommandOutputHandler
@@ -16,6 +15,7 @@ import maker.utils.os.CommandOutputHandler
  * run a class main in a separate JVM instance (but currently synchronously to maker repl)
  */
 case object RunMainTask extends Task {
+  val runLogFile = file("runlog.out")
   def exec(project: Project, acc: List[AnyRef], parameters: Map[String, String] = Map()) = {
     parameters.get("mainClassName") match {
       case Some(name) => {
@@ -30,7 +30,7 @@ case object RunMainTask extends Task {
           project.runClasspath + ":" + project.scalaLibs.mkString(":")) :::
           opts ::: (className :: mainArgs)
 
-        val writer = new PrintWriter(new TeeToFileOutputStream(file("runlog.out")))
+        val writer = new PrintWriter(new TeeToFileOutputStream(runLogFile))
         val cmd = Command(new CommandOutputHandler(Some(writer)).withSavedOutput, None, args: _*)
         writeToFile(file("runcmd.sh"), "#!/bin/bash\n" + cmd.asString)
         Log.info("Running, press ctrl-] to terminate running process...")
