@@ -7,6 +7,9 @@ import maker.utils.Log
 import maker.utils.FileUtils._
 import maker.utils.os.Command
 import maker.utils.os.CommandOutputHandler
+import java.io.PrintWriter
+import maker.utils.TeeToFileOutputStream
+import maker.utils.os.CommandOutputHandler
 
 
 /**
@@ -27,7 +30,8 @@ case object RunMainTask extends Task {
           project.runClasspath + ":" + project.scalaLibs.mkString(":")) :::
           opts ::: (className :: mainArgs)
 
-        val cmd = Command(CommandOutputHandler(file("runlog.out")).withSavedOutput, None, args: _*)
+        val writer = new PrintWriter(new TeeToFileOutputStream(file("runlog.out")))
+        val cmd = Command(new CommandOutputHandler(Some(writer)).withSavedOutput, None, args: _*)
         writeToFile(file("runcmd.sh"), "#!/bin/bash\n" + cmd.asString)
         Log.info("Running, press ctrl-] to terminate running process...")
 
