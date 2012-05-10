@@ -13,7 +13,7 @@ class DetermineClassFilesTests extends FunSuite{
         val proj = new Project(
           "test", dir, List(file(dir, "src")), Nil,
           libDirs=List(file(".maker/lib"))
-      )
+        ).withTaskOutputSuppressed
         f(proj)
     } 
   }
