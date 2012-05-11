@@ -21,14 +21,17 @@ trait ProjectDef {
   def root : File
   def sourceDirs: List[File] = Nil
   def tstDirs: List[File] = Nil
+  def resDirs: List[File] = Nil
 
   // use the standard maven convention dir structure as the defaults
   val mainRoot = file(root, "src/main/")
   val testRoot = file(root, "src/test/")
-  val defaultSrcDirNames = "scala" :: "java" :: Nil
+  val defaultSrcRootDirNames = "scala" :: "java" :: Nil
+  val resourceDir = "resource"
 
-  val srcDirs : List[File] = if (sourceDirs.isEmpty) defaultSrcDirNames.map(file(mainRoot, _)) else sourceDirs
-  val testDirs : List[File] = if (tstDirs.isEmpty) defaultSrcDirNames.map(file(testRoot, _)) else tstDirs
+  val srcDirs : List[File] = if (sourceDirs.isEmpty) defaultSrcRootDirNames.map(file(mainRoot, _)) else sourceDirs
+  val testDirs : List[File] = if (tstDirs.isEmpty) defaultSrcRootDirNames.map(file(testRoot, _)) else tstDirs
+  val resourceDirs : List[File] = if (resDirs.isEmpty) (mainRoot :: testRoot :: Nil).map(r => file(r, resourceDir)) else resDirs
 }
 
 /**
@@ -43,7 +46,7 @@ case class Project(
       libDirs: List[File] = Nil,
       providedLibDirs: List[File] = Nil, // compile time only, don't add to runtime classpath or any packaging
       managedLibDirName : String = "lib_managed",
-      resourceDirs : List[File] = Nil,
+      override val resDirs : List[File] = Nil,
       children: List[Project] = Nil,
       props : Props = Props(),
       unmanagedProperties : Properties = new Properties(),
@@ -85,7 +88,7 @@ case class Project(
 
   // convenience copy functions
   def dependsOn(projects: Project*) = copy(children = children ::: projects.toList)
-  def withResourceDirs(dirs : List[File]) : Project = copy(resourceDirs = dirs)
+  def withResourceDirs(dirs : List[File]) : Project = copy(resDirs = dirs)
   def withResourceDirs(dirs : String*) : Project = withResourceDirs(dirs.map(d => file(root, d)).toList)
   def withAdditionalSourceDirs(dirs : String*) = copy(sourceDirs = dirs.toList.map(d => file(root, d)) ::: this.sourceDirs)
   def withAdditionalTestDirs(dirs : String*) = copy(tstDirs = dirs.toList.map(d => file(root, d)) ::: this.tstDirs)
@@ -356,7 +359,7 @@ case class ProjectLib(projectName:String, exported:Boolean)
 class TopLevelProject(name:String,
                       children:List[Project],
                       props:Props = Props(),
-                      scalaSwingLibraryProjects:List[ProjectLib] = Nil) extends Project(name, file("."), Nil, Nil, Nil, resourceDirs = Nil, children = children, props = props) {
+                      scalaSwingLibraryProjects:List[ProjectLib] = Nil) extends Project(name, file("."), Nil, Nil, Nil, resDirs = Nil, children = children, props = props) {
 
   def generateIDEAProject() {
     val allModules = children.flatMap(_.projectAndDescendents).distinct
