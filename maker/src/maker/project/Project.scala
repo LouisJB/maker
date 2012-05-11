@@ -204,6 +204,9 @@ case class Project(
     println("runMain task completed for class: " + className)
     r
   }
+  def runMainContinuously(className : String)(opts : String*)(args : String*) {
+    this.~(() ⇒ runMain(className)(opts : _*)(args : _*))
+  }
 
   def runJetty : BuildResult[AnyRef] = runJetty()
   def runJetty(portNo : Int = 8080) = {
