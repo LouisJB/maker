@@ -5,6 +5,8 @@ import java.io.File
 import maker.utils.FileUtils._
 import maker.project.Project._
 import scalaz.Scalaz._
+import maker.utils.Log
+import org.apache.log4j.Level._
 
 class ProjectTests extends FunSuite with TestUtils {
 
@@ -175,7 +177,7 @@ class ProjectTests extends FunSuite with TestUtils {
     }
   }
 
-  ignore("Test files have the correct dependencies"){
+  test("Test files have the correct dependencies"){
     withTempDir{
       dir ⇒ 
         val proj = makeTestProject("test-file-dependencies", dir)
@@ -202,8 +204,8 @@ class ProjectTests extends FunSuite with TestUtils {
           """
         )
         proj.testCompile
-        val deps = proj.state.classFileDependencies.deps
-        assert(deps(fooTest).contains(fooSrc))
+        val deps = proj.state.fileDependencies.sourceParentDependencies(Set(fooTest))
+        assert(deps.contains(fooSrc))
 
     }
 

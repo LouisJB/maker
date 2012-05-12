@@ -15,7 +15,9 @@ case class ProjectCompilers(project : Project){
     val scalaLibs = findJars(file(project.props.ScalaHome(), "lib")).toList.mkString(":")
     settings.usejavacp.value = false
     val compilerOutputDir = if (isTestCompiler) project.testOutputDir else project.outputDir
-    settings.outputDirs.setSingleOutput(new PlainDirectory(new Directory(compilerOutputDir)))
+    compilerOutputDir.mkdirs
+    //settings.outputDirs.setSingleOutput(new PlainDirectory(new Directory(compilerOutputDir)))
+    settings.d.value_= (new PlainDirectory(new Directory(compilerOutputDir)).path)
     settings.bootclasspath.value = scalaLibs
     settings.classpath.value = project.compilationClasspath
 
@@ -24,7 +26,9 @@ case class ProjectCompilers(project : Project){
       self =>
       override protected def computeInternalPhases() {
         super.computeInternalPhases
-        phasesSet += new GenerateCompilationMetadata(self, project.state.signatures, project.state.classFileDependencies, compilerOutputDir, project.state.sourceToClassFiles).Component
+        //phasesSet += new GenerateCompilationMetadata(self, project.state.signatures, project.state.classFileDependencies, compilerOutputDir, project.state.sourceToClassFiles).Component
+        phasesSet += new CollectProjectSignatures(self, project.state.signatures)
+        phasesSet += new FileDependencyAnalyzer(self, project.state.fileDependencies)
       }
     }
     comp
