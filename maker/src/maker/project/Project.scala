@@ -245,6 +245,7 @@ case class Project(
     var lastTaskTime : Option[Long] = None
     def printWaitingMessage = println("\nWaiting for source file changes (press 'enter' to interrupt)")
     def rerunTask{
+      println("\n" * 10)
       task()
       lastTaskTime = Some(System.currentTimeMillis)
       printWaitingMessage

@@ -31,8 +31,7 @@ class ProjectTests extends FunSuite {
     case class Baz(y : Int)
     """
 
-  def simpleProject = {
-    val root = tempDir("fred")
+  def simpleProject(root : File) = {
     val proj : Project = makeTestProject("foox", root)
     val outputDir = file(root, "classes")
     val files = new {
@@ -53,115 +52,128 @@ class ProjectTests extends FunSuite {
   }
 
   test("Compilation makes class files, writes dependencies, and package makes jar"){
-    val (proj, _) = simpleProject
-    proj.clean
-    assert(proj.classFiles.size === 0)
-    proj.compile
-    assert(proj.classFiles.size > 0)
-    assert(!proj.outputArtifact.exists)
-    proj.pack
-    assert(proj.outputArtifact.exists)
-    proj.clean
-    assert(proj.classFiles.size === 0)
-    assert(!proj.outputArtifact.exists)
-    proj.delete
+    withTempDir {
+      dir ⇒ 
+        val (proj, _) = simpleProject(dir)
+        proj.clean
+        assert(proj.classFiles.size === 0)
+        proj.compile
+        assert(proj.classFiles.size > 0)
+        assert(!proj.outputArtifact.exists)
+        proj.pack
+        assert(proj.outputArtifact.exists)
+        proj.clean
+        assert(proj.classFiles.size === 0)
+        assert(!proj.outputArtifact.exists)
+    }
   }
 
   test("Compilation not done if signature unchanged"){
-    val (proj, files) = simpleProject
-    import files._
-    proj.compile
-    var compilationTime = proj.state.compilationTime.get
-    sleepToNextSecond
-    writeToFile(fooSrc, originalFooContent)
-    proj.compile
-    var changedClassFiles = proj.classFiles.filter(_.lastModified > compilationTime)
-    assert(changedClassFiles === Set(fooClass, fooObject))
-    proj.delete
+    withTempDir {
+      dir ⇒ 
+        val (proj, files) = simpleProject(dir)
+        import files._
+        proj.compile
+        var compilationTime = proj.state.compilationTime.get
+        sleepToNextSecond
+        writeToFile(fooSrc, originalFooContent)
+        proj.compile
+        var changedClassFiles = proj.classFiles.filter(_.lastModified > compilationTime)
+        assert(changedClassFiles === Set(fooClass, fooObject))
+    }
   }
 
   test("Compilation is done if signature changed, but only on dependent classes"){
-    val (proj, files) = simpleProject
-    proj.compile
-    import files._
-    val compilationTime = proj.state.compilationTime.get
-    sleepToNextSecond
+    withTempDir {
+      dir ⇒ 
+        val (proj, files) = simpleProject(dir)
+        proj.compile
+        import files._
+        val compilationTime = proj.state.compilationTime.get
+        sleepToNextSecond
 
-    writeToFile(
-      fooSrc,
-      """
-      package foo
-      case class Foo(x : Double){
-        val fred = 10
-        def double() = x + x
-        def newPublicMethod(z : Int) = z + z
-      }
-      """
-    )
-    proj.compile
-    val changedClassFiles = proj.classFiles.filter(_.lastModified > compilationTime)
-    assert(changedClassFiles === Set(fooClass, fooObject, barClass, barObject))
-    proj.delete
+        writeToFile(
+          fooSrc,
+          """
+          package foo
+          case class Foo(x : Double){
+            val fred = 10
+            def double() = x + x
+            def newPublicMethod(z : Int) = z + z
+          }
+          """
+        )
+        proj.compile
+        val changedClassFiles = proj.classFiles.filter(_.lastModified > compilationTime)
+        assert(changedClassFiles === Set(fooClass, fooObject, barClass, barObject))
+    }
   }
 
   test("Compilation of dependent classes is not done if signature of public method is unchanged"){
-    val (proj, files) = simpleProject
-    import files._
-    proj.compile
-    val compilationTime = proj.state.compilationTime.get
-    sleepToNextSecond
+    withTempDir {
+      dir ⇒ 
+        val (proj, files) = simpleProject(dir)
+        import files._
+        proj.compile
+        val compilationTime = proj.state.compilationTime.get
+        sleepToNextSecond
 
-    writeToFile(
-      fooSrc,
-      """
-      package foo
-      case class Foo(x : Double){
-        val fred = 10
-        def double() = x + x + x  //implementation changed
-      }
-      """
-    )
-    proj.compile
-    val changedClassFiles = proj.classFiles.filter(_.lastModified > compilationTime)
-    assert(changedClassFiles === Set(fooClass, fooObject))
-    proj.delete
+        writeToFile(
+          fooSrc,
+          """
+          package foo
+          case class Foo(x : Double){
+            val fred = 10
+            def double() = x + x + x  //implementation changed
+          }
+          """
+        )
+        proj.compile
+        val changedClassFiles = proj.classFiles.filter(_.lastModified > compilationTime)
+        assert(changedClassFiles === Set(fooClass, fooObject))
+    }
   }
 
   test("Compilation of dependent classes is not done if new private method is added"){
-    val (proj, files) = simpleProject
-    import files._
-    proj.compile
-    val compilationTime = proj.state.compilationTime.get
-    sleepToNextSecond
+    withTempDir {
+      dir ⇒ 
+        val (proj, files) = simpleProject(dir)
+        import files._
+        proj.compile
+        val compilationTime = proj.state.compilationTime.get
+        sleepToNextSecond
 
-    writeToFile(
-      fooSrc,
-      """
-      package foo
-      case class Foo(x : Double){
-        val fred = 10
-        def double() = x + x 
-        private def treble() = x + x + x
-      }
-      """
-    )
-    proj.compile
-    val changedClassFiles = proj.classFiles.filter(_.lastModified > compilationTime)
-    assert(changedClassFiles === Set(fooClass, fooObject))
-    proj.delete
+        writeToFile(
+          fooSrc,
+          """
+          package foo
+          case class Foo(x : Double){
+            val fred = 10
+            def double() = x + x 
+            private def treble() = x + x + x
+          }
+          """
+        )
+        proj.compile
+        val changedClassFiles = proj.classFiles.filter(_.lastModified > compilationTime)
+        assert(changedClassFiles === Set(fooClass, fooObject))
+    }
   }
 
   test("Deletion of source file causes deletion of class files"){
-    val (proj, files) = simpleProject
-    import files._
-    proj.compile
-    Set(barClass, barObject) |> {
-      s => assert((s & proj.classFiles) === s)
-    }
-    barSrc.delete
-    proj.compile
-    Set(barClass, barObject) |> {
-      s => assert((s & proj.classFiles) === Set())
+    withTempDir {
+      dir ⇒ 
+        val (proj, files) = simpleProject(dir)
+        import files._
+        proj.compile
+        Set(barClass, barObject) |> {
+          s => assert((s & proj.classFiles) === s)
+        }
+        barSrc.delete
+        proj.compile
+        Set(barClass, barObject) |> {
+          s => assert((s & proj.classFiles) === Set())
+        }
     }
   }
 

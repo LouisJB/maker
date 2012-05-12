@@ -49,16 +49,25 @@ object CommandOutputHandler{
     closeWriter = true
   )
   val NULL = new CommandOutputHandler(writer = None)
+  object NO_CONSUME_PROCESS_OUTPUT extends CommandOutputHandler(){
+    override def redirectOutputRunnable(proc : Process) = new Runnable(){
+      def run(){
+      }
+    }
+  }
 }
 
 case class Command(outputHandler : CommandOutputHandler, workingDirectory : Option[File], args : String*) {
 
   def savedOutput = outputHandler.savedOutput
-  def withSavedOutput = new Command(
-    outputHandler = outputHandler.withSavedOutput,
-      workingDirectory,
-      args : _*
+  def withOutput(handler : CommandOutputHandler) = new Command(
+    outputHandler = handler,
+    workingDirectory,
+    args : _*
   )
+
+  def withSavedOutput = withOutput(outputHandler.withSavedOutput)
+  def withNoOutput = withOutput(CommandOutputHandler.NULL)
 
   private def startProc() : Process = {
     if (args.exists(_.trim == ""))

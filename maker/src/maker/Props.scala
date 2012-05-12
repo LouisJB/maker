@@ -41,6 +41,11 @@ case class Props(private val overrides : Map[String, String] = Map()) {
   class OptionalFileProperty extends TypedOptionalProperty[File] {
     def toT(s : String) = Option(s).map(file)
   }
+  class IntProperty(val default : String) extends Property[Int]{
+    def toT(s : String) = s.toInt
+    def apply() = value
+  }
+
   override def toString =
     "Properties:\n" + properties.map(kv => kv._1 + "=" + kv._2.value).mkString("\n")
   
@@ -89,6 +94,8 @@ case class Props(private val overrides : Map[String, String] = Map()) {
       tee = makeTeeStream
     }
   }
+
+  object RemoteTaskPort extends IntProperty("10101")
 
   object Organisation extends StringProperty("The Acme Org")
   object GroupId extends StringProperty("org.acme")

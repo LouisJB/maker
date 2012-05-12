@@ -35,6 +35,7 @@ class RemoteTaskManagerHandler extends SimpleChannelUpstreamHandler{
 object RemoteTaskManager extends App{
 
   import TaskManagement._
+
   Log.info("REMOTE - starting task manager")
 
     val factory = makeServerChannelFactory
@@ -53,6 +54,7 @@ object RemoteTaskManager extends App{
       }
     )
     val allChannels = new DefaultChannelGroup("Spike Server")
+    val address = new InetSocketAddress(Maker.props.RemoteTaskPort())
     val channel : Channel = bootstrap.bind(address)
     Log.info("REMOTE bound to address " + address + " on channel " + channel)
     allChannels.add(channel)

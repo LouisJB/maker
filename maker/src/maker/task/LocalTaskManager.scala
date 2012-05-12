@@ -20,10 +20,10 @@ import maker.utils.os.ProcessID
 import scalaz.Scalaz._
 import scala.actors.Future
 import scala.actors.Futures
+import maker.utils.os.OsUtils
 
 
 object TaskManagement{
-  val address = new InetSocketAddress(8080)
 
   def encoder(localRemote : String) = new ObjectEncoder(){
     override def handleDownstream(ctx : ChannelHandlerContext, e : ChannelEvent){
@@ -62,8 +62,11 @@ class LocalTaskManagerHandler extends SimpleChannelUpstreamHandler{
 }
 
 
+case object CannotConnectToRemoteServer extends Throwable
 
 case class LocalTaskManager(retryTime : Int = 500, maxRetries : Int = 5) {
+
+  private val port : Int = Maker.props.RemoteTaskPort()
 
   val channelFactory = makeClientChannelFactory
   val bootstrap = new ClientBootstrap(channelFactory)
@@ -84,7 +87,9 @@ case class LocalTaskManager(retryTime : Int = 500, maxRetries : Int = 5) {
 
   def remoteProcessID : Option[ProcessID] = remoteProcess.get.map(ProcessID(_))
 
-  val isRemoteRunning = remoteProcessID.fold(_.isRunning, false)
+  def isRemoteRunning = remoteProcessID.fold(_.isRunning, false)
+  def isPortUsed = OsUtils.isPortUsed(port)
+
 
   def connectToRemote{
     channelFuture.set(Some(openConnection()))
@@ -99,27 +104,30 @@ case class LocalTaskManager(retryTime : Int = 500, maxRetries : Int = 5) {
     }
   }
 
-  def launchRemote : Future[Int] = {
+  def launchRemote {
+    assert(! isPortUsed, "Port " + port + " already used ")
     val cmd = ScalaCommand(CommandOutputHandler(), Maker.mkr.props.Java().getAbsolutePath, Nil, Maker.mkr.runClasspath, "maker.task.RemoteTaskManager")
-    val (proc, res) = cmd.execAsync
+    val (proc, _) = cmd.execAsync
     remoteProcess.set(Some(proc))
-    res
   }
 
-  //def launchRemoteWaiting : Int = Futures.awaitAll{
-    //val fut : Future[Int] = launchRemote
-    //Futures.awaitAll(10000, fut) match {
-      //case List(Some(i))  ⇒ i.toString.toInt
-      //case _ ⇒ throw new Exception("couldn't launch remote")
-      //}
-      //7
-      //}
+  def launchRemoteWaiting {
+    launchRemote
+  }
+
+  def closeRemote{
+    remoteProcess.get match {
+      case Some(proc) ⇒ proc.destroy
+      case None ⇒ throw new Exception("No known process runing")
+    }
+    remoteProcess.set(None)
+  }
 
   def openConnection(numTries : Int = 0) : ChannelFuture = {
     Log.debug("LOCAL Trying to open connection")
     if (numTries > maxRetries)
-      throw new Exception("Can't connect to server")
-    val channelFuture = bootstrap.connect(address)
+      throw CannotConnectToRemoteServer
+    val channelFuture = bootstrap.connect(new InetSocketAddress(port))
     val haveConnected = new AtomicBoolean(false)
     channelFuture.addListener(
       new ChannelFutureListener(){
