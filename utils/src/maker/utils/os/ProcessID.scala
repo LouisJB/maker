@@ -4,11 +4,11 @@ import java.lang.management.ManagementFactory
 
 case class ProcessID(id : Int){
   def isRunning = {
-    val status = Command("kill", "-0", id.toString).exec()
+    val status = Command("kill", "-0", id.toString).withNoOutput.exec()
     status == 0
   }
   def kill{
-    val status = Command("kill", "-9", id.toString).exec()
+    val status = Command("kill", "-9", id.toString).withNoOutput.exec()
     assert(status == 0, "Failed to kill process " + id + ", ")
   }
 }
