@@ -110,8 +110,9 @@ case class Project(
   def scalaLibs = List(file(props.ScalaHome(), "lib/scala-compiler.jar"), file(props.ScalaHome(), "lib/scala-library.jar"))
 
   def classpathDirectoriesAndJars : List[File] = ((outputDir :: javaOutputDir :: testOutputDir :: (jars ::: scalaLibs)) ::: resourceDirs ::: children.flatMap(_.classpathDirectoriesAndJars)).distinct
-  def compilationClasspath = classpathDirectoriesAndJars.map(_.getAbsolutePath).mkString(":")
-  def runClasspath = classpathDirectoriesAndJars.map(_.getAbsolutePath).mkString(":")
+  private def asClasspathStr(files : List[File], sep : String = ":") = files.map(_.getAbsolutePath).mkString(sep)
+  def compilationClasspath = asClasspathStr(classpathDirectoriesAndJars)
+  def runClasspath = asClasspathStr(classpathDirectoriesAndJars)
   def scalatestRunpath = classpathDirectoriesAndJars.mkString(" ")
   def printClasspath = compilationClasspath.split(":").foreach(println)
 
@@ -196,7 +197,7 @@ case class Project(
   private def publish_(projects : List[Project], resolver : String = props.DefaultPublishResolver().getOrElse("default"), version : String = props.Version()) =
     TaskManager(projects, PublishTask, Map("publishResolver" -> resolver, "version" -> version))
 
-  def runMain(className : String)(opts : String*)(args : String*) = {
+  def runMain(className : String)(opts : String*)(args : String*) : BuildResult[AnyRef] = {
     var parameters = Map("mainClassName" -> className)
     if (! opts.isEmpty)
       parameters += ("opts" → opts.mkString("|"))
@@ -306,8 +307,9 @@ case class Project(
   import maker.utils.maven._
   import maker.utils.ivy.IvyReader
   def readIvyDependencies() : List[DependencyLib] = {
-    if (ivyFile.exists())
-      IvyReader.readIvyDependenciesFromFile(ivyFile)
+    val ivyF = ivyGeneratedFile.getOrElse(ivyFile)
+    if (ivyF.exists())
+      IvyReader.readIvyDependenciesFromFile(ivyF)
     else {
       Log.info("No Ivy config for this module")
       Nil
