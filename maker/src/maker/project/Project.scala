@@ -354,6 +354,10 @@ case class Project(
     writeToFile(file(srcDirs.head, relativeSrcPath), code)
   }
 
+  def writeTest(relativeSrcPath : String, code : String){
+    writeToFile(file(testDirs.head, relativeSrcPath), code)
+  }
+
   override def toString = "Project " + moduleId.toString
 }
 

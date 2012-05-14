@@ -174,4 +174,44 @@ class ProjectTests extends FunSuite with TestUtils {
         }
     }
   }
+
+  ignore("Test files have the correct dependencies"){
+    withTempDir{
+      dir ⇒ 
+        val proj = makeTestProject("test-file-dependencies", dir)
+        val fooSrc = file(dir, "src/foo/Foo.scala")
+        val fooTest = file(dir, "tests/foo/FooTest.scala")
+        writeToFile(
+          fooSrc,
+          """
+            package foo
+            case class Fooble(i : Int)
+          """
+        )
+        writeToFile(
+          fooTest,
+          """
+            package foo
+            import org.scalatest.FunSuite
+            class FooTest extends FunSuite{
+              test("Foo constructor"){
+                val foo = Fooble(10)
+                assert(foo.i == 10)
+              }
+            }
+          """
+        )
+        proj.testCompile
+        val deps = proj.state.classFileDependencies.deps
+        assert(deps(fooTest).contains(fooSrc))
+
+    }
+
+  }
+
+  override def sleepToNextSecond{
+    Thread.sleep(1100)
+  }
+
+
 }
