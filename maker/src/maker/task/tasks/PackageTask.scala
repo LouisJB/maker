@@ -21,10 +21,13 @@ case object PackageTask extends Task {
       packageDir.mkdirs
 
     val jar = project.props.JavaHome().getAbsolutePath + "/bin/jar"
+
+    // Note: until we support scopes properly we have to be careful what we put on the runtime classpath
+    //   and in package runtime binary artifacts (so test scope content is deliberately excluded here)
     val dirsToPack = {
       val dirs = (project :: project.children).flatMap {
         p =>
-          p.outputDir :: p.javaOutputDir :: p.resourceDirs // :: p.testOutputDir:
+          p.outputDir :: p.javaOutputDir :: p.resourceDirs.filterNot(p => p.getPath.contains("test/")) // :: p.testOutputDir:
       }.filter(_.exists)
       dirs.foreach(d => Log.debug(d.getAbsolutePath))
       dirs
