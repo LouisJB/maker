@@ -9,7 +9,9 @@ import java.io.FileWriter
 import scalaz.Scalaz._
 
 
-case class CommandOutputHandler(writer : Option[PrintWriter] = Some(new PrintWriter(System.out)), buffer : Option[StringBuffer] = None, closeWriter : Boolean = false){
+case class CommandOutputHandler(writer : Option[PrintWriter] = Some(new PrintWriter(System.out)),
+                                buffer : Option[StringBuffer] = None,
+                                closeWriter : Boolean = false) {
   def withSavedOutput = copy(buffer = Some(new StringBuffer()))
   def savedOutput = buffer.fold(_.toString, "")
   def processLine(line : String){
