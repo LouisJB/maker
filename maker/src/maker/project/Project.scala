@@ -27,7 +27,7 @@ trait ProjectDef {
   val mainRoot = file(root, "src/main/")
   val testRoot = file(root, "src/test/")
   val defaultSrcRootDirNames = "scala" :: "java" :: Nil
-  val resourceDir = "resource"
+  val resourceDir = "resources"
 
   val srcDirs : List[File] = if (sourceDirs.isEmpty) defaultSrcRootDirNames.map(file(mainRoot, _)) else sourceDirs
   val testDirs : List[File] = if (tstDirs.isEmpty) defaultSrcRootDirNames.map(file(testRoot, _)) else tstDirs
