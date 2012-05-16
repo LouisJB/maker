@@ -5,7 +5,6 @@ import maker.project.Project
 import maker.task.{ProjectAndTask, Task, TaskFailed}
 import maker.utils.Log
 import maker.utils.FileUtils._
-import maker.utils.os.Command
 import java.io.PrintWriter
 import maker.utils.TeeToFileOutputStream
 import maker.utils.os.CommandOutputHandler
@@ -43,7 +42,7 @@ case object RunMainTask extends Task {
         def checkRunning(): Either[TaskFailed, AnyRef] = {
           if (!procHandle._2.isSet) {
             Thread.sleep(1000)
-            if (System.in.available > 0 && System.in.read == 29 /* ctrl-] */) {
+            if (System.in.available > 0 && System.in.read == Task.termChar) {
               Log.info("Terminating: " + className)
               procHandle._1.destroy()
               Log.info("Terminated process for runMain of class : " + className)

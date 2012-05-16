@@ -2,10 +2,8 @@ package maker.task
 
 import maker.project.Project
 import maker.utils.{Stopwatch, Log}
-import akka.actor.Actor._
 import akka.actor.ActorRef
 import akka.actor.Actor
-import java.io.File
 import akka.util.Timeout
 import akka.actor.ActorSystem
 import akka.actor.Props
@@ -13,7 +11,8 @@ import akka.routing.SmallestMailboxRouter
 import akka.dispatch.Await
 import akka.util.Duration
 import akka.pattern.ask
-import akka.util.duration._
+import java.util.concurrent.TimeUnit._
+import java.util.concurrent.TimeoutException
 
 class TaskManager(projectTasks : Set[ProjectAndTask], router : ActorRef,
                    originalProjectAndTask : ProjectAndTask,
@@ -95,10 +94,34 @@ object TaskManager{
     Log.debug("Running with " + nWorkers + " workers")
     val router = system.actorOf(Props[Worker].withRouter(SmallestMailboxRouter(nWorkers)))
     val qm = system.actorOf(Props(new TaskManager(projectTasks, router, originalProjectAndTask, parameters)))
-    val future = qm ? StartBuild
-    val result = Await.result(future, Duration.Inf).asInstanceOf[BuildResult[AnyRef]]
+    
+    // wait for build to complete or user termination
+    def startAndMonitor() : BuildResult[AnyRef] = {
+      Log.info("Starling build, press %s to terminate".format(Task.termSym))
+      val future = qm ? StartBuild
+      while(true) {
+        try {
+          Await.result(future, Duration(1, SECONDS)) match {
+            case v @ BuildResult(_, _, _) => return v.asInstanceOf[BuildResult[AnyRef]]
+            case _ =>
+          }
+        }
+        catch {
+          case _ : TimeoutException => {
+            if (System.in.available > 0 && System.in.read == Task.termChar) {
+              Log.info("Terminating build...")
+              system.shutdown()
+              return BuildResult(Left(TaskFailed(originalProjectAndTask, "User terminated")) : Either[TaskFailed, AnyRef], projectTasks, originalProjectAndTask)
+            }
+          }
+        }
+      }
+      throw new Exception("need to refactor this!")
+    }
+    val result : BuildResult[AnyRef] = startAndMonitor()
 
     system.shutdown()
+
     Log.debug("Stats: \n" + projectTasks.map(_.runStats).mkString("\n"))
     if (! originalProjectAndTask.project.suppressTaskOutput)
       Log.info("Completed " + originalProjectAndTask + ", took" + sw + "\n")

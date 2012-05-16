@@ -41,4 +41,7 @@ object Task {
     CompileTestsTask -> Set(CompileTestsTask),
     CompileSourceTask → Set(CompileSourceTask)
   )
+
+  val termSym = "ctrl-]"
+  val termChar = 29 // ctrl-]
 }
