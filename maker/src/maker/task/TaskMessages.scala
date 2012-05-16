@@ -95,7 +95,7 @@ case class BuildResult[+A](res : Either[TaskFailed, A],
     def withFilter(q: A => Boolean): WithFilter =
       new WithFilter(x => p(x) && q(x))
   }
-  /** called with conditional statement in for comprehension */
+  // is called with conditional statement in for comprehension
   def withFilter(p: A => Boolean): WithFilter = new WithFilter(p)
 
 /*

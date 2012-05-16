@@ -3,12 +3,10 @@ package maker.project
 import org.scalatest.FunSuite
 import java.io.File
 import maker.utils.FileUtils._
-import maker._
-import maker.project._
 import maker.project.Project._
 import scalaz.Scalaz._
 
-class ProjectTests extends FunSuite {
+class ProjectTests extends FunSuite with TestUtils {
 
   val originalFooContent = 
     """
@@ -164,10 +162,4 @@ class ProjectTests extends FunSuite {
       s => assert((s & proj.classFiles) === Set())
     }
   }
-
-  private def sleepToNextSecond{
-    Thread.sleep(1100)
-  }
-
-
 }
