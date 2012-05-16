@@ -97,7 +97,7 @@ object TaskManager{
     
     // wait for build to complete or user termination
     def startAndMonitor() : BuildResult[AnyRef] = {
-      Log.info("Starling build, press %s to terminate".format(Task.termSym))
+      Log.info("Starting build, press %s to terminate".format(Task.termSym))
       val future = qm ? StartBuild
       while(true) {
         try {
