@@ -97,13 +97,13 @@ object TaskManager{
     
     // wait for build to complete or user termination
     def startAndMonitor() : BuildResult[AnyRef] = {
-      Log.info("Starting build, press %s to terminate".format(Task.termSym))
+      Log.info("Starting task %s, press %s to terminate".format(originalProjectAndTask, Task.termSym))
       val future = qm ? StartBuild
-      while(true) {
+      def getResult() : Option[BuildResult[AnyRef]] = {
         try {
           Await.result(future, Duration(1, SECONDS)) match {
-            case v @ BuildResult(_, _, _) => return v.asInstanceOf[BuildResult[AnyRef]]
-            case _ =>
+            case v @ BuildResult(_, _, _) => Some(v.asInstanceOf[BuildResult[AnyRef]])
+            case _ => None
           }
         }
         catch {
@@ -111,12 +111,13 @@ object TaskManager{
             if (System.in.available > 0 && System.in.read == Task.termChar) {
               Log.info("Terminating build...")
               system.shutdown()
-              return BuildResult(Left(TaskFailed(originalProjectAndTask, "User terminated")) : Either[TaskFailed, AnyRef], projectTasks, originalProjectAndTask)
+              Some(BuildResult(Left(TaskFailed(originalProjectAndTask, "User terminated")) : Either[TaskFailed, AnyRef], projectTasks, originalProjectAndTask))
             }
+            else None
           }
         }
       }
-      throw new Exception("need to refactor this!")
+      Stream.continually[Option[BuildResult[AnyRef]]](getResult()).dropWhile(_.isEmpty).head.get
     }
     val result : BuildResult[AnyRef] = startAndMonitor()
 
