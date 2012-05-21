@@ -61,60 +61,63 @@ class BuildTests extends FunSuite {
       }
     }
     """
-    test("Build of single project"){
-      val root = tempDir("fred")
-        val proj = makeTestProject("foox", root)
+  ignore("Build of single project"){
+    val root = tempDir("fred")
+    val proj = makeTestProject("foox", root)
 
-        writeToFile(new File(root, "src/foo/Foo.scala"), fooContent)
-      assert(proj.compile.res.isRight)
-      proj.delete
-    }
+    writeToFile(new File(root, "src/foo/Foo.scala"), fooContent)
+    assert(proj.compile.res.isRight)
+    proj.delete
+  }
 
-    test("Build of dependent projects"){
-      val root1 = tempDir("fred")
-        val root2 = tempDir("fred")
+  test("Build of dependent projects"){
+    withTempDir( {
+      root ⇒ 
+        val root1 = file(root, "proj1")
+        val root2 = file(root, "proj2")
         val proj1 = makeTestProject("1", root1)
         val proj2 = makeTestProject("2", root2) dependsOn proj1
 
-      writeToFile(new File(root1, "src/foo/Foo.scala"), fooContent)
-      writeToFile(new File(root2, "src/bar/Bar.scala"), barContent)
-      proj1.delete
-      proj2.delete
+        writeToFile(new File(root1, "src/foo/Foo.scala"), fooContent)
+        writeToFile(new File(root2, "src/bar/Bar.scala"), barContent)
+        proj2.compile
+    },
+    false)
+  }
+
+  ignore("Build of dependent projects with compilation error fails"){
+    val root1 = tempDir("fred")
+      val root2 = tempDir("fred")
+      val proj1 = makeTestProject("1", root1)
+      val proj2 = makeTestProject("2", root2) dependsOn proj1
+
+    writeToFile(new File(root1, "src/foo/Foo.scala"), fooContent)
+    writeToFile(new File(root2, "src/bar/Bar.scala"), barContentWithError)
+    proj2.compile match {
+      case BuildResult(Left(taskFailure), _, _) =>
+      case r => fail("Expected build to fail, got " + r)
     }
+    proj1.delete
+    proj2.delete
+  }
 
-    test("Build of dependent projects with compilation error fails"){
-      val root1 = tempDir("fred")
-        val root2 = tempDir("fred")
-        val proj1 = makeTestProject("1", root1)
-        val proj2 = makeTestProject("2", root2) dependsOn proj1
-
-      writeToFile(new File(root1, "src/foo/Foo.scala"), fooContent)
-      writeToFile(new File(root2, "src/bar/Bar.scala"), barContentWithError)
-      proj2.compile match {
-        case BuildResult(Left(taskFailure), _, _) =>
-        case r => fail("Expected build to fail, got " + r)
-      }
-      proj1.delete
-      proj2.delete
-    }
-
-    test("Unit test runs"){
-      val root = tempDir("fred")
-        val proj = makeTestProject("foo_with_test", root)
-        writeToFile(new File(root, "src/foo/Foo.scala"), fooContent)
-      writeToFile(new File(root, "tests/foo/FooTest.scala"), fooTestContent)
-      proj.compile
-      val fooClass = proj.classLoader.loadClass("foo.Foo")
+  ignore("Unit test runs"){
+    val root = tempDir("fred")
+      val proj = makeTestProject("foo_with_test", root)
+      writeToFile(new File(root, "src/foo/Foo.scala"), fooContent)
+    writeToFile(new File(root, "tests/foo/FooTest.scala"), fooTestContent)
+    proj.compile
+    val fooClass = proj.classLoader.loadClass("foo.Foo")
 
 
-        assert(
-        proj.test.res.isRight 
-      )
+      assert(
+      proj.test.res.isRight 
+    )
 
     proj.delete
   }
 
-  test("Failing test fails"){
+  ignore("Failing test fails"){
     val root = tempDir("fred")
     val proj = makeTestProject("with_failing_test", root)
     writeToFile(new File(root, "tests/foo/FooTest.scala"), failingTestContent)
@@ -126,7 +129,7 @@ class BuildTests extends FunSuite {
     proj.delete
   }
 
-  test("Can re-run failing tests"){
+  ignore("Can re-run failing tests"){
     val root = tempDir("fred")
       val proj = makeTestProject("rerun_failing_test", root)
       writeToFile(

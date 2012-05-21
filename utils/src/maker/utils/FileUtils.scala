@@ -121,17 +121,21 @@ object FileUtils {
     out.close()
   }
 
-  def withFileLineReader(file : File)(f : String => _){
+  def withFileLineReader[A](file : File)(f : String => A) = {
+    var res : List[A] = Nil
     if (file.exists()) {
-      val fstream = new FileReader(file)
-      val in = new BufferedReader(fstream)
-      var line = in.readLine
-      while (line != null) {
-        f(line)
-        line = in.readLine
+      val in = new BufferedReader(new FileReader(file))
+      try{
+        var line = in.readLine
+        while (line != null) {
+          res = f(line) :: res
+          line = in.readLine
+        }
+      } finally {
+        in.close()
       }
-      in.close()
     }
+    res.reverse
   }
   
   def tempDir(name : String = "") = {
