@@ -36,7 +36,7 @@ abstract class CompileTask extends Task{
         Log.info("Compiling " + proj)
       else
         print(".")
-      proj.state.sourceToClassFiles.classFilesFor(deletedSrcFiles_).filter(_.exists) |> {
+      proj.state.classFilesGeneratedBy(deletedSrcFiles_).filter(_.exists) |> {
         classFiles =>
           if (classFiles.size > 0){
             debug("Deleting " + classFiles.size + " class files")
@@ -59,8 +59,8 @@ abstract class CompileTask extends Task{
 
       val dependentFiles = (sourceFilesFromThisProjectWithChangedSigs ++ sourceFilesFromOtherProjectsWithChangedSigs ++ deletedSrcFiles_) |> {
         filesWhoseDependentsMustRecompile =>
-          val dependentFiles = proj.state.classFileDependencies.dependentFiles(filesWhoseDependentsMustRecompile).filterNot(filesWhoseDependentsMustRecompile)
-          debug("Files dependent on those with shanged sigs" + listOfFiles(dependentFiles))
+          val dependentFiles = proj.state.fileDependencies.sourceFilesThatDependOn(filesWhoseDependentsMustRecompile).filterNot(filesWhoseDependentsMustRecompile)
+          debug("Files dependent on those with changed sigs" + listOfFiles(dependentFiles))
           debug("Compiling " + dependentFiles.size + " dependent files")
           new comp.Run() compile dependentFiles.toList.map(_.getPath)
           dependentFiles
@@ -69,8 +69,7 @@ abstract class CompileTask extends Task{
       if (reporter.hasErrors)
         Left(TaskFailed(ProjectAndTask(proj, this), "Failed to compile"))
       else {
-        proj.state.classFileDependencies.persist
-        proj.state.sourceToClassFiles.persist
+        proj.state.fileDependencies.persist
         CompileJavaSourceTask.exec(proj, acc, parameters) match {
           case Right(javaFilesToCompile) => Right((sourceFilesFromThisProjectWithChangedSigs, modifiedSrcFiles ++ dependentFiles))
           case err @ Left(TaskFailed(ProjectAndTask(project, _), error)) => err

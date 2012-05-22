@@ -55,8 +55,14 @@ class DetermineClassFilesTests extends FunSuite{
           """
         )
         proj.compile
-        val srcFiles = List(fooSrc, barSrc, bazSrc)
-        val allPossibleClassAndObjectFiles = (Set[File]() /: srcFiles.map(proj.state.classFilesFor))(_++_)
+        val srcFiles = Set(fooSrc, barSrc, bazSrc)
+        val allPossibleClassAndObjectFiles = proj.state.fileDependencies.classFilesGeneratedBy(srcFiles)
+        println("Project class files")
+        println(proj.classFiles.toList.mkString("\n\t", "\n\t","\n"))
+        println("all possible class files")
+        println(allPossibleClassAndObjectFiles.toList.mkString("\n\t", "\n\t","\n"))
+        println("generated classes")
+        println(proj.state.fileDependencies.generatedClasses)
         assert(proj.classFiles.forall(allPossibleClassAndObjectFiles))
     }
   }

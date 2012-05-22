@@ -204,8 +204,8 @@ class ProjectTests extends FunSuite {
           """
         )
         proj.testCompile
-        val deps = proj.state.classFileDependencies.deps
-        assert(deps(fooTest).contains(fooSrc))
+        val deps = proj.state.fileDependencies.sourceFilesThatDependOn(Set(fooTest))
+        assert(deps.contains(fooSrc))
 
     }
 

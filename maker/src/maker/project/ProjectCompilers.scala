@@ -27,7 +27,8 @@ case class ProjectCompilers(project : Project){
       override protected def computeInternalPhases() {
         super.computeInternalPhases
         //phasesSet += new GenerateCompilationMetadata(self, project.state.signatures, project.state.classFileDependencies, compilerOutputDir, project.state.sourceToClassFiles).Component
-        phasesSet += new Analyzer(self, new AnalysisCallbackImpl(project.makerDirectory))
+        phasesSet += new CollectProjectSignatures(self, project.state.signatures)
+        phasesSet += new FileDependencyAnalyzer(self, ProjectFileDependencies(project.makerDirectory))
       }
     }
     comp

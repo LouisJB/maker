@@ -14,11 +14,11 @@ import java.util.zip.ZipFile
 import scala.tools.nsc.Global
 import scala.tools.nsc.plugins.PluginComponent
 
-case class Analyzer(val global: Global, val callback: AnalysisCallback) 
+case class FileDependencyAnalyzer(val global: Global, val fileDependencies: ProjectFileDependencies) 
 extends PluginComponent
 {
 	import global._
-  val phaseName = "makerAnalysis"
+  val phaseName = "makerFileDependency"
   val runsAfter = List[String]("jvm")
 
 	def newPhase(prev: Phase): Phase = new AnalyzerPhase(prev)
@@ -34,10 +34,10 @@ extends PluginComponent
 			{
 				// build dependencies structure
 				val sourceFile = unit.source.file.file
-				callback.beginSource(sourceFile)
+				fileDependencies.beginSource(sourceFile)
 				for(on <- unit.depends)
 				{
-					def binaryDependency(file: File, className: String) = callback.binaryDependency(sourceFile, file, className)
+					def binaryDependency(file: File, className: String) = fileDependencies.binaryDependency(sourceFile, file, className)
 					val onSource = on.sourceFile
 					if(onSource == null)
 					{
@@ -54,7 +54,7 @@ extends PluginComponent
 						}
 					}
 					else
-						callback.sourceDependency(onSource.file, sourceFile)
+						fileDependencies.sourceDependency(onSource.file, sourceFile)
 				}
 
 				// build list of generated classes
@@ -65,7 +65,7 @@ extends PluginComponent
 					{
 						val classFile = fileForClass(outputDirectory, sym, separatorRequired)
 						if(classFile.exists)
-							callback.generatedClass(sourceFile, classFile, className(sym, '.', separatorRequired))
+							fileDependencies.generatedClass(sourceFile, classFile, className(sym, '.', separatorRequired))
 					}
 					if(sym.isModuleClass && !sym.isImplClass)
 					{
@@ -76,7 +76,7 @@ extends PluginComponent
 					else
 						addGenerated(false)
 				}
-				callback.endSource(sourceFile)
+				fileDependencies.endSource(sourceFile)
 			}
 		}
 	}
@@ -115,35 +115,3 @@ extends PluginComponent
 	private def fileForClass(outputDirectory: File, s: Symbol, separatorRequired: Boolean): File =
 		new File(outputDirectory, className(s, File.separatorChar, separatorRequired) + ".class")
 }
-abstract class Compat
-{
-	val global: Global
-	import global._
-	val LocalChild = global.tpnme.LOCAL_CHILD
-	val Nullary = global.NullaryMethodType
-
-	private[this] final class MiscCompat
-	{
-		// in 2.9, nme.LOCALCHILD was renamed to tpnme.LOCAL_CHILD
-		def tpnme = nme
-		def LOCAL_CHILD = nme.LOCALCHILD
-		def LOCALCHILD = sourceCompatibilityOnly
-
-		def NullaryMethodType = NullaryMethodTpe
-	}
-	// in 2.9, NullaryMethodType was added to Type
-	object NullaryMethodTpe {
-		def unapply(t: Type): Option[Type] = None
-	}
-
-	private[this] def sourceCompatibilityOnly: Nothing = throw new RuntimeException("For source compatibility only: should not get here.")
-
-	private[this] final implicit def miscCompat(n: AnyRef): MiscCompat = new MiscCompat
-}
-
-
-//case class AnalyserPlugin(global : Global) extends Plugin{
-  //val description = "Analyse dependencies"
-  //val name = "Analyser"
-  //val components : List[PluginComponent] = List(new Analyzer(global, new AnalysisCallbackImpl))
-  //}
