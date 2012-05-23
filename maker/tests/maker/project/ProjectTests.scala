@@ -7,6 +7,8 @@ import maker._
 import maker.project._
 import maker.project.Project._
 import scalaz.Scalaz._
+import maker.utils.Log
+import org.apache.log4j.Level._
 
 class ProjectTests extends FunSuite {
 
@@ -51,7 +53,7 @@ class ProjectTests extends FunSuite {
     (proj, files)
   }
 
-  test("Compilation makes class files, writes dependencies, and package makes jar"){
+  ignore("Compilation makes class files, writes dependencies, and package makes jar"){
     withTempDir {
       dir ⇒ 
         val (proj, _) = simpleProject(dir)
@@ -68,7 +70,7 @@ class ProjectTests extends FunSuite {
     }
   }
 
-  test("Compilation not done if signature unchanged"){
+  ignore("Compilation not done if signature unchanged"){
     withTempDir {
       dir ⇒ 
         val (proj, files) = simpleProject(dir)
@@ -88,6 +90,7 @@ class ProjectTests extends FunSuite {
       dir ⇒ 
         val (proj, files) = simpleProject(dir)
         proj.compile
+        println(proj.state.fileDependencies)
         import files._
         val compilationTime = proj.state.compilationTime.get
         sleepToNextSecond
@@ -105,11 +108,12 @@ class ProjectTests extends FunSuite {
         )
         proj.compile
         val changedClassFiles = proj.classFiles.filter(_.lastModified > compilationTime)
+        changedClassFiles.foreach(println)
         assert(changedClassFiles === Set(fooClass, fooObject, barClass, barObject))
     }
   }
 
-  test("Compilation of dependent classes is not done if signature of public method is unchanged"){
+  ignore("Compilation of dependent classes is not done if signature of public method is unchanged"){
     withTempDir {
       dir ⇒ 
         val (proj, files) = simpleProject(dir)
@@ -134,7 +138,7 @@ class ProjectTests extends FunSuite {
     }
   }
 
-  test("Compilation of dependent classes is not done if new private method is added"){
+  ignore("Compilation of dependent classes is not done if new private method is added"){
     withTempDir {
       dir ⇒ 
         val (proj, files) = simpleProject(dir)
@@ -160,7 +164,7 @@ class ProjectTests extends FunSuite {
     }
   }
 
-  test("Deletion of source file causes deletion of class files"){
+  ignore("Deletion of source file causes deletion of class files"){
     withTempDir {
       dir ⇒ 
         val (proj, files) = simpleProject(dir)
@@ -196,7 +200,7 @@ class ProjectTests extends FunSuite {
             package foo
             import org.scalatest.FunSuite
             class FooTest extends FunSuite{
-              test("Foo constructor"){
+              ignore("Foo constructor"){
                 val foo = Fooble(10)
                 assert(foo.i == 10)
               }

@@ -28,7 +28,7 @@ case class ProjectCompilers(project : Project){
         super.computeInternalPhases
         //phasesSet += new GenerateCompilationMetadata(self, project.state.signatures, project.state.classFileDependencies, compilerOutputDir, project.state.sourceToClassFiles).Component
         phasesSet += new CollectProjectSignatures(self, project.state.signatures)
-        phasesSet += new FileDependencyAnalyzer(self, ProjectFileDependencies(project.makerDirectory))
+        phasesSet += new FileDependencyAnalyzer(self, project.state.fileDependencies)
       }
     }
     comp

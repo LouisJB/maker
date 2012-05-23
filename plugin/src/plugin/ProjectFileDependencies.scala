@@ -19,14 +19,14 @@ object PersistedFileAssociation{
         val List(source, assoc) = line.split(":").toList.map(file)
         SourceFileAssociation(source, assoc)
     }
-    PersistedFileAssociation(Some(persistFile), list)
+    PersistedFileAssociation(Some(persistFile), list.toSet)
   }
-  def apply(list : List[SourceFileAssociation]) : PersistedFileAssociation = PersistedFileAssociation(None, list)
+  def apply(set : Set[SourceFileAssociation]) : PersistedFileAssociation = PersistedFileAssociation(None, set)
 }
 
 case class PersistedFileAssociation(
   persistFile : Option[File] = None, 
-  private var list : List[SourceFileAssociation] = Nil
+  private var set : Set[SourceFileAssociation] = Set[SourceFileAssociation]()
 ){
 
   def persist{
@@ -34,7 +34,7 @@ case class PersistedFileAssociation(
       case Some(f) ⇒ 
         withFileWriter(f) {
           writer : BufferedWriter =>
-            list.foreach {
+            set.foreach {
               case SourceFileAssociation(source, assoc) ⇒ 
                 writer.println(source.getPath + ":" + assoc.getPath)
             }
@@ -44,23 +44,23 @@ case class PersistedFileAssociation(
   }
 
   def += (source : File, assoc : File){
-    list = SourceFileAssociation(source, assoc) :: list
+    set = set + SourceFileAssociation(source, assoc) 
   }
 
   def removeSource(source : File){
-    list = list.filterNot(_.source == source)
+    set = set.filterNot(_.source == source)
   }
   def filesAssociatedWith(sources : Set[File]) = {
-    list.filter{assoc ⇒ sources.contains(assoc.source)}.map(_.assoc).toSet
+    set.filter{assoc ⇒ sources.contains(assoc.source)}.map(_.assoc)
   }
   def sourceFilesAccociatedWith(assocs : Set[File]) : Set[File] = {
-    list.filter{assoc ⇒ assocs.contains(assoc.assoc)}.map(_.source).toSet
+    set.filter{assoc ⇒ assocs.contains(assoc.assoc)}.map(_.source)
   }
 
-  def sourceFiles = list.map(_.source).toSet
+  def sourceFiles = set.map(_.source)
 
   override def toString = {
-    list.map{case SourceFileAssociation(source, file) ⇒ source + " → " + file}.mkString("\n\t", "\n\t", "\n")
+    set.map{case SourceFileAssociation(source, file) ⇒ source + " → " + file}.mkString("\n\t", "\n\t", "\n")
   }
 }
 
@@ -106,8 +106,9 @@ case class ProjectFileDependencies(
 	/** Called to indicate that the source file <code>source</code> produces a class file at
 	* <code>module</code> contain class <code>name</code>.*/
 	def generatedClass(source : File, classFile : File, className : String){
-    Log.info("Adding generated class " + source + ", " + classFile + ", " + className)
+    Log.debug("Adding generated class " + source + ", " + classFile + ", " + className)
 	  generatedClasses += (source, classFile)
+    assert(sourceFiles.size > 0, "Source files must be non empty")
   }
 
 	/** Called after the source at the given location has been processed. */
