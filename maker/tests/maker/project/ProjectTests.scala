@@ -85,12 +85,11 @@ class ProjectTests extends FunSuite {
     }
   }
 
-  test("Compilation is done if signature changed, but only on dependent classes"){
+  ignore("Compilation is done if signature changed, but only on dependent classes"){
     withTempDir {
       dir ⇒ 
         val (proj, files) = simpleProject(dir)
         proj.compile
-        println(proj.state.fileDependencies)
         import files._
         val compilationTime = proj.state.compilationTime.get
         sleepToNextSecond
@@ -108,7 +107,6 @@ class ProjectTests extends FunSuite {
         )
         proj.compile
         val changedClassFiles = proj.classFiles.filter(_.lastModified > compilationTime)
-        changedClassFiles.foreach(println)
         assert(changedClassFiles === Set(fooClass, fooObject, barClass, barObject))
     }
   }
@@ -181,7 +179,7 @@ class ProjectTests extends FunSuite {
     }
   }
 
-  ignore("Test files have the correct dependencies"){
+  test("Test files have the correct dependencies"){
     withTempDir{
       dir ⇒ 
         val proj = makeTestProject("test-file-dependencies", dir)
@@ -208,7 +206,8 @@ class ProjectTests extends FunSuite {
           """
         )
         proj.testCompile
-        val deps = proj.state.fileDependencies.sourceFilesThatDependOn(Set(fooTest))
+        println(proj.state.fileDependencies)
+        val deps = proj.state.fileDependencies.sourceParentDependencies(Set(fooTest))
         assert(deps.contains(fooSrc))
 
     }

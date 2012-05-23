@@ -59,7 +59,7 @@ abstract class CompileTask extends Task{
 
       val dependentFiles = (sourceFilesFromThisProjectWithChangedSigs ++ sourceFilesFromOtherProjectsWithChangedSigs ++ deletedSrcFiles_) |> {
         filesWhoseDependentsMustRecompile =>
-          val dependentFiles = proj.state.fileDependencies.sourceFilesThatDependOn(filesWhoseDependentsMustRecompile).filterNot(filesWhoseDependentsMustRecompile)
+          val dependentFiles = proj.state.fileDependencies.sourceChildDependencies(filesWhoseDependentsMustRecompile).filterNot(filesWhoseDependentsMustRecompile)
           debug("Files dependent on those with changed sigs" + listOfFiles(dependentFiles))
           debug("Compiling " + dependentFiles.size + " dependent files")
           new comp.Run() compile dependentFiles.toList.map(_.getPath)

@@ -29,6 +29,7 @@ extends PluginComponent
 		def run
 		{
 			def outputDirectory = new File(global.settings.outdir.value)
+        println("Output dir = " + outputDirectory
 
 			for(unit <- currentRun.units if !unit.isJava)
 			{
@@ -37,7 +38,10 @@ extends PluginComponent
 				fileDependencies.beginSource(sourceFile)
 				for(on <- unit.depends)
 				{
-					def binaryDependency(file: File, className: String) = fileDependencies.binaryDependency(sourceFile, file, className)
+					def binaryDependency(file: File, className: String) = {
+            println("Have bin dep on " + file + ", " + className)
+            fileDependencies.binaryDependency(sourceFile, file, className)
+          }
 					val onSource = on.sourceFile
 					if(onSource == null)
 					{
