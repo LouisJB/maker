@@ -255,7 +255,8 @@ case class Project(
     def anySourceFileHasChanged = {
       projectAndDescendents.exists{
         proj =>
-          val changed = proj.state.changedSrcFiles ++ proj.state.changedTestFiles ++ proj.state.changedJavaFiles
+          import proj.state._
+          val changed = changedSrcFiles ++ changedTestFiles ++ changedJavaFiles ++ deletedSrcFiles ++ deletedTestFiles
           changed.size > 0
       }
     }

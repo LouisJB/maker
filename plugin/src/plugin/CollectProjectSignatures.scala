@@ -3,7 +3,7 @@ package plugin
 import scala.tools.nsc.plugins.{PluginComponent, Plugin}
 import scala.tools.nsc.{Phase, Global}
 import scala.collection.mutable.{Set=>MSet}
-import utils.{SourceClassFileMapping, ClassFileDependencies, ProjectSignatures}
+import utils.ProjectSignatures
 import maker.utils.FileUtils._
 import java.io.File
 
