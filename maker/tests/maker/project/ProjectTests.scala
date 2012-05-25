@@ -208,7 +208,39 @@ class ProjectTests extends FunSuite with TestUtils {
         assert(deps.contains(fooSrc))
 
     }
+  }
 
+  test("Generated class files are deleted before compilation of source"){
+    withTempDir{
+      dir ⇒ 
+        val proj = makeTestProject("test-class-file-deletion", dir)
+        val fooSrc = file(dir, "src/foo/Foo.scala")
+        writeToFile(
+          fooSrc,
+          """
+            package foo
+            case class Fred(i : Int)
+            case class Ginger(i : Int)
+          """
+        )
+        proj.compile
+        val fredClass = new File(proj.outputDir, "foo/Fred.class")
+        val gingerClass = new File(proj.outputDir, "foo/Ginger.class")
+        assert(fredClass.exists && gingerClass.exists)
+
+        sleepToNextSecond
+        writeToFile(
+          fooSrc,
+          """
+            package foo
+            case class Fred(i : Int)
+            //case class Ginger(i : Int)
+          """
+        )
+        proj.compile
+        assert(fredClass.exists, "Fred should still exist")
+        assert(!gingerClass.exists, "Ginger should not exist")
+    }
   }
 
   override def sleepToNextSecond{

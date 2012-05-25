@@ -36,21 +36,32 @@ abstract class CompileTask extends Task{
         Log.info("Compiling " + proj)
       else
         print(".")
-      proj.state.classFilesGeneratedBy(deletedSrcFiles_).filter(_.exists) |> {
-        classFiles =>
-          if (classFiles.size > 0){
-            debug("Deleting " + classFiles.size + " class files")
-            debug("as they are associated with the deleted src files")
-          }
-          classFiles.foreach(_.delete)
-      }
+
+      deleteClassFilesGeneratedBy(deletedSrcFiles_)
       debug("Compiling, " + modifiedSrcFiles.size + " modified or uncompiled files")
 
       debug("Changed files are " + listOfFiles(modifiedSrcFiles))
       reporter.reset
 
+      def deleteClassFilesGeneratedBy(srcFiles : Set[File]){
+        proj.state.classFilesGeneratedBy(srcFiles).filter(_.exists) |> {
+          classFiles =>
+            if (classFiles.size > 0){
+              debug(
+                "Deleting " + classFiles.size + " class files" + 
+                classFiles.toList.mkString("\n\t", "\n\t", "\n")
+              )
+            } 
+            classFiles.foreach(_.delete)
+        }
+      }
+      def compileSourceFiles(srcFiles : Set[File]){
+        deleteClassFilesGeneratedBy(srcFiles)
+        new comp.Run() compile srcFiles.toList.map(_.getPath)
+      }
+
       // First compile those files who have changed
-      new comp.Run() compile modifiedSrcFiles.toList.map(_.getPath)
+      compileSourceFiles(modifiedSrcFiles)
 
       // Determine which source files have changed signatures
       val sourceFilesFromThisProjectWithChangedSigs: Set[File] = Set() ++ proj.state.updateSignatures
@@ -62,7 +73,8 @@ abstract class CompileTask extends Task{
           val dependentFiles = proj.state.fileDependencies.sourceChildDependencies(filesWhoseDependentsMustRecompile).filterNot(filesWhoseDependentsMustRecompile)
           debug("Files dependent on those with changed sigs" + listOfFiles(dependentFiles))
           debug("Compiling " + dependentFiles.size + " dependent files")
-          new comp.Run() compile dependentFiles.toList.map(_.getPath)
+          compileSourceFiles(dependentFiles)
+          //new comp.Run() compile dependentFiles.toList.map(_.getPath)
           dependentFiles
       }
 

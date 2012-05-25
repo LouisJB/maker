@@ -108,6 +108,12 @@ case class Props(private val overrides : Map[String, String] = Map()) {
   object Developers extends StringProperty("")
   object Username extends StringProperty("")
   object Password extends StringProperty("")
+
+  /** 
+   * Check for ivy updates before each compile - strictly a
+   * dependency but does have a performance impact, hence
+   * optional
+   */
   object UpdateOnCompile extends BooleanProperty("false")
 
   lazy val properties = propertyMethods.map(m =>
