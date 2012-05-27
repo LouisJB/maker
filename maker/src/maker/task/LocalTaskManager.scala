@@ -18,9 +18,8 @@ import java.util.concurrent.atomic.AtomicReference
 import java.util.concurrent.atomic.AtomicInteger
 import maker.utils.os.ProcessID
 import scalaz.Scalaz._
-import scala.actors.Future
-import scala.actors.Futures
 import maker.utils.os.OsUtils
+import java.util.concurrent.ConcurrentHashMap
 
 
 object TaskManagement{
@@ -38,34 +37,80 @@ object TaskManagement{
       super.handleUpstream(ctx, e)
     }
   }
+
   def makeClientChannelFactory() = new NioClientSocketChannelFactory(
     Executors.newCachedThreadPool(),
     Executors.newCachedThreadPool())
+
   def makeServerChannelFactory() = new NioServerSocketChannelFactory(
     Executors.newCachedThreadPool(),
     Executors.newCachedThreadPool())
 }
 
-class LocalTaskManagerHandler extends SimpleChannelUpstreamHandler{
+
+case class Waiting(msg : Any){
+  private val lock = new Object
+  private var completed = false
+  private var result: Any = null
+  private var exception: Throwable = null
+
+  def waitAndReturn = {
+    lock.synchronized {
+      if (!completed) {
+        lock.wait()
+      }
+      if (exception != null) {
+        throw exception
+      }
+      result
+    }
+  }
+
+  def exception(e: Throwable) {
+    lock.synchronized {
+      this.completed = true
+      exception = e
+      lock.notify()
+    }
+  }
+
+  def setResult(result: Object) {
+    lock.synchronized {
+      this.completed = true
+      this.result = result
+      lock.notify()
+    }
+  }
+}
+
+case object CannotConnectToRemoteServer extends Throwable
+
+case class LocalTaskManager(retryTime : Int = 500, maxRetries : Int = 5) {
+
+  val waitingFor = new ConcurrentHashMap[Int, Waiting]() 
+
+  class LocalTaskManagerHandler extends SimpleChannelUpstreamHandler{
+
     override def exceptionCaught(ctx : ChannelHandlerContext, e : ExceptionEvent){
       e.getCause match {
         case _ : ConnectException ⇒ // retries will be done
         case _ ⇒ super.exceptionCaught(ctx, e)
       }
     }
-  override def messageReceived(ctx : ChannelHandlerContext, e : MessageEvent){
-    Log.debug("LOCAL manager received " + e.getMessage)
+
+    override def messageReceived(ctx : ChannelHandlerContext, e : MessageEvent){
+      Log.debug("LOCAL manager received " + e.getMessage)
+      e.getMessage match {
+        case (id, result : AnyRef) ⇒ 
+          waitingFor.get(id).setResult(result)
+      }
+    }
+
+    override def channelConnected(ctx : ChannelHandlerContext, e : ChannelStateEvent){
+      Log.debug("LOCAL channelConnected " + e.getState + ", " + e.getValue)
+    }
+
   }
-  override def channelConnected(ctx : ChannelHandlerContext, e : ChannelStateEvent){
-    Log.debug("LOCAL channelConnected " + e.getState + ", " + e.getValue)
-  }
-}
-
-
-case object CannotConnectToRemoteServer extends Throwable
-
-case class LocalTaskManager(retryTime : Int = 500, maxRetries : Int = 5) {
-
   private val port : Int = Maker.props.RemoteTaskPort()
 
   val channelFactory = makeClientChannelFactory
@@ -82,7 +127,7 @@ case class LocalTaskManager(retryTime : Int = 500, maxRetries : Int = 5) {
   })
 
   val channelFuture : AtomicReference[Option[ChannelFuture]] = new AtomicReference(None)
-  val nextMessagNo = new AtomicInteger(0)
+  val nextMessageNo = new AtomicInteger(0)
   val remoteProcess : AtomicReference[Option[Process]] = new AtomicReference(None)
 
   def remoteProcessID : Option[ProcessID] = remoteProcess.get.map(ProcessID(_))
@@ -97,8 +142,20 @@ case class LocalTaskManager(retryTime : Int = 500, maxRetries : Int = 5) {
 
   def sendMessage(message : AnyRef) = {
     channelFuture.get match {
-      case Some(cf) ⇒ 
-        cf.getChannel.write((nextMessagNo.getAndIncrement, message)).awaitUninterruptibly
+      case Some(cf) ⇒ {
+        val id = nextMessageNo.getAndIncrement
+        val waiting = Waiting(message)
+        waitingFor.put(id, waiting)
+        val result = cf.getChannel.write((id, message))
+        result.addListener(new ChannelFutureListener {
+          def operationComplete(future: ChannelFuture) {
+            if (!future.isSuccess) {
+              waiting.exception(future.getCause)
+            }
+          }
+        })
+        waiting.waitAndReturn
+      }
       case None ⇒ 
         throw new Exception("Have no channel")
     }
@@ -111,10 +168,6 @@ case class LocalTaskManager(retryTime : Int = 500, maxRetries : Int = 5) {
     remoteProcess.set(Some(proc))
   }
 
-  def launchRemoteWaiting {
-    launchRemote
-  }
-
   def closeRemote{
     remoteProcess.get match {
       case Some(proc) ⇒ proc.destroy
@@ -123,25 +176,26 @@ case class LocalTaskManager(retryTime : Int = 500, maxRetries : Int = 5) {
     remoteProcess.set(None)
   }
 
-  def openConnection(numTries : Int = 0) : ChannelFuture = {
-    Log.debug("LOCAL Trying to open connection")
+  private def openConnection(numTries : Int = 0) : ChannelFuture = {
+    Log.info("LOCAL Trying to open connection")
     if (numTries > maxRetries)
       throw CannotConnectToRemoteServer
-    val channelFuture = bootstrap.connect(new InetSocketAddress(port))
+    val future = bootstrap.connect(new InetSocketAddress(port))
     val haveConnected = new AtomicBoolean(false)
-    channelFuture.addListener(
+    future.addListener(
       new ChannelFutureListener(){
         def operationComplete(fut : ChannelFuture){
           haveConnected.set(fut.isSuccess)
         }
       }
     )
-    channelFuture.awaitUninterruptibly
+    future.awaitUninterruptibly
     if (haveConnected.get){
-      Log.debug("LOCAL Have connected")
-      channelFuture
+      Log.info("LOCAL Have connected, future = " + future)
+      future
     } else{
-      Log.debug("LOCAL Connection failed - will retry")
+      Log.info("LOCAL Connection failed - will retry")
+      Log.info("LOCAL Connection failed - sleeping for " + retryTime)
       Thread.sleep(retryTime)
       openConnection(numTries + 1)
     }

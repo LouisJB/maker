@@ -9,46 +9,46 @@ class CommandTests extends FunSuite{
   test("synchronous command runs"){
     withTempDir{
       dir ⇒
-      val f = file(dir, "foo")
+        val f = file(dir, "foo")
         assert(! f.exists)
-      val cmd = Command(CommandOutputHandler.NULL, None, "touch", f.getAbsolutePath)
+        val cmd = Command(CommandOutputHandler.NULL, None, "touch", f.getAbsolutePath)
         cmd.exec
-      assert(f.exists)
+        assert(f.exists)
     }
   }
 
   test("asynchronous command runs"){
     withTempDir{
       dir ⇒
-      val f = file(dir, "foo")
+        val f = file(dir, "foo")
         assert(! f.exists)
-      val cmd = Command(CommandOutputHandler.NULL, None, "touch", f.getAbsolutePath)
+        val cmd = Command(CommandOutputHandler.NULL, None, "touch", f.getAbsolutePath)
         val (_, future) = cmd.execAsync
-      val result = Futures.awaitAll(1000, future).head
-      assert(f.exists)
-      assert(result == Some(0))
+        val result = Futures.awaitAll(1000, future).head
+        assert(f.exists)
+        assert(result == Some(0))
     }
   }
 
   test("Output is written to file"){
     withTempDir{
       dir ⇒
-      val outputFile = file(dir, "output")
+        val outputFile = file(dir, "output")
         assert(! outputFile.exists)
-      val cmd = Command(CommandOutputHandler(outputFile), None, "echo", "HELLO")
+        val cmd = Command(CommandOutputHandler(outputFile), None, "echo", "HELLO")
         cmd.exec
-      assert(outputFile.exists)
-      val lines = outputFile.read.toList
-      assert(lines === List("HELLO"))
+        assert(outputFile.exists)
+        val lines = outputFile.read.toList
+        assert(lines === List("HELLO"))
     }
   }
 
   test("Output is saved"){
     withTempDir{
       dir ⇒
-      val cmd = Command(CommandOutputHandler.NULL.withSavedOutput, None, "echo", "HELLO")
+        val cmd = Command(CommandOutputHandler.NULL.withSavedOutput, None, "echo", "HELLO")
         cmd.exec
-      assert(cmd.savedOutput === "HELLO")
+        assert(cmd.savedOutput === "HELLO")
     }
   }
 
@@ -103,5 +103,6 @@ class CommandTests extends FunSuite{
         assert(future.isSet)
     }
   }
+
 }
 

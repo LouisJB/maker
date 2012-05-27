@@ -14,6 +14,11 @@ case class ProcessID(id : Int){
 }
 
 object ProcessID{
+  /**
+   * Returns the process ID of the current process
+   * Not certain this would work any anything other than Linux, but 
+   * is only used in tests
+   */
   def apply() : ProcessID = {
     val List(idString, host) = ManagementFactory.getRuntimeMXBean().getName().split("@").toList
     ProcessID(idString.toInt)
