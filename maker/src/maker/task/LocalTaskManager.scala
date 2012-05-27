@@ -121,12 +121,7 @@ case class LocalTaskManager(retryTime : Int = 500, maxRetries : Int = 5) {
   val remoteProcess : AtomicReference[Option[Process]] = new AtomicReference(None)
 
   def isRemoteRunning = remoteProcess.get.fold(ProcessID(_).isRunning, false)
-  def isPortUsed = OsUtils.isPortUsed(port)
 
-
-  def connectToRemote{
-    channelFuture.set(Some(openConnection))
-  }
 
   def sendMessage(message : AnyRef) = {
     channelFuture.get match {
@@ -149,22 +144,9 @@ case class LocalTaskManager(retryTime : Int = 500, maxRetries : Int = 5) {
     }
   }
 
-  def launchRemote {
-    assert(! isPortUsed, "Port " + port + " already used ")
-    val cmd = ScalaCommand(CommandOutputHandler(), Maker.mkr.props.Java().getAbsolutePath, Nil, Maker.mkr.runClasspath, "maker.task.RemoteTaskManager")
-    val (proc, _) = cmd.execAsync
-    remoteProcess.set(Some(proc))
-  }
+  def connectToRemote{
+    assert(! channelFuture.get.isDefined, "Already have a connection to RemoteTaskManager")
 
-  def closeRemote{
-    remoteProcess.get match {
-      case Some(proc) ⇒ proc.destroy
-      case None ⇒ throw new Exception("No known process runing")
-    }
-    remoteProcess.set(None)
-  }
-
-  private def openConnection : ChannelFuture = {
     val bootstrap = new ClientBootstrap(channelFactory)
     bootstrap.setPipelineFactory(new ChannelPipelineFactory() {
         def getPipeline : ChannelPipeline = {
@@ -175,8 +157,9 @@ case class LocalTaskManager(retryTime : Int = 500, maxRetries : Int = 5) {
           )
         }
     })
+
     def tryToConnect(numTries : Int = 0) : ChannelFuture = {
-      Log.debug("LOCAL Trying to open connection")
+      Log.info("LOCAL Trying to open connection")
       if (numTries > maxRetries)
         throw CannotConnectToRemoteServer
       val future = bootstrap.connect(new InetSocketAddress(port))
@@ -193,16 +176,32 @@ case class LocalTaskManager(retryTime : Int = 500, maxRetries : Int = 5) {
         Log.debug("LOCAL Have connected, future = " + future)
         future
       } else{
-        Log.debug("LOCAL Connection failed - will retry")
+        Log.info("LOCAL Connection failed - will retry")
         Thread.sleep(retryTime)
         tryToConnect(numTries + 1)
       }
     }
-    tryToConnect()
+
+    channelFuture.set(Some(tryToConnect()))
+  }
+
+  def launchRemote {
+    assert(! OsUtils.isPortUsed(port), "Port " + port + " already used ")
+    val cmd = ScalaCommand(CommandOutputHandler(), Maker.mkr.props.Java().getAbsolutePath, Nil, Maker.mkr.runClasspath, "maker.task.RemoteTaskManager")
+    val (proc, _) = cmd.execAsync
+    remoteProcess.set(Some(proc))
+  }
+
+  def shutdownRemote{
+    remoteProcess.get match {
+      case Some(proc) ⇒ proc.destroy
+      case None ⇒ throw new Exception("No known process running")
+    }
+    remoteProcess.set(None)
   }
 
 
-  def close{
+  def closeConnection{
     channelFuture.get.foreach{
       cf ⇒ 
         cf.awaitUninterruptibly

@@ -35,7 +35,10 @@ object FileUtils {
       }
       appendToFile(file, stringToWrite)
     }
+
+    def asAbsoluteFile = new File(file.getAbsolutePath)
   }
+
   def findFiles(pred : File => Boolean, dirs : File*) : Set[File] = {
     def rec(file : File) : List[File] = {
       if (file.isDirectory)

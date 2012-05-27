@@ -36,7 +36,7 @@ case class PersistedFileAssociation(
           writer : BufferedWriter =>
             set.foreach {
               case SourceFileAssociation(source, assoc) ⇒ 
-                writer.println(source.getPath + ":" + assoc.getPath)
+                writer.println(source.getAbsolutePath + ":" + assoc.getAbsolutePath)
             }
         }
       case None ⇒ throw new Exception("No file to persist to")
@@ -44,23 +44,29 @@ case class PersistedFileAssociation(
   }
 
   def += (source : File, assoc : File){
-    set = set + SourceFileAssociation(source, assoc) 
+    // The files that come from the compiler plugin have a mixture of 
+    // relative and absolute paths.
+    set = set + SourceFileAssociation(source.asAbsoluteFile, assoc.asAbsoluteFile)
   }
 
   def removeParent(source : File){
-    set = set.filterNot(_.parent == source)
+    val absSource = source.asAbsoluteFile
+    set = set.filterNot(_.parent == absSource)
   }
   def removeChild(source : File){
-    set = set.filterNot(_.child == source)
+    val absSource = source.asAbsoluteFile
+    set = set.filterNot(_.child == absSource)
   }
   def parents(sources : Set[File]) = {
+    val absSources = sources.map(_.asAbsoluteFile)
     set.filter{
-      case SourceFileAssociation(_, child)⇒ sources.contains(child)
+      case SourceFileAssociation(_, child) ⇒ absSources.contains(child)
     }.map(_.parent)
   }
   def children(sources : Set[File]) = {
+    val absSources = sources.map(_.asAbsoluteFile)
     set.filter{
-      case SourceFileAssociation(parent, _)⇒ sources.contains(parent)
+      case SourceFileAssociation(parent, _) ⇒ absSources.contains(parent)
     }.map(_.child)
   }
 
@@ -128,8 +134,6 @@ case class ProjectFileDependencies(
 	  val sourceFiles = sourceDependencies.children(sources)
 	  val classFiles = generatedClasses.children(sources)
 	  val moreSourceFiles = binaryDependencies.parents(classFiles)
-    //val classFiles  = binaryDependencies.children(sources)
-  //val moreSourceFiles : Set[File] = generatedClasses.parents(classFiles)
     sourceFiles ++ moreSourceFiles
   }
 
@@ -139,8 +143,6 @@ case class ProjectFileDependencies(
     val klass = classFiles.head
     
     val moreSourceFiles = generatedClasses.parents(classFiles)
-    //val classFiles = generatedClasses.children(sources)
-  //val moreSourceFiles = binaryDependencies.parents(classFiles)
     sources ++ moreSourceFiles
   }
 

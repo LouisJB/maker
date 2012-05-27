@@ -15,18 +15,18 @@ class LocalTaskManagerTests extends FunSuite{
     }
   }
 
-  private def withRemoteTaskManager(ltm : LocalTaskManager = new LocalTaskManager(500, 5))(fn : LocalTaskManager ⇒ _){
+  private def withRemoteTaskManager(ltm : LocalTaskManager = new LocalTaskManager(1000, 5))(fn : LocalTaskManager ⇒ _){
     //val ltm = new LocalTaskManager(500, 3)
     try {
       ltm.launchRemote
       fn(ltm)
     } finally {
-      ltm.closeRemote
+      ltm.shutdownRemote
     }
   }
 
   test("Can launch remote server and bring it down"){
-    val ltm = new LocalTaskManager(800, 5)
+    val ltm = new LocalTaskManager(1000, 5)
     withRemoteTaskManager(ltm){
       ltm : LocalTaskManager ⇒ 
         assert(ltm.isRemoteRunning)
@@ -44,14 +44,14 @@ class LocalTaskManagerTests extends FunSuite{
   test("Can send a message to remote server and get result back"){
     withRemoteTaskManager(){
       ltm : LocalTaskManager ⇒ 
-      assert(ltm.isRemoteRunning)
-      ltm.connectToRemote
-      ltm.sendMessage(TellMeYourProcessID) match {
-        case ProcessID(pid) ⇒ 
-          assert(pid != ProcessID().id)
-        case other ⇒ 
-          fail("Expected to receive ProcessID, got " + other)
-      }
+        assert(ltm.isRemoteRunning)
+        ltm.connectToRemote
+        ltm.sendMessage(TellMeYourProcessID) match {
+          case ProcessID(pid) ⇒ 
+            assert(pid != ProcessID().id)
+          case other ⇒ 
+            fail("Expected to receive ProcessID, got " + other)
+        }
     }
   }
 }

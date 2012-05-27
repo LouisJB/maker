@@ -141,9 +141,11 @@ case class Project(
   def cleanOnly = TaskManager(List(this), CleanTask)
 
   def compile = TaskManager(projectAndDescendents, CompileSourceTask)
+  def compileOnly = TaskManager(List(this), CompileSourceTask)
   def compileContinuously{ this.~(compile _) }
 
   def testCompile = TaskManager(projectAndDescendents, CompileTestsTask)
+  def testCompileOnly = TaskManager(List(this), CompileTestsTask)
   def testCompileContinuously{ this.~(testCompile _) }
   def test = TaskManager(projectAndDescendents, RunUnitTestsTask)
   def testOnly = TaskManager(List(this), RunUnitTestsTask)

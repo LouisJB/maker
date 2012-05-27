@@ -243,6 +243,52 @@ class ProjectTests extends FunSuite with TestUtils {
     }
   }
 
+  test("Recompilation of test source is done if signature of dependent source file changes"){
+    withTempDir{
+      dir ⇒ 
+        val proj = makeTestProject("Test-recompilation", dir)
+
+        val fooSrc = file(dir, "src/foo/Foo.scala")
+        writeToFile(
+          fooSrc,
+          """
+            package foo
+            case class Foo(i : Int){
+              def publicMethod{
+                println("hi")
+              }
+            }
+          """
+        )
+        val fooTest = file(dir, "tests/foo/FooTest.scala")
+        writeToFile(
+          fooTest,
+          """
+            package foo
+            class Bar{
+              val foo = Foo(20)
+              foo.publicMethod
+            }
+          """
+        )
+        assert(proj.testCompile.res.isRight)
+        sleepToNextSecond
+        assert(proj.testCompile.res.isRight)
+        sleepToNextSecond
+        writeToFile(
+          fooSrc,
+          """
+            package foo
+            case class Foo(i : Int){
+              def renamedPublicMethod{
+                println("hi")
+              }
+            }
+          """
+        )
+        assert(proj.testCompile.res.isLeft)
+    }
+  }
   override def sleepToNextSecond{
     Thread.sleep(1100)
   }

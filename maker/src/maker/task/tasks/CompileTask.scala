@@ -30,6 +30,7 @@ abstract class CompileTask extends Task{
     val deletedSrcFiles_ = deletedSrcFiles(proj)
 
     if (modifiedSrcFiles.isEmpty && deletedSrcFiles_.isEmpty) {
+      Log.debug("Not compiling as nothing changed")
       Right((Set[File](), Set[File]()))
     } else {
       if (Maker.verboseTaskOutput && ! proj.suppressTaskOutput)
@@ -66,15 +67,12 @@ abstract class CompileTask extends Task{
       // Determine which source files have changed signatures
       val sourceFilesFromThisProjectWithChangedSigs: Set[File] = Set() ++ proj.state.updateSignatures
       val sourceFilesFromOtherProjectsWithChangedSigs = (Set[File]() /: acc.map(_.asInstanceOf[(Set[File], Set[File])]).map(_._1))(_ ++ _)
-      debug("Files with changed sigs is , " + listOfFiles(sourceFilesFromThisProjectWithChangedSigs))
 
       val dependentFiles = (sourceFilesFromThisProjectWithChangedSigs ++ sourceFilesFromOtherProjectsWithChangedSigs ++ deletedSrcFiles_) |> {
         filesWhoseDependentsMustRecompile =>
           val dependentFiles = proj.state.fileDependencies.sourceChildDependencies(filesWhoseDependentsMustRecompile).filterNot(filesWhoseDependentsMustRecompile)
-          debug("Files dependent on those with changed sigs" + listOfFiles(dependentFiles))
           debug("Compiling " + dependentFiles.size + " dependent files")
           compileSourceFiles(dependentFiles)
-          //new comp.Run() compile dependentFiles.toList.map(_.getPath)
           dependentFiles
       }
 

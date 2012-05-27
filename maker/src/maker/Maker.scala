@@ -26,9 +26,9 @@ object Maker {
     )
   }
 
-  lazy val utils = mkProject("utils", List(file("utils/lib_managed"), file("libs/")))
-  lazy val plugin = mkProject("plugin") dependsOn utils
-  lazy val makerProj = mkProject("maker") dependsOn plugin
+  lazy val utilsProj = mkProject("utils", List(file("utils/lib_managed"), file("libs/")))
+  lazy val pluginProj = mkProject("plugin") dependsOn utilsProj
+  lazy val makerProj = mkProject("maker") dependsOn pluginProj
 
   lazy val mkr = makerProj
 
