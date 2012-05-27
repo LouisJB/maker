@@ -8,7 +8,7 @@ import maker.Maker
 import maker.utils.Log
 import maker.utils.os.{ProcessID, ScalaCommand}
 import org.jboss.netty.bootstrap.{ClientBootstrap, ServerBootstrap}
-import org.jboss.netty.channel.{Channel, ChannelEvent, ChannelFuture, ChannelFutureListener, ChannelHandlerContext, ChannelPipeline, ChannelPipelineFactory, ChannelStateEvent, Channels, ExceptionEvent, MessageEvent, SimpleChannelDownstreamHandler, SimpleChannelUpstreamHandler}
+import org.jboss.netty.channel._
 import org.jboss.netty.channel.group.DefaultChannelGroup
 import org.jboss.netty.channel.socket.nio.{NioClientSocketChannelFactory, NioServerSocketChannelFactory}
 import org.jboss.netty.handler.codec.serialization.{ClassResolvers, ObjectDecoder, ObjectEncoder}
@@ -43,12 +43,10 @@ object RemoteTaskManager extends App{
     bootstrap.setPipelineFactory(
       new ChannelPipelineFactory(){
         def getPipeline : ChannelPipeline = {
-          //Channels.pipeline(new ServerHandler)
           Channels.pipeline(
             encoder("REMOTE"), 
             objectDecoder("REMOTE"),
             new RemoteTaskManagerHandler()
-            //new ServerHandler
           )
         }
       }

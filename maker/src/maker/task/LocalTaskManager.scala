@@ -87,7 +87,7 @@ case object CannotConnectToRemoteServer extends Throwable
 
 case class LocalTaskManager(retryTime : Int = 500, maxRetries : Int = 5) {
 
-  val waitingFor = new ConcurrentHashMap[Int, Waiting]() 
+  private val waitingFor = new ConcurrentHashMap[Int, Waiting]() 
 
   class LocalTaskManagerHandler extends SimpleChannelUpstreamHandler{
 
@@ -109,35 +109,23 @@ case class LocalTaskManager(retryTime : Int = 500, maxRetries : Int = 5) {
     override def channelConnected(ctx : ChannelHandlerContext, e : ChannelStateEvent){
       Log.debug("LOCAL channelConnected " + e.getState + ", " + e.getValue)
     }
-
   }
+
+
   private val port : Int = Maker.props.RemoteTaskPort()
 
-  val channelFactory = makeClientChannelFactory
-  val bootstrap = new ClientBootstrap(channelFactory)
-  
-  bootstrap.setPipelineFactory(new ChannelPipelineFactory() {
-      def getPipeline : ChannelPipeline = {
-        Channels.pipeline(
-          encoder("LOCAL"),
-          objectDecoder("LOCAL"),
-          new LocalTaskManagerHandler
-        )
-      }
-  })
+  private val channelFactory = makeClientChannelFactory
 
   val channelFuture : AtomicReference[Option[ChannelFuture]] = new AtomicReference(None)
   val nextMessageNo = new AtomicInteger(0)
   val remoteProcess : AtomicReference[Option[Process]] = new AtomicReference(None)
 
-  def remoteProcessID : Option[ProcessID] = remoteProcess.get.map(ProcessID(_))
-
-  def isRemoteRunning = remoteProcessID.fold(_.isRunning, false)
+  def isRemoteRunning = remoteProcess.get.fold(ProcessID(_).isRunning, false)
   def isPortUsed = OsUtils.isPortUsed(port)
 
 
   def connectToRemote{
-    channelFuture.set(Some(openConnection()))
+    channelFuture.set(Some(openConnection))
   }
 
   def sendMessage(message : AnyRef) = {
@@ -176,29 +164,41 @@ case class LocalTaskManager(retryTime : Int = 500, maxRetries : Int = 5) {
     remoteProcess.set(None)
   }
 
-  private def openConnection(numTries : Int = 0) : ChannelFuture = {
-    Log.info("LOCAL Trying to open connection")
-    if (numTries > maxRetries)
-      throw CannotConnectToRemoteServer
-    val future = bootstrap.connect(new InetSocketAddress(port))
-    val haveConnected = new AtomicBoolean(false)
-    future.addListener(
-      new ChannelFutureListener(){
-        def operationComplete(fut : ChannelFuture){
-          haveConnected.set(fut.isSuccess)
+  private def openConnection : ChannelFuture = {
+    val bootstrap = new ClientBootstrap(channelFactory)
+    bootstrap.setPipelineFactory(new ChannelPipelineFactory() {
+        def getPipeline : ChannelPipeline = {
+          Channels.pipeline(
+            encoder("LOCAL"),
+            objectDecoder("LOCAL"),
+            new LocalTaskManagerHandler
+          )
         }
+    })
+    def tryToConnect(numTries : Int = 0) : ChannelFuture = {
+      Log.debug("LOCAL Trying to open connection")
+      if (numTries > maxRetries)
+        throw CannotConnectToRemoteServer
+      val future = bootstrap.connect(new InetSocketAddress(port))
+      val haveConnected = new AtomicBoolean(false)
+      future.addListener(
+        new ChannelFutureListener(){
+          def operationComplete(fut : ChannelFuture){
+            haveConnected.set(fut.isSuccess)
+          }
+        }
+      )
+      future.awaitUninterruptibly
+      if (haveConnected.get){
+        Log.debug("LOCAL Have connected, future = " + future)
+        future
+      } else{
+        Log.debug("LOCAL Connection failed - will retry")
+        Thread.sleep(retryTime)
+        tryToConnect(numTries + 1)
       }
-    )
-    future.awaitUninterruptibly
-    if (haveConnected.get){
-      Log.info("LOCAL Have connected, future = " + future)
-      future
-    } else{
-      Log.info("LOCAL Connection failed - will retry")
-      Log.info("LOCAL Connection failed - sleeping for " + retryTime)
-      Thread.sleep(retryTime)
-      openConnection(numTries + 1)
     }
+    tryToConnect()
   }
 
 

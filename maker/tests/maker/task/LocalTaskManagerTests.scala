@@ -41,7 +41,7 @@ class LocalTaskManagerTests extends FunSuite{
     assert(! ltm.isRemoteRunning)
   }
 
-  test("Can send a message to remote server"){
+  test("Can send a message to remote server and get result back"){
     withRemoteTaskManager(){
       ltm : LocalTaskManager ⇒ 
       assert(ltm.isRemoteRunning)
