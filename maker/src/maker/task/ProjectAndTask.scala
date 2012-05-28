@@ -4,6 +4,27 @@ import maker.project.Project
 import maker.utils.{Stopwatch, Log}
 import maker.Maker
 
+trait Dependency[A]{
+  def immediateDependencies : Set[A]
+}
+
+case class DependencyTree[A <: Dependency[A]](tree : Map[A, Set[A]]){
+  def all : Set[A] = tree.flatMap{
+    case (parent, children) ⇒ children + parent
+  }.toSet
+
+  def parents : Set[A] = tree.map{
+    case (parent, _) ⇒ parent
+  }.toSet
+
+  def childless : Set[A] = all.filterNot(parents)
+
+  def filter(pt : A ⇒ Boolean) : DependencyTree[A] = {
+    null
+    
+  }
+}
+
 object ProjectAndTask {
   val lock = new Object
   var runningTasks = List[ProjectAndTask]()
