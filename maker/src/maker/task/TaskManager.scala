@@ -121,6 +121,8 @@ object TaskManager{
     }
     val result : BuildResult[AnyRef] = startAndMonitor()
 
+    TaskResults.addResult(result)
+
     system.shutdown()
 
     Log.debug("Stats: \n" + projectTasks.map(_.runStats).mkString("\n"))
