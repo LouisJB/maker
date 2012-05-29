@@ -77,6 +77,7 @@ case class Command(outputHandler : CommandOutputHandler, workingDirectory : Opti
     val procBuilder = new ProcessBuilder(args : _*)
     procBuilder.redirectErrorStream(true)
     workingDirectory.map(procBuilder.directory(_))
+    Log.debug("cwd set to " + workingDirectory.map(_.getAbsolutePath))
     procBuilder.start
   }
 
@@ -103,7 +104,7 @@ object Command{
   def apply(workingDirectory : Option[File], args : String*) : Command = new Command(CommandOutputHandler(), workingDirectory, args : _*)
 }
 
-object ScalaCommand{
+object ScalaCommand {
   def apply(outputHandler : CommandOutputHandler, java : String, opts : List[String], classpath : String, klass : String, args : String*) : Command = {
     val allArgs : List[String] = List(
       java,
@@ -113,5 +114,17 @@ object ScalaCommand{
       List("scala.tools.nsc.MainGenericRunner",
       klass) ::: args.toList
     Command(outputHandler, None, allArgs :_*)
+  }
+}
+
+object ScalaDocCmd {
+  def apply(outputHandler : CommandOutputHandler, outputDir : File, java : String, classpath : String, opts : List[String], files : File*) : Command = {
+    val allArgs : List[String] = List(
+      java,
+      "-Dscala.usejavacp=true",
+      "-classpath",
+      classpath) ::: opts :::
+      "scala.tools.nsc.ScalaDoc" :: files.map(_.getAbsolutePath).toList
+    Command(outputHandler, Some(outputDir), allArgs :_*)
   }
 }

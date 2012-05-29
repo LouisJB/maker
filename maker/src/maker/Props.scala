@@ -65,6 +65,7 @@ case class Props(private val overrides : Map[String, String] = Map()) {
   }
   
   val javaHomeEnv = Option(System.getenv("JAVA_HOME")).orElse(Option(System.getenv("JDK_HOME")))
+  val javaExec = JavaHome() + "/bin/java"
   val scalaHomeEnv = Option(System.getenv("SCALA_HOME"))
   object ScalaHome extends FileProperty(scalaHomeEnv.getOrElse("/usr/local/scala/"))
   object JavaHome extends FileProperty(javaHomeEnv.getOrElse("/usr/local/jdk/"))

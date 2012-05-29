@@ -219,6 +219,8 @@ case class Project(
     r
   }
 
+  def doc : BuildResult[AnyRef] = TaskManager(List(this), DocTask)
+
   def cleanManagedLibs = {
     Option(managedLibDir.listFiles).map(_.foreach(_.delete))
     ivyGeneratedFile.map(f => if (f.exists) f.delete) // delete this as well since it's regenerated on the fly during update
