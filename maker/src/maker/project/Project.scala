@@ -219,7 +219,9 @@ case class Project(
     r
   }
 
-  def doc : BuildResult[AnyRef] = TaskManager(List(this), DocTask)
+  def doc : BuildResult[AnyRef] = TaskManager(projectAndDescendents, DocTask)
+  def docOnly : BuildResult[AnyRef] = docOnly()
+  def docOnly(aggregate : Boolean = false) : BuildResult[AnyRef] = TaskManager(List(this), DocTask, Map("aggregate" -> aggregate.toString))
 
   def cleanManagedLibs = {
     Option(managedLibDir.listFiles).map(_.foreach(_.delete))
