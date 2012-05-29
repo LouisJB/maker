@@ -102,6 +102,19 @@ case class Props(private val overrides : Map[String, String] = Map()) {
   object Version extends StringProperty("1.0-SNAPSHOT")
   object DefaultPublishResolver extends OptionalStringProperty
   object PomTemplateFile extends OptionalFileProperty
+  object JavaSystemProperties extends OptionalFileProperty{
+    def properties = {
+      val properties = new java.util.Properties()
+      value.foreach{file ⇒ properties.load(new FileInputStream(file))}
+      properties
+    }
+    def asMap = {
+      val ps = properties
+      JavaConversions.asScalaSet(ps.stringPropertyNames).map{
+        p ⇒ p → ps.getProperty(p)
+      }.toMap
+    }
+  }
   object ScmUrl extends StringProperty("")
   object ScmConnection extends StringProperty("")
   object Licenses extends StringProperty("")

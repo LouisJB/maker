@@ -72,10 +72,20 @@ case object RunUnitTestsTask extends Task {
       Log.debug("Tests to run: ")
       suiteParameters.foreach(Log.debug(_)  )
       val maxHeapMB = Runtime.getRuntime().maxMemory() / (1024 * 1024) // replicate bootstrap JVM max heap into spawned JVMs
-      val opts = List("-Xmx" + maxHeapMB + "m")
-      val args = (if (Maker.verboseTestOutput && !project.suppressTaskOutput) List("-o") else Nil) :::
+      val systemProperties = project.props.JavaSystemProperties.asMap.map{
+        case (key, value) ⇒ "-D" + key + "=" + value
+      }.toList
+      val opts = List("-Xmx" + maxHeapMB + "m") ::: systemProperties
+      val args = (if (Maker.verboseTestOutput && !project.suppressTaskOutput) List("-o") else Nil) ::: 
         List("-c", "-u", project.testResultsDir.getAbsolutePath, "-p", project.scalatestRunpath) ::: suiteParameters
-      val cmd = ScalaCommand(CommandOutputHandler(), project.props.Java().getAbsolutePath, opts, project.runClasspath, "org.scalatest.tools.Runner", args : _*)
+      val cmd = ScalaCommand(
+        CommandOutputHandler(), 
+        project.props.Java().getAbsolutePath, 
+        opts,
+        project.runClasspath, 
+        "org.scalatest.tools.Runner", 
+        args : _*
+      )
       Log.debug("Executing tests in separate JVM using:\nopts = " + opts + "\n" + cmd.toString)
       cmd.exec match {
         case 0 ⇒ Right(Unit)
