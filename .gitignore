@@ -12,3 +12,4 @@ maker.jar
 vim-compile-output
 lib_managed
 *ivy-dynamic.ivy
+.maker.vim/
