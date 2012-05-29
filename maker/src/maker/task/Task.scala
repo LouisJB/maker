@@ -30,7 +30,8 @@ object Task {
     RunUnitTestsTask -> Set(CompileTestsTask),
     RunFailingTestsTask -> Set(CompileTestsTask),
     RunMainTask -> Set(CompileSourceTask),
-    RunJettyTask -> Set(PackageTask)
+    RunJettyTask -> Set(PackageTask),
+    DocTask -> Set(CompileSourceTask)
   )
 
   lazy val standardWithinProjectDependencies : Project => Map[Task, Set[Task]] = Memoize1((project : Project) => {
