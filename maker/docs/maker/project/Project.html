@@ -1,0 +1,1805 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html>
+        <head>
+          <title>maker.project.Project</title>
+          <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+          
+      <link type="text/css" media="screen" rel="stylesheet" href="../../lib/template.css" />
+      <script type="text/javascript" src="../../lib/jquery.js"></script>
+      <script type="text/javascript" src="../../lib/jquery-ui.js"></script>
+      <script type="text/javascript" src="../../lib/template.js"></script>
+      <script type="text/javascript" src="../../lib/tools.tooltip.js"></script>
+    
+        </head>
+        <body class="type">
+      <div id="definition">
+        <a title="Go to companion" href="Project$.html"><img src="../../lib/class_to_object_big.png" /></a>
+        <p id="owner"><a name="maker" class="extype" href="../package.html">maker</a>.<a name="maker.project" class="extype" href="package.html">project</a></p>
+        <h1><a title="Go to companion" href="Project$.html">Project</a></h1>
+      </div>
+
+      <h4 class="signature" id="signature">
+      <span class="kind">case class</span>
+      <span class="symbol"> 
+        <span class="name">Project</span>
+        
+        <span class="params">(<span name="name">name: String</span>, <span name="root">root: <span name="java.io.File" class="extype">File</span></span>, <span name="sourceDirs">sourceDirs: List[<span name="java.io.File" class="extype">File</span>]</span>, <span name="tstDirs">tstDirs: List[<span name="java.io.File" class="extype">File</span>]</span>, <span name="libDirs">libDirs: List[<span name="java.io.File" class="extype">File</span>]</span>, <span name="providedLibDirs">providedLibDirs: List[<span name="java.io.File" class="extype">File</span>]</span>, <span name="managedLibDirName">managedLibDirName: String</span>, <span name="resDirs">resDirs: List[<span name="java.io.File" class="extype">File</span>]</span>, <span name="children">children: List[<a name="maker.project.Project" class="extype" href="">Project</a>]</span>, <span name="props">props: <a name="maker.Props" class="extype" href="../Props.html">Props</a></span>, <span name="unmanagedProperties">unmanagedProperties: <span name="java.util.Properties" class="extype">Properties</span></span>, <span name="description">description: <span name="scala.Option" class="extype">Option</span>[String]</span>, <span name="ivySettingsFile">ivySettingsFile: <span name="java.io.File" class="extype">File</span></span>, <span name="ivyFileRel">ivyFileRel: String</span>, <span name="webAppDir">webAppDir: <span name="scala.Option" class="extype">Option</span>[<span name="java.io.File" class="extype">File</span>]</span>, <span name="moduleIdentity">moduleIdentity: <span name="scala.Option" class="extype">Option</span>[<a name="maker.utils.GroupAndArtifact" class="extype" href="../utils/GroupAndArtifact.html">GroupAndArtifact</a>]</span>, <span name="additionalLibs">additionalLibs: List[<a name="maker.utils.GAV" class="extype" href="../utils/GAV.html">GAV</a>]</span>, <span name="additionalExcludedLibs">additionalExcludedLibs: List[<a name="maker.utils.GAV" class="extype" href="../utils/GAV.html">GAV</a>]</span>, <span name="providedLibs">providedLibs: List[String]</span>, <span name="suppressTaskOutput">suppressTaskOutput: <span name="scala.Boolean" class="extype">Boolean</span></span>)</span><span class="result"> extends <a name="maker.project.ProjectDef" class="extype" href="ProjectDef.html">ProjectDef</a> with <span name="scala.Product" class="extype">Product</span> with <span name="scala.Serializable" class="extype">Serializable</span></span>
+      </span>
+      </h4>
+      
+          <div class="fullcommenttop" id="comment"><div class="comment cmt"><p>Main maker project, defines a software build module.
+  most params have default values and can be omitted as necessary
+</p></div><div class="toggleContainer block">
+          <span class="toggle">Linear Supertypes</span>
+          <div class="superTypes hiddenContent"><span name="scala.Serializable" class="extype">Serializable</span>, <span name="java.io.Serializable" class="extype">Serializable</span>, <span name="scala.Product" class="extype">Product</span>, <span name="scala.Equals" class="extype">Equals</span>, <a name="maker.project.ProjectDef" class="extype" href="ProjectDef.html">ProjectDef</a>, AnyRef, <span name="scala.Any" class="extype">Any</span></div>
+        </div><div class="toggleContainer block">
+          <span class="toggle">Known Subclasses</span>
+          <div class="subClasses hiddenContent"><a name="maker.project.TopLevelProject" class="extype" href="TopLevelProject.html">TopLevelProject</a></div>
+        </div></div>
+        
+
+      <div id="template">
+
+        <div id="mbrsel">
+          <div id="textfilter"><span class="pre"></span><span class="input"><input accesskey="/" type="text" /></span><span class="post"></span></div>
+          <div id="order">
+                <span class="filtertype">Ordering</span>
+                <ol><li class="alpha in"><span>Alphabetic</span></li><li class="inherit out"><span>By inheritance</span></li></ol>
+              </div>
+          <div id="ancestors">
+                <span class="filtertype">Inherited</span>
+                <ol><li class="hideall out"><span>Hide All</span></li>
+                <li class="showall in"><span>Show all</span></li></ol>
+                <ol id="linearization"><li name="maker.project.Project" class="in"><span>Project</span></li><li name="scala.Serializable" class="in"><span>Serializable</span></li><li name="java.io.Serializable" class="in"><span>Serializable</span></li><li name="scala.Product" class="in"><span>Product</span></li><li name="scala.Equals" class="in"><span>Equals</span></li><li name="maker.project.ProjectDef" class="in"><span>ProjectDef</span></li><li name="scala.AnyRef" class="in"><span>AnyRef</span></li><li name="scala.Any" class="in"><span>Any</span></li></ol>
+              </div>
+          <div id="visbl">
+              <span class="filtertype">Visibility</span>
+              <ol><li class="public in"><span>Public</span></li><li class="all out"><span>All</span></li></ol>
+            </div>
+        </div>
+
+        <div class="members" id="constructors">
+              <h3>Instance Constructors</h3>
+              <ol><li visbl="pub" name="maker.project.Project#this" data-isabs="false">
+      <a id="this:Project"></a>
+      <h4 class="signature">
+      <span class="kind">new</span>
+      <span class="symbol"> 
+        <span class="name">Project</span>
+        
+        <span class="params">(<span name="name">name: String</span>, <span name="root">root: <span name="java.io.File" class="extype">File</span></span>, <span name="sourceDirs">sourceDirs: List[<span name="java.io.File" class="extype">File</span>]</span>, <span name="tstDirs">tstDirs: List[<span name="java.io.File" class="extype">File</span>]</span>, <span name="libDirs">libDirs: List[<span name="java.io.File" class="extype">File</span>]</span>, <span name="providedLibDirs">providedLibDirs: List[<span name="java.io.File" class="extype">File</span>]</span>, <span name="managedLibDirName">managedLibDirName: String</span>, <span name="resDirs">resDirs: List[<span name="java.io.File" class="extype">File</span>]</span>, <span name="children">children: List[<a name="maker.project.Project" class="extype" href="">Project</a>]</span>, <span name="props">props: <a name="maker.Props" class="extype" href="../Props.html">Props</a></span>, <span name="unmanagedProperties">unmanagedProperties: <span name="java.util.Properties" class="extype">Properties</span></span>, <span name="description">description: <span name="scala.Option" class="extype">Option</span>[String]</span>, <span name="ivySettingsFile">ivySettingsFile: <span name="java.io.File" class="extype">File</span></span>, <span name="ivyFileRel">ivyFileRel: String</span>, <span name="webAppDir">webAppDir: <span name="scala.Option" class="extype">Option</span>[<span name="java.io.File" class="extype">File</span>]</span>, <span name="moduleIdentity">moduleIdentity: <span name="scala.Option" class="extype">Option</span>[<a name="maker.utils.GroupAndArtifact" class="extype" href="../utils/GroupAndArtifact.html">GroupAndArtifact</a>]</span>, <span name="additionalLibs">additionalLibs: List[<a name="maker.utils.GAV" class="extype" href="../utils/GAV.html">GAV</a>]</span>, <span name="additionalExcludedLibs">additionalExcludedLibs: List[<a name="maker.utils.GAV" class="extype" href="../utils/GAV.html">GAV</a>]</span>, <span name="providedLibs">providedLibs: List[String]</span>, <span name="suppressTaskOutput">suppressTaskOutput: <span name="scala.Boolean" class="extype">Boolean</span></span>)</span>
+      </span>
+      </h4>
+      
+    </li></ol>
+            </div>
+
+        
+        
+        
+
+        <div class="values members" id="values">
+              <h3>Value Members</h3>
+              <ol><li visbl="pub" name="scala.AnyRef#!=" data-isabs="false">
+      <a id="!=(AnyRef):Boolean"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">!=</span>
+        
+        <span class="params">(<span name="arg0">arg0: AnyRef</span>)</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>final </dd><dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li visbl="pub" name="scala.Any#!=" data-isabs="false">
+      <a id="!=(Any):Boolean"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">!=</span>
+        
+        <span class="params">(<span name="arg0">arg0: <span name="scala.Any" class="extype">Any</span></span>)</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>final </dd><dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li visbl="pub" name="scala.AnyRef###" data-isabs="false">
+      <a id="##():Int"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">##</span>
+        
+        <span class="params">()</span><span class="result">: <span name="scala.Int" class="extype">Int</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>final </dd><dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li visbl="pub" name="scala.AnyRef#==" data-isabs="false">
+      <a id="==(AnyRef):Boolean"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">==</span>
+        
+        <span class="params">(<span name="arg0">arg0: AnyRef</span>)</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>final </dd><dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li visbl="pub" name="scala.Any#==" data-isabs="false">
+      <a id="==(Any):Boolean"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">==</span>
+        
+        <span class="params">(<span name="arg0">arg0: <span name="scala.Any" class="extype">Any</span></span>)</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>final </dd><dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li visbl="pub" name="maker.project.Project#additionalExcludedLibs" data-isabs="false">
+      <a id="additionalExcludedLibs:List[GAV]"></a>
+      <h4 class="signature">
+      <span class="kind">val</span>
+      <span class="symbol"> 
+        <span class="name">additionalExcludedLibs</span>
+        
+        <span class="result">: List[<a name="maker.utils.GAV" class="extype" href="../utils/GAV.html">GAV</a>]</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.project.Project#additionalLibs" data-isabs="false">
+      <a id="additionalLibs:List[GAV]"></a>
+      <h4 class="signature">
+      <span class="kind">val</span>
+      <span class="symbol"> 
+        <span class="name">additionalLibs</span>
+        
+        <span class="result">: List[<a name="maker.utils.GAV" class="extype" href="../utils/GAV.html">GAV</a>]</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.project.Project#allDeps" data-isabs="false">
+      <a id="allDeps:List[Project]"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">allDeps</span>
+        
+        <span class="result">: List[<a name="maker.project.Project" class="extype" href="">Project</a>]</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="scala.Any#asInstanceOf" data-isabs="false">
+      <a id="asInstanceOf[T0]:T0"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">asInstanceOf</span>
+        <span class="tparams">[<span name="T0">T0</span>]</span>
+        <span class="result">: T0</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>final </dd><dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li visbl="pub" name="maker.project.Project#canEqual" data-isabs="false">
+      <a id="canEqual(Any):Boolean"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">canEqual</span>
+        
+        <span class="params">(<span name="arg0">arg0: <span name="scala.Any" class="extype">Any</span></span>)</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="maker.project.Project" class="extype" href="">Project</a> → Equals</dd></dl></div>
+    </li><li visbl="pub" name="maker.project.Project#children" data-isabs="false">
+      <a id="children:List[Project]"></a>
+      <h4 class="signature">
+      <span class="kind">val</span>
+      <span class="symbol"> 
+        <span class="name">children</span>
+        
+        <span class="result">: List[<a name="maker.project.Project" class="extype" href="">Project</a>]</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.project.Project#classFiles" data-isabs="false">
+      <a id="classFiles:Set[File]"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">classFiles</span>
+        
+        <span class="result">: Set[<span name="java.io.File" class="extype">File</span>]</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.project.Project#classLoader" data-isabs="false">
+      <a id="classLoader:URLClassLoader"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">classLoader</span>
+        
+        <span class="result">: <span name="java.net.URLClassLoader" class="extype">URLClassLoader</span></span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.project.Project#classpathDirectoriesAndJars" data-isabs="false">
+      <a id="classpathDirectoriesAndJars:List[File]"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">classpathDirectoriesAndJars</span>
+        
+        <span class="result">: List[<span name="java.io.File" class="extype">File</span>]</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.project.Project#clean" data-isabs="false">
+      <a id="clean:BuildResult[AnyRef]"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">clean</span>
+        
+        <span class="result">: <a name="maker.task.BuildResult" class="extype" href="../task/BuildResult.html">BuildResult</a>[AnyRef]</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.project.Project#cleanAll" data-isabs="false">
+      <a id="cleanAll:BuildResult[AnyRef]"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">cleanAll</span>
+        
+        <span class="result">: <a name="maker.task.BuildResult" class="extype" href="../task/BuildResult.html">BuildResult</a>[AnyRef]</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.project.Project#cleanAllManagedLibs" data-isabs="false">
+      <a id="cleanAllManagedLibs:List[Option[AnyVal]]"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">cleanAllManagedLibs</span>
+        
+        <span class="result">: <span name="scala.collection.immutable.List" class="extype">List</span>[<span name="scala.Option" class="extype">Option</span>[<span name="scala.AnyVal" class="extype">AnyVal</span>]]</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.project.Project#cleanAllOnly" data-isabs="false">
+      <a id="cleanAllOnly:BuildResult[AnyRef]"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">cleanAllOnly</span>
+        
+        <span class="result">: <a name="maker.task.BuildResult" class="extype" href="../task/BuildResult.html">BuildResult</a>[AnyRef]</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.project.Project#cleanManagedLibs" data-isabs="false">
+      <a id="cleanManagedLibs:Option[AnyVal]"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">cleanManagedLibs</span>
+        
+        <span class="result">: <span name="scala.Option" class="extype">Option</span>[<span name="scala.AnyVal" class="extype">AnyVal</span>]</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.project.Project#cleanOnly" data-isabs="false">
+      <a id="cleanOnly:BuildResult[AnyRef]"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">cleanOnly</span>
+        
+        <span class="result">: <a name="maker.task.BuildResult" class="extype" href="../task/BuildResult.html">BuildResult</a>[AnyRef]</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="prt" name="scala.AnyRef#clone" data-isabs="false">
+      <a id="clone():AnyRef"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">clone</span>
+        
+        <span class="params">()</span><span class="result">: AnyRef</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a name="java.lang" class="extype" href="../../java/lang/package.html">lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">()</span>
+              
+        </dd></dl></div>
+    </li><li visbl="pub" name="maker.project.Project#compilationClasspath" data-isabs="false">
+      <a id="compilationClasspath:String"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">compilationClasspath</span>
+        
+        <span class="result">: String</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.project.Project#compile" data-isabs="false">
+      <a id="compile:BuildResult[AnyRef]"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">compile</span>
+        
+        <span class="result">: <a name="maker.task.BuildResult" class="extype" href="../task/BuildResult.html">BuildResult</a>[AnyRef]</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.project.Project#compileContinuously" data-isabs="false">
+      <a id="compileContinuously:Unit"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">compileContinuously</span>
+        
+        <span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.project.Project#compilers" data-isabs="false">
+      <a id="compilers:ProjectCompilers"></a>
+      <h4 class="signature">
+      <span class="kind">val</span>
+      <span class="symbol"> 
+        <span class="name">compilers</span>
+        
+        <span class="result">: <a name="maker.project.ProjectCompilers" class="extype" href="ProjectCompilers.html">ProjectCompilers</a></span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.project.ProjectDef#defaultSrcRootDirNames" data-isabs="false">
+      <a id="defaultSrcRootDirNames:List[String]"></a>
+      <h4 class="signature">
+      <span class="kind">val</span>
+      <span class="symbol"> 
+        <span class="name">defaultSrcRootDirNames</span>
+        
+        <span class="result">: <span name="scala.collection.immutable.List" class="extype">List</span>[<span name="java.lang.String" class="extype">String</span>]</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="maker.project.ProjectDef" class="extype" href="ProjectDef.html">ProjectDef</a></dd></dl></div>
+    </li><li visbl="pub" name="maker.project.Project#delete" data-isabs="false">
+      <a id="delete:Unit"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">delete</span>
+        
+        <span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.project.Project#dependencies" data-isabs="false">
+      <a id="dependencies:ProjectDependencies"></a>
+      <h4 class="signature">
+      <span class="kind">val</span>
+      <span class="symbol"> 
+        <span class="name">dependencies</span>
+        
+        <span class="result">: <a name="maker.project.ProjectDependencies" class="extype" href="ProjectDependencies.html">ProjectDependencies</a></span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.project.Project#dependsOn" data-isabs="false">
+      <a id="dependsOn(Project*):Project"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">dependsOn</span>
+        
+        <span class="params">(<span name="projects">projects: <a name="maker.project.Project" class="extype" href="">Project</a>*</span>)</span><span class="result">: <a name="maker.project.Project" class="extype" href="">Project</a></span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.project.Project#dependsOnPaths" data-isabs="false">
+      <a id="dependsOnPaths(Project):List[List[Project]]"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">dependsOnPaths</span>
+        
+        <span class="params">(<span name="project">project: <a name="maker.project.Project" class="extype" href="">Project</a></span>)</span><span class="result">: List[List[<a name="maker.project.Project" class="extype" href="">Project</a>]]</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.project.Project#description" data-isabs="false">
+      <a id="description:Option[String]"></a>
+      <h4 class="signature">
+      <span class="kind">val</span>
+      <span class="symbol"> 
+        <span class="name">description</span>
+        
+        <span class="result">: <span name="scala.Option" class="extype">Option</span>[String]</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.project.Project#doc" data-isabs="false">
+      <a id="doc:BuildResult[AnyRef]"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">doc</span>
+        
+        <span class="result">: <a name="maker.task.BuildResult" class="extype" href="../task/BuildResult.html">BuildResult</a>[AnyRef]</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.project.Project#docOnly" data-isabs="false">
+      <a id="docOnly(Boolean):BuildResult[AnyRef]"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">docOnly</span>
+        
+        <span class="params">(<span name="aggregate">aggregate: <span name="scala.Boolean" class="extype">Boolean</span> = <span class="symbol">false</span></span>)</span><span class="result">: <a name="maker.task.BuildResult" class="extype" href="../task/BuildResult.html">BuildResult</a>[AnyRef]</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.project.Project#docOnly" data-isabs="false">
+      <a id="docOnly:BuildResult[AnyRef]"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">docOnly</span>
+        
+        <span class="result">: <a name="maker.task.BuildResult" class="extype" href="../task/BuildResult.html">BuildResult</a>[AnyRef]</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="scala.AnyRef#eq" data-isabs="false">
+      <a id="eq(AnyRef):Boolean"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">eq</span>
+        
+        <span class="params">(<span name="arg0">arg0: AnyRef</span>)</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>final </dd><dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li visbl="pub" name="maker.project.Project#equals" data-isabs="false">
+      <a id="equals(Any):Boolean"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">equals</span>
+        
+        <span class="params">(<span name="arg0">arg0: <span name="scala.Any" class="extype">Any</span></span>)</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="maker.project.Project" class="extype" href="">Project</a> → Equals → AnyRef → Any</dd></dl></div>
+    </li><li visbl="prt" name="scala.AnyRef#finalize" data-isabs="false">
+      <a id="finalize():Unit"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">finalize</span>
+        
+        <span class="params">()</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a name="java.lang" class="extype" href="../../java/lang/package.html">lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">()</span>
+              
+        </dd></dl></div>
+    </li><li visbl="pub" name="maker.project.Project#findLibs" data-isabs="false">
+      <a id="findLibs(String):Unit"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">findLibs</span>
+        
+        <span class="params">(<span name="libName">libName: String</span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="scala.AnyRef#getClass" data-isabs="false">
+      <a id="getClass():java.lang.Class[_]"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">getClass</span>
+        
+        <span class="params">()</span><span class="result">: java.lang.Class[_]</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>final </dd><dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li visbl="pub" name="maker.project.Project#hasScala" data-isabs="false">
+      <a id="hasScala:Boolean"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">hasScala</span>
+        
+        <span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.project.Project#hashCode" data-isabs="false">
+      <a id="hashCode():Int"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">hashCode</span>
+        
+        <span class="params">()</span><span class="result">: <span name="scala.Int" class="extype">Int</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="maker.project.Project" class="extype" href="">Project</a> → AnyRef → Any</dd></dl></div>
+    </li><li visbl="pub" name="maker.project.Project#isDependentOn" data-isabs="false">
+      <a id="isDependentOn(Project):Boolean"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">isDependentOn</span>
+        
+        <span class="params">(<span name="project">project: <a name="maker.project.Project" class="extype" href="">Project</a></span>)</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="scala.Any#isInstanceOf" data-isabs="false">
+      <a id="isInstanceOf[T0]:Boolean"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">isInstanceOf</span>
+        <span class="tparams">[<span name="T0">T0</span>]</span>
+        <span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>final </dd><dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li visbl="pub" name="maker.project.Project#ivyFile" data-isabs="false">
+      <a id="ivyFile:File"></a>
+      <h4 class="signature">
+      <span class="kind">val</span>
+      <span class="symbol"> 
+        <span class="name">ivyFile</span>
+        
+        <span class="result">: <span name="java.io.File" class="extype">File</span></span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.project.Project#ivyFileRel" data-isabs="false">
+      <a id="ivyFileRel:String"></a>
+      <h4 class="signature">
+      <span class="kind">val</span>
+      <span class="symbol"> 
+        <span class="name">ivyFileRel</span>
+        
+        <span class="result">: String</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.project.Project#ivyGeneratedFile" data-isabs="false">
+      <a id="ivyGeneratedFile:Option[File]"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">ivyGeneratedFile</span>
+        
+        <span class="result">: <span name="scala.Option" class="extype">Option</span>[<span name="java.io.File" class="extype">File</span>]</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.project.Project#ivySettingsFile" data-isabs="false">
+      <a id="ivySettingsFile:File"></a>
+      <h4 class="signature">
+      <span class="kind">val</span>
+      <span class="symbol"> 
+        <span class="name">ivySettingsFile</span>
+        
+        <span class="result">: <span name="java.io.File" class="extype">File</span></span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.project.Project#jarDirs" data-isabs="false">
+      <a id="jarDirs:List[File]"></a>
+      <h4 class="signature">
+      <span class="kind">val</span>
+      <span class="symbol"> 
+        <span class="name">jarDirs</span>
+        
+        <span class="result">: List[<span name="java.io.File" class="extype">File</span>]</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.project.Project#jars" data-isabs="false">
+      <a id="jars:List[File]"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">jars</span>
+        
+        <span class="result">: <span name="scala.collection.immutable.List" class="extype">List</span>[<span name="java.io.File" class="extype">File</span>]</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.project.Project#javaClassFiles" data-isabs="false">
+      <a id="javaClassFiles:Set[File]"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">javaClassFiles</span>
+        
+        <span class="result">: Set[<span name="java.io.File" class="extype">File</span>]</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.project.Project#javaOutputDir" data-isabs="false">
+      <a id="javaOutputDir:File"></a>
+      <h4 class="signature">
+      <span class="kind">val</span>
+      <span class="symbol"> 
+        <span class="name">javaOutputDir</span>
+        
+        <span class="result">: <span name="java.io.File" class="extype">File</span></span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.project.Project#javaSrcFiles" data-isabs="false">
+      <a id="javaSrcFiles():Set[File]"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">javaSrcFiles</span>
+        
+        <span class="params">()</span><span class="result">: Set[<span name="java.io.File" class="extype">File</span>]</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.project.Project#libDirs" data-isabs="false">
+      <a id="libDirs:List[File]"></a>
+      <h4 class="signature">
+      <span class="kind">val</span>
+      <span class="symbol"> 
+        <span class="name">libDirs</span>
+        
+        <span class="result">: List[<span name="java.io.File" class="extype">File</span>]</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.project.ProjectDef#mainRoot" data-isabs="false">
+      <a id="mainRoot:File"></a>
+      <h4 class="signature">
+      <span class="kind">val</span>
+      <span class="symbol"> 
+        <span class="name">mainRoot</span>
+        
+        <span class="result">: <span name="java.io.File" class="extype">File</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="maker.project.ProjectDef" class="extype" href="ProjectDef.html">ProjectDef</a></dd></dl></div>
+    </li><li visbl="pub" name="maker.project.Project#makerDirectory" data-isabs="false">
+      <a id="makerDirectory:File"></a>
+      <h4 class="signature">
+      <span class="kind">val</span>
+      <span class="symbol"> 
+        <span class="name">makerDirectory</span>
+        
+        <span class="result">: <span name="java.io.File" class="extype">File</span></span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.project.Project#managedLibDir" data-isabs="false">
+      <a id="managedLibDir:File"></a>
+      <h4 class="signature">
+      <span class="kind">val</span>
+      <span class="symbol"> 
+        <span class="name">managedLibDir</span>
+        
+        <span class="result">: <span name="java.io.File" class="extype">File</span></span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.project.Project#managedLibDirName" data-isabs="false">
+      <a id="managedLibDirName:String"></a>
+      <h4 class="signature">
+      <span class="kind">val</span>
+      <span class="symbol"> 
+        <span class="name">managedLibDirName</span>
+        
+        <span class="result">: String</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.project.Project#mkTask" data-isabs="false">
+      <a id="mkTask(Task):ProjectAndTask"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">mkTask</span>
+        
+        <span class="params">(<span name="t">t: <a name="maker.task.Task" class="extype" href="../task/Task.html">Task</a></span>)</span><span class="result">: <a name="maker.task.ProjectAndTask" class="extype" href="../task/ProjectAndTask.html">ProjectAndTask</a></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">********************
+    Tasks
+********************</p>
+    </li><li visbl="pub" name="maker.project.Project#moduleDef" data-isabs="false">
+      <a id="moduleDef:ModuleDef"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">moduleDef</span>
+        
+        <span class="result">: <a name="maker.utils.maven.ModuleDef" class="extype" href="../utils/maven/ModuleDef.html">ModuleDef</a></span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.project.Project#moduleId" data-isabs="false">
+      <a id="moduleId:GroupAndArtifact"></a>
+      <h4 class="signature">
+      <span class="kind">val</span>
+      <span class="symbol"> 
+        <span class="name">moduleId</span>
+        
+        <span class="result">: <a name="maker.utils.GroupAndArtifact" class="extype" href="../utils/GroupAndArtifact.html">GroupAndArtifact</a></span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.project.Project#moduleIdentity" data-isabs="false">
+      <a id="moduleIdentity:Option[GroupAndArtifact]"></a>
+      <h4 class="signature">
+      <span class="kind">val</span>
+      <span class="symbol"> 
+        <span class="name">moduleIdentity</span>
+        
+        <span class="result">: <span name="scala.Option" class="extype">Option</span>[<a name="maker.utils.GroupAndArtifact" class="extype" href="../utils/GroupAndArtifact.html">GroupAndArtifact</a>]</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.project.Project#name" data-isabs="false">
+      <a id="name:String"></a>
+      <h4 class="signature">
+      <span class="kind">val</span>
+      <span class="symbol"> 
+        <span class="name">name</span>
+        
+        <span class="result">: String</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="maker.project.Project" class="extype" href="">Project</a> → <a name="maker.project.ProjectDef" class="extype" href="ProjectDef.html">ProjectDef</a></dd></dl></div>
+    </li><li visbl="pub" name="scala.AnyRef#ne" data-isabs="false">
+      <a id="ne(AnyRef):Boolean"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">ne</span>
+        
+        <span class="params">(<span name="arg0">arg0: AnyRef</span>)</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>final </dd><dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li visbl="pub" name="scala.AnyRef#notify" data-isabs="false">
+      <a id="notify():Unit"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">notify</span>
+        
+        <span class="params">()</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>final </dd><dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li visbl="pub" name="scala.AnyRef#notifyAll" data-isabs="false">
+      <a id="notifyAll():Unit"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">notifyAll</span>
+        
+        <span class="params">()</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>final </dd><dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li visbl="pub" name="maker.project.Project#outputArtifact" data-isabs="false">
+      <a id="outputArtifact:File"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">outputArtifact</span>
+        
+        <span class="result">: <span name="java.io.File" class="extype">File</span></span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.project.Project#outputDir" data-isabs="false">
+      <a id="outputDir:File"></a>
+      <h4 class="signature">
+      <span class="kind">val</span>
+      <span class="symbol"> 
+        <span class="name">outputDir</span>
+        
+        <span class="result">: <span name="java.io.File" class="extype">File</span></span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.project.Project#pack" data-isabs="false">
+      <a id="pack:BuildResult[AnyRef]"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">pack</span>
+        
+        <span class="result">: <a name="maker.task.BuildResult" class="extype" href="../task/BuildResult.html">BuildResult</a>[AnyRef]</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.project.Project#packOnly" data-isabs="false">
+      <a id="packOnly:BuildResult[AnyRef]"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">packOnly</span>
+        
+        <span class="result">: <a name="maker.task.BuildResult" class="extype" href="../task/BuildResult.html">BuildResult</a>[AnyRef]</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.project.Project#packageDir" data-isabs="false">
+      <a id="packageDir:File"></a>
+      <h4 class="signature">
+      <span class="kind">val</span>
+      <span class="symbol"> 
+        <span class="name">packageDir</span>
+        
+        <span class="result">: <span name="java.io.File" class="extype">File</span></span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.project.Project#packagingRoot" data-isabs="false">
+      <a id="packagingRoot:File"></a>
+      <h4 class="signature">
+      <span class="kind">val</span>
+      <span class="symbol"> 
+        <span class="name">packagingRoot</span>
+        
+        <span class="result">: <span name="java.io.File" class="extype">File</span></span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.project.Project#printClasspath" data-isabs="false">
+      <a id="printClasspath:Unit"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">printClasspath</span>
+        
+        <span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.project.Project#productArity" data-isabs="false">
+      <a id="productArity:Int"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">productArity</span>
+        
+        <span class="result">: <span name="scala.Int" class="extype">Int</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="maker.project.Project" class="extype" href="">Project</a> → Product</dd></dl></div>
+    </li><li visbl="pub" name="maker.project.Project#productElement" data-isabs="false">
+      <a id="productElement(Int):Any"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">productElement</span>
+        
+        <span class="params">(<span name="arg0">arg0: <span name="scala.Int" class="extype">Int</span></span>)</span><span class="result">: <span name="scala.Any" class="extype">Any</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="maker.project.Project" class="extype" href="">Project</a> → Product</dd></dl></div>
+    </li><li visbl="pub" name="scala.Product#productIterator" data-isabs="false">
+      <a id="productIterator:Iterator[Any]"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">productIterator</span>
+        
+        <span class="result">: Iterator[<span name="scala.Any" class="extype">Any</span>]</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Product</dd></dl></div>
+    </li><li visbl="pub" name="maker.project.Project#productPrefix" data-isabs="false">
+      <a id="productPrefix:String"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">productPrefix</span>
+        
+        <span class="result">: <span name="java.lang.String" class="extype">String</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="maker.project.Project" class="extype" href="">Project</a> → Product</dd></dl></div>
+    </li><li visbl="pub" name="maker.project.Project#projectAndDescendents" data-isabs="false">
+      <a id="projectAndDescendents:List[Project]"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">projectAndDescendents</span>
+        
+        <span class="result">: <span name="scala.collection.immutable.List" class="extype">List</span>[<a name="maker.project.Project" class="extype" href="">Project</a>]</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.project.Project#props" data-isabs="false">
+      <a id="props:Props"></a>
+      <h4 class="signature">
+      <span class="kind">val</span>
+      <span class="symbol"> 
+        <span class="name">props</span>
+        
+        <span class="result">: <a name="maker.Props" class="extype" href="../Props.html">Props</a></span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.project.Project#providedLibDirs" data-isabs="false">
+      <a id="providedLibDirs:List[File]"></a>
+      <h4 class="signature">
+      <span class="kind">val</span>
+      <span class="symbol"> 
+        <span class="name">providedLibDirs</span>
+        
+        <span class="result">: List[<span name="java.io.File" class="extype">File</span>]</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.project.Project#providedLibs" data-isabs="false">
+      <a id="providedLibs:List[String]"></a>
+      <h4 class="signature">
+      <span class="kind">val</span>
+      <span class="symbol"> 
+        <span class="name">providedLibs</span>
+        
+        <span class="result">: List[String]</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.project.Project#publish" data-isabs="false">
+      <a id="publish(String,String):BuildResult[AnyRef]"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">publish</span>
+        
+        <span class="params">(<span name="resolver">resolver: String = <span name='<span class="name"><a href="#props:Props">props.DefaultPublishResolver().getOrElse(&quot;default&quot;)</a></span>' class="defval">...</span></span>, <span name="version">version: String = <span class="symbol"><span class="name"><a href="#props:Props">props.Version()</a></span></span></span>)</span><span class="result">: <a name="maker.task.BuildResult" class="extype" href="../task/BuildResult.html">BuildResult</a>[AnyRef]</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.project.Project#publish" data-isabs="false">
+      <a id="publish:BuildResult[AnyRef]"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">publish</span>
+        
+        <span class="result">: <a name="maker.task.BuildResult" class="extype" href="../task/BuildResult.html">BuildResult</a>[AnyRef]</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.project.Project#publishLocal" data-isabs="false">
+      <a id="publishLocal(String,String):BuildResult[AnyRef]"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">publishLocal</span>
+        
+        <span class="params">(<span name="configurations">configurations: String = <span class="symbol">&quot;default&quot;</span></span>, <span name="version">version: String = <span class="symbol"><span class="name"><a href="#props:Props">props.Version()</a></span></span></span>)</span><span class="result">: <a name="maker.task.BuildResult" class="extype" href="../task/BuildResult.html">BuildResult</a>[AnyRef]</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.project.Project#publishLocal" data-isabs="false">
+      <a id="publishLocal:BuildResult[AnyRef]"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">publishLocal</span>
+        
+        <span class="result">: <a name="maker.task.BuildResult" class="extype" href="../task/BuildResult.html">BuildResult</a>[AnyRef]</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.project.Project#publishLocalOnly" data-isabs="false">
+      <a id="publishLocalOnly(String,String):BuildResult[AnyRef]"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">publishLocalOnly</span>
+        
+        <span class="params">(<span name="configurations">configurations: String = <span class="symbol">&quot;default&quot;</span></span>, <span name="version">version: String = <span class="symbol"><span class="name"><a href="#props:Props">props.Version()</a></span></span></span>)</span><span class="result">: <a name="maker.task.BuildResult" class="extype" href="../task/BuildResult.html">BuildResult</a>[AnyRef]</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.project.Project#publishLocalOnly" data-isabs="false">
+      <a id="publishLocalOnly:BuildResult[AnyRef]"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">publishLocalOnly</span>
+        
+        <span class="result">: <a name="maker.task.BuildResult" class="extype" href="../task/BuildResult.html">BuildResult</a>[AnyRef]</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.project.Project#publishOnly" data-isabs="false">
+      <a id="publishOnly(String,String):BuildResult[AnyRef]"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">publishOnly</span>
+        
+        <span class="params">(<span name="resolver">resolver: String = <span name='<span class="name"><a href="#props:Props">props.DefaultPublishResolver().getOrElse(&quot;default&quot;)</a></span>' class="defval">...</span></span>, <span name="version">version: String = <span class="symbol"><span class="name"><a href="#props:Props">props.Version()</a></span></span></span>)</span><span class="result">: <a name="maker.task.BuildResult" class="extype" href="../task/BuildResult.html">BuildResult</a>[AnyRef]</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.project.Project#publishOnly" data-isabs="false">
+      <a id="publishOnly:BuildResult[AnyRef]"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">publishOnly</span>
+        
+        <span class="result">: <a name="maker.task.BuildResult" class="extype" href="../task/BuildResult.html">BuildResult</a>[AnyRef]</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.project.Project#readIvyDependencies" data-isabs="false">
+      <a id="readIvyDependencies():List[DependencyLib]"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">readIvyDependencies</span>
+        
+        <span class="params">()</span><span class="result">: List[<a name="maker.utils.DependencyLib" class="extype" href="../utils/DependencyLib.html">DependencyLib</a>]</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.project.Project#readIvyResolvers" data-isabs="false">
+      <a id="readIvyResolvers():List[MavenRepository]"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">readIvyResolvers</span>
+        
+        <span class="params">()</span><span class="result">: List[<a name="maker.utils.maven.MavenRepository" class="extype" href="../utils/maven/MavenRepository.html">MavenRepository</a>]</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.project.Project#resDirs" data-isabs="false">
+      <a id="resDirs:List[File]"></a>
+      <h4 class="signature">
+      <span class="kind">val</span>
+      <span class="symbol"> 
+        <span class="name">resDirs</span>
+        
+        <span class="result">: List[<span name="java.io.File" class="extype">File</span>]</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="maker.project.Project" class="extype" href="">Project</a> → <a name="maker.project.ProjectDef" class="extype" href="ProjectDef.html">ProjectDef</a></dd></dl></div>
+    </li><li visbl="pub" name="maker.project.ProjectDef#resourceDir" data-isabs="false">
+      <a id="resourceDir:String"></a>
+      <h4 class="signature">
+      <span class="kind">val</span>
+      <span class="symbol"> 
+        <span class="name">resourceDir</span>
+        
+        <span class="result">: <span name="java.lang.String" class="extype">String</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="maker.project.ProjectDef" class="extype" href="ProjectDef.html">ProjectDef</a></dd></dl></div>
+    </li><li visbl="pub" name="maker.project.ProjectDef#resourceDirs" data-isabs="false">
+      <a id="resourceDirs:List[File]"></a>
+      <h4 class="signature">
+      <span class="kind">val</span>
+      <span class="symbol"> 
+        <span class="name">resourceDirs</span>
+        
+        <span class="result">: List[<span name="java.io.File" class="extype">File</span>]</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="maker.project.ProjectDef" class="extype" href="ProjectDef.html">ProjectDef</a></dd></dl></div>
+    </li><li visbl="pub" name="maker.project.Project#root" data-isabs="false">
+      <a id="root:File"></a>
+      <h4 class="signature">
+      <span class="kind">val</span>
+      <span class="symbol"> 
+        <span class="name">root</span>
+        
+        <span class="result">: <span name="java.io.File" class="extype">File</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="maker.project.Project" class="extype" href="">Project</a> → <a name="maker.project.ProjectDef" class="extype" href="ProjectDef.html">ProjectDef</a></dd></dl></div>
+    </li><li visbl="pub" name="maker.project.Project#runClasspath" data-isabs="false">
+      <a id="runClasspath:String"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">runClasspath</span>
+        
+        <span class="result">: String</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.project.Project#runJetty" data-isabs="false">
+      <a id="runJetty(Int):BuildResult[AnyRef]"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">runJetty</span>
+        
+        <span class="params">(<span name="portNo">portNo: <span name="scala.Int" class="extype">Int</span> = <span class="symbol">8080</span></span>)</span><span class="result">: <a name="maker.task.BuildResult" class="extype" href="../task/BuildResult.html">BuildResult</a>[AnyRef]</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.project.Project#runJetty" data-isabs="false">
+      <a id="runJetty:BuildResult[AnyRef]"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">runJetty</span>
+        
+        <span class="result">: <a name="maker.task.BuildResult" class="extype" href="../task/BuildResult.html">BuildResult</a>[AnyRef]</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.project.Project#runMain" data-isabs="false">
+      <a id="runMain(String)(String*)(String*):BuildResult[AnyRef]"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">runMain</span>
+        
+        <span class="params">(<span name="className">className: String</span>)</span><span class="params">(<span name="opts">opts: String*</span>)</span><span class="params">(<span name="args">args: String*</span>)</span><span class="result">: <a name="maker.task.BuildResult" class="extype" href="../task/BuildResult.html">BuildResult</a>[AnyRef]</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.project.Project#runMainContinuously" data-isabs="false">
+      <a id="runMainContinuously(String)(String*)(String*):Unit"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">runMainContinuously</span>
+        
+        <span class="params">(<span name="className">className: String</span>)</span><span class="params">(<span name="opts">opts: String*</span>)</span><span class="params">(<span name="args">args: String*</span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.project.Project#scalaLibs" data-isabs="false">
+      <a id="scalaLibs:List[File]"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">scalaLibs</span>
+        
+        <span class="result">: <span name="scala.collection.immutable.List" class="extype">List</span>[<span name="java.io.File" class="extype">File</span>]</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.project.Project#scalatestRunpath" data-isabs="false">
+      <a id="scalatestRunpath:String"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">scalatestRunpath</span>
+        
+        <span class="result">: String</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.project.Project#setAdditionalExcludedLibs" data-isabs="false">
+      <a id="setAdditionalExcludedLibs(GAV*):Project"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">setAdditionalExcludedLibs</span>
+        
+        <span class="params">(<span name="libs">libs: <a name="maker.utils.GAV" class="extype" href="../utils/GAV.html">GAV</a>*</span>)</span><span class="result">: <a name="maker.project.Project" class="extype" href="">Project</a></span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.project.Project#showDependencyLibraryGraph" data-isabs="false">
+      <a id="showDependencyLibraryGraph():File"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">showDependencyLibraryGraph</span>
+        
+        <span class="params">()</span><span class="result">: <span name="java.io.File" class="extype">File</span></span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.project.Project#showDependencyProjectGraph" data-isabs="false">
+      <a id="showDependencyProjectGraph(Int,Boolean,Boolean):File"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">showDependencyProjectGraph</span>
+        
+        <span class="params">(<span name="depth">depth: <span name="scala.Int" class="extype">Int</span> = <span class="symbol">100</span></span>, <span name="showLibDirs">showLibDirs: <span name="scala.Boolean" class="extype">Boolean</span> = <span class="symbol">false</span></span>, <span name="showLibs">showLibs: <span name="scala.Boolean" class="extype">Boolean</span> = <span class="symbol">false</span></span>)</span><span class="result">: <span name="java.io.File" class="extype">File</span></span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.project.Project#showFailingTest" data-isabs="false">
+      <a id="showFailingTest:Unit"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">showFailingTest</span>
+        
+        <span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.project.Project#sourceDirs" data-isabs="false">
+      <a id="sourceDirs:List[File]"></a>
+      <h4 class="signature">
+      <span class="kind">val</span>
+      <span class="symbol"> 
+        <span class="name">sourceDirs</span>
+        
+        <span class="result">: List[<span name="java.io.File" class="extype">File</span>]</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="maker.project.Project" class="extype" href="">Project</a> → <a name="maker.project.ProjectDef" class="extype" href="ProjectDef.html">ProjectDef</a></dd></dl></div>
+    </li><li visbl="pub" name="maker.project.ProjectDef#srcDirs" data-isabs="false">
+      <a id="srcDirs:List[File]"></a>
+      <h4 class="signature">
+      <span class="kind">val</span>
+      <span class="symbol"> 
+        <span class="name">srcDirs</span>
+        
+        <span class="result">: List[<span name="java.io.File" class="extype">File</span>]</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="maker.project.ProjectDef" class="extype" href="ProjectDef.html">ProjectDef</a></dd></dl></div>
+    </li><li visbl="pub" name="maker.project.Project#srcFiles" data-isabs="false">
+      <a id="srcFiles():Set[File]"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">srcFiles</span>
+        
+        <span class="params">()</span><span class="result">: Set[<span name="java.io.File" class="extype">File</span>]</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.project.Project#state" data-isabs="false">
+      <a id="state:ProjectState"></a>
+      <h4 class="signature">
+      <span class="kind">val</span>
+      <span class="symbol"> 
+        <span class="name">state</span>
+        
+        <span class="result">: <a name="maker.project.ProjectState" class="extype" href="ProjectState.html">ProjectState</a></span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.project.Project#suppressTaskOutput" data-isabs="false">
+      <a id="suppressTaskOutput:Boolean"></a>
+      <h4 class="signature">
+      <span class="kind">val</span>
+      <span class="symbol"> 
+        <span class="name">suppressTaskOutput</span>
+        
+        <span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="scala.AnyRef#synchronized" data-isabs="false">
+      <a id="synchronized[T0](⇒ T0):T0"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">synchronized</span>
+        <span class="tparams">[<span name="T0">T0</span>]</span>
+        <span class="params">(<span name="arg0">arg0: ⇒ T0</span>)</span><span class="result">: T0</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>final </dd><dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li visbl="pub" name="maker.project.Project#test" data-isabs="false">
+      <a id="test:BuildResult[AnyRef]"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">test</span>
+        
+        <span class="result">: <a name="maker.task.BuildResult" class="extype" href="../task/BuildResult.html">BuildResult</a>[AnyRef]</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.project.Project#testClass" data-isabs="false">
+      <a id="testClass(String*):BuildResult[AnyRef]"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">testClass</span>
+        
+        <span class="params">(<span name="testClassNames">testClassNames: String*</span>)</span><span class="result">: <a name="maker.task.BuildResult" class="extype" href="../task/BuildResult.html">BuildResult</a>[AnyRef]</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.project.Project#testClassContinuously" data-isabs="false">
+      <a id="testClassContinuously(String*):Unit"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">testClassContinuously</span>
+        
+        <span class="params">(<span name="testClassNames">testClassNames: String*</span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.project.Project#testClassFiles" data-isabs="false">
+      <a id="testClassFiles:Set[File]"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">testClassFiles</span>
+        
+        <span class="result">: Set[<span name="java.io.File" class="extype">File</span>]</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.project.Project#testCompile" data-isabs="false">
+      <a id="testCompile:BuildResult[AnyRef]"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">testCompile</span>
+        
+        <span class="result">: <a name="maker.task.BuildResult" class="extype" href="../task/BuildResult.html">BuildResult</a>[AnyRef]</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.project.Project#testCompileContinuously" data-isabs="false">
+      <a id="testCompileContinuously:Unit"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">testCompileContinuously</span>
+        
+        <span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.project.ProjectDef#testDirs" data-isabs="false">
+      <a id="testDirs:List[File]"></a>
+      <h4 class="signature">
+      <span class="kind">val</span>
+      <span class="symbol"> 
+        <span class="name">testDirs</span>
+        
+        <span class="result">: List[<span name="java.io.File" class="extype">File</span>]</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="maker.project.ProjectDef" class="extype" href="ProjectDef.html">ProjectDef</a></dd></dl></div>
+    </li><li visbl="pub" name="maker.project.Project#testFailingSuites" data-isabs="false">
+      <a id="testFailingSuites:BuildResult[AnyRef]"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">testFailingSuites</span>
+        
+        <span class="result">: <a name="maker.task.BuildResult" class="extype" href="../task/BuildResult.html">BuildResult</a>[AnyRef]</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.project.Project#testFailingSuitesOnly" data-isabs="false">
+      <a id="testFailingSuitesOnly:BuildResult[AnyRef]"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">testFailingSuitesOnly</span>
+        
+        <span class="result">: <a name="maker.task.BuildResult" class="extype" href="../task/BuildResult.html">BuildResult</a>[AnyRef]</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.project.Project#testOnly" data-isabs="false">
+      <a id="testOnly:BuildResult[AnyRef]"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">testOnly</span>
+        
+        <span class="result">: <a name="maker.task.BuildResult" class="extype" href="../task/BuildResult.html">BuildResult</a>[AnyRef]</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.project.Project#testOutputDir" data-isabs="false">
+      <a id="testOutputDir:File"></a>
+      <h4 class="signature">
+      <span class="kind">val</span>
+      <span class="symbol"> 
+        <span class="name">testOutputDir</span>
+        
+        <span class="result">: <span name="java.io.File" class="extype">File</span></span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.project.Project#testResults" data-isabs="false">
+      <a id="testResults:ScalatestResults"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">testResults</span>
+        
+        <span class="result">: <a name="maker.task.ScalatestResults" class="extype" href="../task/ScalatestResults.html">ScalatestResults</a></span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.project.Project#testResultsDir" data-isabs="false">
+      <a id="testResultsDir:File"></a>
+      <h4 class="signature">
+      <span class="kind">val</span>
+      <span class="symbol"> 
+        <span class="name">testResultsDir</span>
+        
+        <span class="result">: <span name="java.io.File" class="extype">File</span></span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.project.Project#testResultsOnly" data-isabs="false">
+      <a id="testResultsOnly:ScalatestResults"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">testResultsOnly</span>
+        
+        <span class="result">: <a name="maker.task.ScalatestResults" class="extype" href="../task/ScalatestResults.html">ScalatestResults</a></span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.project.ProjectDef#testRoot" data-isabs="false">
+      <a id="testRoot:File"></a>
+      <h4 class="signature">
+      <span class="kind">val</span>
+      <span class="symbol"> 
+        <span class="name">testRoot</span>
+        
+        <span class="result">: <span name="java.io.File" class="extype">File</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="maker.project.ProjectDef" class="extype" href="ProjectDef.html">ProjectDef</a></dd></dl></div>
+    </li><li visbl="pub" name="maker.project.Project#testSrcFiles" data-isabs="false">
+      <a id="testSrcFiles():Set[File]"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">testSrcFiles</span>
+        
+        <span class="params">()</span><span class="result">: Set[<span name="java.io.File" class="extype">File</span>]</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.project.Project#toString" data-isabs="false">
+      <a id="toString():String"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">toString</span>
+        
+        <span class="params">()</span><span class="result">: <span name="java.lang.String" class="extype">String</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="maker.project.Project" class="extype" href="">Project</a> → AnyRef → Any</dd></dl></div>
+    </li><li visbl="pub" name="maker.project.Project#tstDirs" data-isabs="false">
+      <a id="tstDirs:List[File]"></a>
+      <h4 class="signature">
+      <span class="kind">val</span>
+      <span class="symbol"> 
+        <span class="name">tstDirs</span>
+        
+        <span class="result">: List[<span name="java.io.File" class="extype">File</span>]</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="maker.project.Project" class="extype" href="">Project</a> → <a name="maker.project.ProjectDef" class="extype" href="ProjectDef.html">ProjectDef</a></dd></dl></div>
+    </li><li visbl="pub" name="maker.project.Project#unmanagedProperties" data-isabs="false">
+      <a id="unmanagedProperties:Properties"></a>
+      <h4 class="signature">
+      <span class="kind">val</span>
+      <span class="symbol"> 
+        <span class="name">unmanagedProperties</span>
+        
+        <span class="result">: <span name="java.util.Properties" class="extype">Properties</span></span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.project.Project#update" data-isabs="false">
+      <a id="update(String*):BuildResult[AnyRef]"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">update</span>
+        
+        <span class="params">(<span name="configurations">configurations: String*</span>)</span><span class="result">: <a name="maker.task.BuildResult" class="extype" href="../task/BuildResult.html">BuildResult</a>[AnyRef]</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.project.Project#update" data-isabs="false">
+      <a id="update:BuildResult[AnyRef]"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">update</span>
+        
+        <span class="result">: <a name="maker.task.BuildResult" class="extype" href="../task/BuildResult.html">BuildResult</a>[AnyRef]</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.project.Project#updateOnly" data-isabs="false">
+      <a id="updateOnly(String*):BuildResult[AnyRef]"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">updateOnly</span>
+        
+        <span class="params">(<span name="configurations">configurations: String*</span>)</span><span class="result">: <a name="maker.task.BuildResult" class="extype" href="../task/BuildResult.html">BuildResult</a>[AnyRef]</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.project.Project#updateOnly" data-isabs="false">
+      <a id="updateOnly:BuildResult[AnyRef]"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">updateOnly</span>
+        
+        <span class="result">: <a name="maker.task.BuildResult" class="extype" href="../task/BuildResult.html">BuildResult</a>[AnyRef]</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="scala.AnyRef#wait" data-isabs="false">
+      <a id="wait():Unit"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">wait</span>
+        
+        <span class="params">()</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>final </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">()</span>
+              
+        </dd></dl></div>
+    </li><li visbl="pub" name="scala.AnyRef#wait" data-isabs="false">
+      <a id="wait(Long,Int):Unit"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">wait</span>
+        
+        <span class="params">(<span name="arg0">arg0: <span name="scala.Long" class="extype">Long</span></span>, <span name="arg1">arg1: <span name="scala.Int" class="extype">Int</span></span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>final </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">()</span>
+              
+        </dd></dl></div>
+    </li><li visbl="pub" name="scala.AnyRef#wait" data-isabs="false">
+      <a id="wait(Long):Unit"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">wait</span>
+        
+        <span class="params">(<span name="arg0">arg0: <span name="scala.Long" class="extype">Long</span></span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>final </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">()</span>
+              
+        </dd></dl></div>
+    </li><li visbl="pub" name="maker.project.Project#webAppDir" data-isabs="false">
+      <a id="webAppDir:Option[File]"></a>
+      <h4 class="signature">
+      <span class="kind">val</span>
+      <span class="symbol"> 
+        <span class="name">webAppDir</span>
+        
+        <span class="result">: <span name="scala.Option" class="extype">Option</span>[<span name="java.io.File" class="extype">File</span>]</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.project.Project#withAdditionalLibs" data-isabs="false">
+      <a id="withAdditionalLibs(GAV*):Project"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">withAdditionalLibs</span>
+        
+        <span class="params">(<span name="libs">libs: <a name="maker.utils.GAV" class="extype" href="../utils/GAV.html">GAV</a>*</span>)</span><span class="result">: <a name="maker.project.Project" class="extype" href="">Project</a></span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.project.Project#withAdditionalSourceDirs" data-isabs="false">
+      <a id="withAdditionalSourceDirs(String*):Project"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">withAdditionalSourceDirs</span>
+        
+        <span class="params">(<span name="dirs">dirs: String*</span>)</span><span class="result">: <a name="maker.project.Project" class="extype" href="">Project</a></span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.project.Project#withAdditionalTestDirs" data-isabs="false">
+      <a id="withAdditionalTestDirs(String*):Project"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">withAdditionalTestDirs</span>
+        
+        <span class="params">(<span name="dirs">dirs: String*</span>)</span><span class="result">: <a name="maker.project.Project" class="extype" href="">Project</a></span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.project.Project#withDefaultConfig" data-isabs="false">
+      <a id="withDefaultConfig:(List[String]) ⇒ List[String]"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">withDefaultConfig</span>
+        
+        <span class="result">: (List[<span name="java.lang.String" class="extype">String</span>]) ⇒ List[<span name="java.lang.String" class="extype">String</span>]</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.project.Project#withProvidedLibDirs" data-isabs="false">
+      <a id="withProvidedLibDirs(String*):Project"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">withProvidedLibDirs</span>
+        
+        <span class="params">(<span name="dirs">dirs: String*</span>)</span><span class="result">: <a name="maker.project.Project" class="extype" href="">Project</a></span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.project.Project#withProvidedLibs" data-isabs="false">
+      <a id="withProvidedLibs(String*):Project"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">withProvidedLibs</span>
+        
+        <span class="params">(<span name="libNames">libNames: String*</span>)</span><span class="result">: <a name="maker.project.Project" class="extype" href="">Project</a></span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.project.Project#withResourceDirs" data-isabs="false">
+      <a id="withResourceDirs(String*):Project"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">withResourceDirs</span>
+        
+        <span class="params">(<span name="dirs">dirs: String*</span>)</span><span class="result">: <a name="maker.project.Project" class="extype" href="">Project</a></span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.project.Project#withResourceDirs" data-isabs="false">
+      <a id="withResourceDirs(List[File]):Project"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">withResourceDirs</span>
+        
+        <span class="params">(<span name="dirs">dirs: List[<span name="java.io.File" class="extype">File</span>]</span>)</span><span class="result">: <a name="maker.project.Project" class="extype" href="">Project</a></span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.project.Project#withTaskOutputSuppressed" data-isabs="false">
+      <a id="withTaskOutputSuppressed:Project"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">withTaskOutputSuppressed</span>
+        
+        <span class="result">: <a name="maker.project.Project" class="extype" href="">Project</a></span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.project.Project#writeClasspath" data-isabs="false">
+      <a id="writeClasspath:Unit"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">writeClasspath</span>
+        
+        <span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.project.Project#writeSrc" data-isabs="false">
+      <a id="writeSrc(String,String):Unit"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">writeSrc</span>
+        
+        <span class="params">(<span name="relativeSrcPath">relativeSrcPath: String</span>, <span name="code">code: String</span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.project.Project#writeTest" data-isabs="false">
+      <a id="writeTest(String,String):Unit"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">writeTest</span>
+        
+        <span class="params">(<span name="relativeSrcPath">relativeSrcPath: String</span>, <span name="code">code: String</span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.project.Project#~" data-isabs="false">
+      <a id="~(() ⇒ BuildResult[AnyRef]):Unit"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name">~</span>
+        
+        <span class="params">(<span name="task">task: () ⇒ <a name="maker.task.BuildResult" class="extype" href="../task/BuildResult.html">BuildResult</a>[AnyRef]</span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+      </span>
+      </h4>
+      
+    </li></ol>
+            </div>
+
+        <div class="values members" id="values">
+              <h3>Deprecated Value Members</h3>
+              <ol><li visbl="pub" name="scala.Product#productElements" data-isabs="false">
+      <a id="productElements:Iterator[Any]"></a>
+      <h4 class="signature">
+      <span class="kind">def</span>
+      <span class="symbol"> 
+        <span class="name deprecated">productElements</span>
+        
+        <span class="result">: Iterator[<span name="scala.Any" class="extype">Any</span>]</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Product</dd><dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p>use productIterator instead</p></dd></dl></div>
+    </li></ol>
+            </div>
+
+        <div name="scala.Serializable" class="parent">
+              <h3>Inherited from <span name="scala.Serializable" class="extype">Serializable</span></h3>
+            </div><div name="java.io.Serializable" class="parent">
+              <h3>Inherited from <span name="java.io.Serializable" class="extype">Serializable</span></h3>
+            </div><div name="scala.Product" class="parent">
+              <h3>Inherited from <span name="scala.Product" class="extype">Product</span></h3>
+            </div><div name="scala.Equals" class="parent">
+              <h3>Inherited from <span name="scala.Equals" class="extype">Equals</span></h3>
+            </div><div name="maker.project.ProjectDef" class="parent">
+              <h3>Inherited from <a name="maker.project.ProjectDef" class="extype" href="ProjectDef.html">ProjectDef</a></h3>
+            </div><div name="scala.AnyRef" class="parent">
+              <h3>Inherited from AnyRef</h3>
+            </div><div name="scala.Any" class="parent">
+              <h3>Inherited from <span name="scala.Any" class="extype">Any</span></h3>
+            </div>
+
+      </div>
+      
+      <div id="tooltip"></div>
+      
+    </body>
+      </html>

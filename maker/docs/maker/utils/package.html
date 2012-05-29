@@ -1,0 +1,444 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html>
+        <head>
+          <title>maker.utils</title>
+          <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+          
+      <link type="text/css" media="screen" rel="stylesheet" href="../../lib/template.css" />
+      <script type="text/javascript" src="../../lib/jquery.js"></script>
+      <script type="text/javascript" src="../../lib/jquery-ui.js"></script>
+      <script type="text/javascript" src="../../lib/template.js"></script>
+      <script type="text/javascript" src="../../lib/tools.tooltip.js"></script>
+    
+        </head>
+        <body class="value">
+      <div id="definition">
+        <img src="../../lib/package_big.png" />
+        <p id="owner"><a name="maker" class="extype" href="../package.html">maker</a></p>
+        <h1>utils</h1>
+      </div>
+
+      <h4 class="signature" id="signature">
+      <span class="kind">package</span>
+      <span class="symbol"> 
+        <span class="name">utils</span>
+        
+        
+      </span>
+      </h4>
+      
+          <div class="fullcommenttop" id="comment"></div>
+        
+
+      <div id="template">
+
+        <div id="mbrsel">
+          <div id="textfilter"><span class="pre"></span><span class="input"><input accesskey="/" type="text" /></span><span class="post"></span></div>
+          
+          
+          <div id="visbl">
+              <span class="filtertype">Visibility</span>
+              <ol><li class="public in"><span>Public</span></li><li class="all out"><span>All</span></li></ol>
+            </div>
+        </div>
+
+        
+
+        <div class="types members" id="types">
+              <h3>Type Members</h3>
+              <ol><li visbl="pub" name="maker.utils.ArtifactId" data-isabs="false">
+      <a id="ArtifactId:ArtifactId"></a>
+      <h4 class="signature">
+      <span class="kind">case class</span>
+      <span class="symbol"> 
+        <a href="ArtifactId.html"><span class="name">ArtifactId</span></a>
+        
+        <span class="params">(<span name="id">id: String</span>)</span><span class="result"> extends Product with Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.utils.DependencyLib" data-isabs="false">
+      <a id="DependencyLib:DependencyLib"></a>
+      <h4 class="signature">
+      <span class="kind">case class</span>
+      <span class="symbol"> 
+        <a href="DependencyLib.html"><span class="name">DependencyLib</span></a>
+        
+        <span class="params">(<span name="name">name: String</span>, <span name="gav">gav: GroupArtifactAndVersion</span>, <span name="scope">scope: String</span>, <span name="classifierOpt">classifierOpt: Option[String]</span>)</span><span class="result"> extends Product with Serializable</span>
+      </span>
+      </h4>
+      <p class="comment cmt">Simple case class representing a library dependency definition (from a Maven repo)
+</p>
+    </li><li visbl="pub" name="maker.utils.GAV" data-isabs="true">
+      <a id="GAV:GAV"></a>
+      <h4 class="signature">
+      <span class="kind">trait</span>
+      <span class="symbol"> 
+        <a href="GAV.html"><span class="name">GAV</span></a>
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.utils.GroupAndArtifact" data-isabs="false">
+      <a id="GroupAndArtifact:GroupAndArtifact"></a>
+      <h4 class="signature">
+      <span class="kind">case class</span>
+      <span class="symbol"> 
+        <a href="GroupAndArtifact.html"><span class="name">GroupAndArtifact</span></a>
+        
+        <span class="params">(<span name="groupId">groupId: GroupId</span>, <span name="artifactId">artifactId: ArtifactId</span>)</span><span class="result"> extends GAV with Product with Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.utils.GroupArtifactAndVersion" data-isabs="false">
+      <a id="GroupArtifactAndVersion:GroupArtifactAndVersion"></a>
+      <h4 class="signature">
+      <span class="kind">case class</span>
+      <span class="symbol"> 
+        <a href="GroupArtifactAndVersion.html"><span class="name">GroupArtifactAndVersion</span></a>
+        
+        <span class="params">(<span name="groupId">groupId: GroupId</span>, <span name="artifactId">artifactId: ArtifactId</span>, <span name="version">version: Option[Version]</span>)</span><span class="result"> extends GAV with Product with Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.utils.GroupId" data-isabs="false">
+      <a id="GroupId:GroupId"></a>
+      <h4 class="signature">
+      <span class="kind">case class</span>
+      <span class="symbol"> 
+        <a href="GroupId.html"><span class="name">GroupId</span></a>
+        
+        <span class="params">(<span name="id">id: String</span>)</span><span class="result"> extends Product with Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.utils.Log" data-isabs="false">
+      <a id="Log:Log"></a>
+      <h4 class="signature">
+      <span class="kind">case class</span>
+      <span class="symbol"> 
+        <a href="Log.html"><span class="name">Log</span></a>
+        
+        <span class="params">(<span name="logger">logger: Logger</span>)</span><span class="result"> extends Product with Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.utils.Memoize" data-isabs="false">
+      <a id="Memoize:Memoize[A, B]"></a>
+      <h4 class="signature">
+      <span class="kind">case class</span>
+      <span class="symbol"> 
+        <a href="Memoize.html"><span class="name">Memoize</span></a>
+        <span class="tparams">[<span name="A">A</span>, <span name="B">B</span>]</span>
+        <span class="params">(<span name="fn">fn: (A) ⇒ B</span>)</span><span class="result"> extends Product with Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.utils.Memoize1" data-isabs="false">
+      <a id="Memoize1:Memoize1[T, R]"></a>
+      <h4 class="signature">
+      <span class="kind">class</span>
+      <span class="symbol"> 
+        <a href="Memoize1.html"><span class="name">Memoize1</span></a>
+        <span class="tparams">[<span name="T">-T</span>, <span name="R">+R</span>]</span>
+        <span class="result"> extends (T) ⇒ R</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.utils.Memoize2" data-isabs="false">
+      <a id="Memoize2:Memoize2[A, B, C]"></a>
+      <h4 class="signature">
+      <span class="kind">case class</span>
+      <span class="symbol"> 
+        <a href="Memoize2.html"><span class="name">Memoize2</span></a>
+        <span class="tparams">[<span name="A">A</span>, <span name="B">B</span>, <span name="C">C</span>]</span>
+        <span class="params">(<span name="fn">fn: (A, B) ⇒ C</span>)</span><span class="result"> extends Product with Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.utils.ScalaVersion" data-isabs="false">
+      <a id="ScalaVersion:ScalaVersion"></a>
+      <h4 class="signature">
+      <span class="kind">case class</span>
+      <span class="symbol"> 
+        <a href="ScalaVersion.html"><span class="name">ScalaVersion</span></a>
+        
+        <span class="params">(<span name="version">version: Version</span>)</span><span class="result"> extends Product with Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.utils.Scope" data-isabs="true">
+      <a id="Scope:Scope"></a>
+      <h4 class="signature">
+      <span class="kind">trait</span>
+      <span class="symbol"> 
+        <a href="Scope.html"><span class="name">Scope</span></a>
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.utils.Stopwatch" data-isabs="false">
+      <a id="Stopwatch:Stopwatch"></a>
+      <h4 class="signature">
+      <span class="kind">case class</span>
+      <span class="symbol"> 
+        <a href="Stopwatch.html"><span class="name">Stopwatch</span></a>
+        
+        <span class="params">(<span name="name">name: String</span>)</span><span class="result"> extends Product with Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.utils.TeeToFileOutputStream" data-isabs="false">
+      <a id="TeeToFileOutputStream:TeeToFileOutputStream"></a>
+      <h4 class="signature">
+      <span class="kind">case class</span>
+      <span class="symbol"> 
+        <a href="TeeToFileOutputStream.html"><span class="name">TeeToFileOutputStream</span></a>
+        
+        <span class="params">(<span name="file">file: File</span>, <span name="os">os: OutputStream</span>)</span><span class="result"> extends OutputStream with Product with Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.utils.TimingInfo" data-isabs="false">
+      <a id="TimingInfo:TimingInfo"></a>
+      <h4 class="signature">
+      <span class="kind">case class</span>
+      <span class="symbol"> 
+        <a href="TimingInfo.html"><span class="name">TimingInfo</span></a>
+        
+        <span class="params">(<span name="startTime">startTime: Long</span>, <span name="endTime">endTime: Long</span>)</span><span class="result"> extends Product with Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.utils.Version" data-isabs="false">
+      <a id="Version:Version"></a>
+      <h4 class="signature">
+      <span class="kind">case class</span>
+      <span class="symbol"> 
+        <a href="Version.html"><span class="name">Version</span></a>
+        
+        <span class="params">(<span name="version">version: String</span>)</span><span class="result"> extends Product with Serializable</span>
+      </span>
+      </h4>
+      
+    </li></ol>
+            </div>
+        
+        
+
+        <div class="values members" id="values">
+              <h3>Value Members</h3>
+              <ol><li visbl="pub" name="maker.utils.Compile" data-isabs="false">
+      <a id="Compile:Compile"></a>
+      <h4 class="signature">
+      <span class="kind">object</span>
+      <span class="symbol"> 
+        <a href="Compile$.html"><span class="name">Compile</span></a>
+        
+        <span class="result"> extends Scope with Product with Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.utils.DependencyLib" data-isabs="false">
+      <a id="DependencyLib:DependencyLib"></a>
+      <h4 class="signature">
+      <span class="kind">object</span>
+      <span class="symbol"> 
+        <a href="DependencyLib$.html"><span class="name">DependencyLib</span></a>
+        
+        <span class="result"> extends Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.utils.FileUtils" data-isabs="false">
+      <a id="FileUtils:FileUtils"></a>
+      <h4 class="signature">
+      <span class="kind">object</span>
+      <span class="symbol"> 
+        <a href="FileUtils$.html"><span class="name">FileUtils</span></a>
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.utils.Log" data-isabs="false">
+      <a id="Log:Log"></a>
+      <h4 class="signature">
+      <span class="kind">object</span>
+      <span class="symbol"> 
+        <a href="Log$.html"><span class="name">Log</span></a>
+        
+        <span class="result"> extends Log</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.utils.Memoize" data-isabs="false">
+      <a id="Memoize:Memoize"></a>
+      <h4 class="signature">
+      <span class="kind">object</span>
+      <span class="symbol"> 
+        <a href="Memoize$.html"><span class="name">Memoize</span></a>
+        
+        <span class="result"> extends Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.utils.Memoize1" data-isabs="false">
+      <a id="Memoize1:Memoize1"></a>
+      <h4 class="signature">
+      <span class="kind">object</span>
+      <span class="symbol"> 
+        <a href="Memoize1$.html"><span class="name">Memoize1</span></a>
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.utils.ModuleId" data-isabs="false">
+      <a id="ModuleId:ModuleId"></a>
+      <h4 class="signature">
+      <span class="kind">object</span>
+      <span class="symbol"> 
+        <a href="ModuleId$.html"><span class="name">ModuleId</span></a>
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.utils.Provided" data-isabs="false">
+      <a id="Provided:Provided"></a>
+      <h4 class="signature">
+      <span class="kind">object</span>
+      <span class="symbol"> 
+        <a href="Provided$.html"><span class="name">Provided</span></a>
+        
+        <span class="result"> extends Scope with Product with Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.utils.RichString" data-isabs="false">
+      <a id="RichString:RichString"></a>
+      <h4 class="signature">
+      <span class="kind">object</span>
+      <span class="symbol"> 
+        <a href="RichString$.html"><span class="name">RichString</span></a>
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.utils.ScalaVersion" data-isabs="false">
+      <a id="ScalaVersion:ScalaVersion"></a>
+      <h4 class="signature">
+      <span class="kind">object</span>
+      <span class="symbol"> 
+        <a href="ScalaVersion$.html"><span class="name">ScalaVersion</span></a>
+        
+        <span class="result"> extends Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.utils.Stopwatch" data-isabs="false">
+      <a id="Stopwatch:Stopwatch"></a>
+      <h4 class="signature">
+      <span class="kind">object</span>
+      <span class="symbol"> 
+        <a href="Stopwatch$.html"><span class="name">Stopwatch</span></a>
+        
+        <span class="result"> extends Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.utils.Test" data-isabs="false">
+      <a id="Test:Test"></a>
+      <h4 class="signature">
+      <span class="kind">object</span>
+      <span class="symbol"> 
+        <a href="Test$.html"><span class="name">Test</span></a>
+        
+        <span class="result"> extends Scope with Product with Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.utils.TestMemo" data-isabs="false">
+      <a id="TestMemo:TestMemo"></a>
+      <h4 class="signature">
+      <span class="kind">object</span>
+      <span class="symbol"> 
+        <a href="TestMemo$.html"><span class="name">TestMemo</span></a>
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.utils.Utils" data-isabs="false">
+      <a id="Utils:Utils"></a>
+      <h4 class="signature">
+      <span class="kind">object</span>
+      <span class="symbol"> 
+        <a href="Utils$.html"><span class="name">Utils</span></a>
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.utils.Y" data-isabs="false">
+      <a id="Y:Y"></a>
+      <h4 class="signature">
+      <span class="kind">object</span>
+      <span class="symbol"> 
+        <a href="Y$.html"><span class="name">Y</span></a>
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.utils.ivy" data-isabs="false">
+      <a id="ivy:ivy"></a>
+      <h4 class="signature">
+      <span class="kind">package</span>
+      <span class="symbol"> 
+        <a href="ivy/package.html"><span class="name">ivy</span></a>
+        
+        
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.utils.maven" data-isabs="false">
+      <a id="maven:maven"></a>
+      <h4 class="signature">
+      <span class="kind">package</span>
+      <span class="symbol"> 
+        <a href="maven/package.html"><span class="name">maven</span></a>
+        
+        
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.utils.os" data-isabs="false">
+      <a id="os:os"></a>
+      <h4 class="signature">
+      <span class="kind">package</span>
+      <span class="symbol"> 
+        <a href="os/package.html"><span class="name">os</span></a>
+        
+        
+      </span>
+      </h4>
+      
+    </li></ol>
+            </div>
+
+        
+
+        
+
+      </div>
+      
+      <div id="tooltip"></div>
+      
+    </body>
+      </html>

@@ -1,0 +1,432 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html>
+        <head>
+          <title>maker.task</title>
+          <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+          
+      <link type="text/css" media="screen" rel="stylesheet" href="../../lib/template.css" />
+      <script type="text/javascript" src="../../lib/jquery.js"></script>
+      <script type="text/javascript" src="../../lib/jquery-ui.js"></script>
+      <script type="text/javascript" src="../../lib/template.js"></script>
+      <script type="text/javascript" src="../../lib/tools.tooltip.js"></script>
+    
+        </head>
+        <body class="value">
+      <div id="definition">
+        <img src="../../lib/package_big.png" />
+        <p id="owner"><a name="maker" class="extype" href="../package.html">maker</a></p>
+        <h1>task</h1>
+      </div>
+
+      <h4 class="signature" id="signature">
+      <span class="kind">package</span>
+      <span class="symbol"> 
+        <span class="name">task</span>
+        
+        
+      </span>
+      </h4>
+      
+          <div class="fullcommenttop" id="comment"></div>
+        
+
+      <div id="template">
+
+        <div id="mbrsel">
+          <div id="textfilter"><span class="pre"></span><span class="input"><input accesskey="/" type="text" /></span><span class="post"></span></div>
+          
+          
+          <div id="visbl">
+              <span class="filtertype">Visibility</span>
+              <ol><li class="public in"><span>Public</span></li><li class="all out"><span>All</span></li></ol>
+            </div>
+        </div>
+
+        
+
+        <div class="types members" id="types">
+              <h3>Type Members</h3>
+              <ol><li visbl="pub" name="maker.task.BuildMessage" data-isabs="true">
+      <a id="BuildMessage:BuildMessage"></a>
+      <h4 class="signature">
+      <span class="kind">trait</span>
+      <span class="symbol"> 
+        <a href="BuildMessage.html"><span class="name">BuildMessage</span></a>
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>sealed </dd></dl></div>
+    </li><li visbl="pub" name="maker.task.BuildResult" data-isabs="false">
+      <a id="BuildResult:BuildResult[A]"></a>
+      <h4 class="signature">
+      <span class="kind">case class</span>
+      <span class="symbol"> 
+        <a href="BuildResult.html"><span class="name">BuildResult</span></a>
+        <span class="tparams">[<span name="A">+A</span>]</span>
+        <span class="params">(<span name="res">res: Either[TaskFailed, A]</span>, <span name="projectAndTasks">projectAndTasks: Set[ProjectAndTask]</span>, <span name="originalProjectAndTask">originalProjectAndTask: ProjectAndTask</span>)</span><span class="result"> extends BuildMessage with Product with Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.task.DependencyTree" data-isabs="false">
+      <a id="DependencyTree:DependencyTree[A]"></a>
+      <h4 class="signature">
+      <span class="kind">case class</span>
+      <span class="symbol"> 
+        <a href="DependencyTree.html"><span class="name">DependencyTree</span></a>
+        <span class="tparams">[<span name="A">A</span>]</span>
+        <span class="params">(<span name="tree">tree: Map[A, Set[A]]</span>)</span><span class="result"> extends Product with Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.task.ExecTaskMessage" data-isabs="false">
+      <a id="ExecTaskMessage:ExecTaskMessage"></a>
+      <h4 class="signature">
+      <span class="kind">case class</span>
+      <span class="symbol"> 
+        <a href="ExecTaskMessage.html"><span class="name">ExecTaskMessage</span></a>
+        
+        <span class="params">(<span name="projectTask">projectTask: ProjectAndTask</span>, <span name="acc">acc: Map[Task, List[AnyRef]]</span>, <span name="parameters">parameters: Map[String, String]</span>)</span><span class="result"> extends BuildMessage with Product with Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.task.LocalTaskManager" data-isabs="false">
+      <a id="LocalTaskManager:LocalTaskManager"></a>
+      <h4 class="signature">
+      <span class="kind">case class</span>
+      <span class="symbol"> 
+        <a href="LocalTaskManager.html"><span class="name">LocalTaskManager</span></a>
+        
+        <span class="params">(<span name="retryTime">retryTime: Int</span>, <span name="maxRetries">maxRetries: Int</span>)</span><span class="result"> extends Product with Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.task.LocalTaskManagerHandler" data-isabs="false">
+      <a id="LocalTaskManagerHandler:LocalTaskManagerHandler"></a>
+      <h4 class="signature">
+      <span class="kind">class</span>
+      <span class="symbol"> 
+        <a href="LocalTaskManagerHandler.html"><span class="name">LocalTaskManagerHandler</span></a>
+        
+        <span class="result"> extends SimpleChannelUpstreamHandler</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.task.ProjectAndTask" data-isabs="false">
+      <a id="ProjectAndTask:ProjectAndTask"></a>
+      <h4 class="signature">
+      <span class="kind">case class</span>
+      <span class="symbol"> 
+        <a href="ProjectAndTask.html"><span class="name">ProjectAndTask</span></a>
+        
+        <span class="params">(<span name="project">project: Project</span>, <span name="task">task: Task</span>)</span><span class="result"> extends Product with Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.task.RemoteTaskManagerHandler" data-isabs="false">
+      <a id="RemoteTaskManagerHandler:RemoteTaskManagerHandler"></a>
+      <h4 class="signature">
+      <span class="kind">class</span>
+      <span class="symbol"> 
+        <a href="RemoteTaskManagerHandler.html"><span class="name">RemoteTaskManagerHandler</span></a>
+        
+        <span class="result"> extends SimpleChannelUpstreamHandler</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.task.ScalatestResults" data-isabs="false">
+      <a id="ScalatestResults:ScalatestResults"></a>
+      <h4 class="signature">
+      <span class="kind">case class</span>
+      <span class="symbol"> 
+        <a href="ScalatestResults.html"><span class="name">ScalatestResults</span></a>
+        
+        <span class="params">(<span name="results">results: Set[TestResult]</span>)</span><span class="result"> extends Product with Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.task.Task" data-isabs="true">
+      <a id="Task:Task"></a>
+      <h4 class="signature">
+      <span class="kind">trait</span>
+      <span class="symbol"> 
+        <a href="Task.html"><span class="name">Task</span></a>
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.task.TaskError" data-isabs="false">
+      <a id="TaskError:TaskError"></a>
+      <h4 class="signature">
+      <span class="kind">case class</span>
+      <span class="symbol"> 
+        <a href="TaskError.html"><span class="name">TaskError</span></a>
+        
+        <span class="params">(<span name="reason">reason: String</span>, <span name="exception">exception: Option[Throwable]</span>)</span><span class="result"> extends TaskResult with Product with Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.task.TaskFailed" data-isabs="false">
+      <a id="TaskFailed:TaskFailed"></a>
+      <h4 class="signature">
+      <span class="kind">case class</span>
+      <span class="symbol"> 
+        <a href="TaskFailed.html"><span class="name">TaskFailed</span></a>
+        
+        <span class="params">(<span name="task">task: ProjectAndTask</span>, <span name="reason">reason: String</span>)</span><span class="result"> extends Product with Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.task.TaskManager" data-isabs="false">
+      <a id="TaskManager:TaskManager"></a>
+      <h4 class="signature">
+      <span class="kind">class</span>
+      <span class="symbol"> 
+        <a href="TaskManager.html"><span class="name">TaskManager</span></a>
+        
+        <span class="result"> extends Actor</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.task.TaskResult" data-isabs="true">
+      <a id="TaskResult:TaskResult"></a>
+      <h4 class="signature">
+      <span class="kind">trait</span>
+      <span class="symbol"> 
+        <a href="TaskResult.html"><span class="name">TaskResult</span></a>
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.task.TaskResultMessage" data-isabs="false">
+      <a id="TaskResultMessage:TaskResultMessage"></a>
+      <h4 class="signature">
+      <span class="kind">case class</span>
+      <span class="symbol"> 
+        <a href="TaskResultMessage.html"><span class="name">TaskResultMessage</span></a>
+        
+        <span class="params">(<span name="projectTask">projectTask: ProjectAndTask</span>, <span name="result">result: Either[TaskFailed, AnyRef]</span>)</span><span class="result"> extends BuildMessage with Product with Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.task.TestResult" data-isabs="false">
+      <a id="TestResult:TestResult"></a>
+      <h4 class="signature">
+      <span class="kind">case class</span>
+      <span class="symbol"> 
+        <a href="TestResult.html"><span class="name">TestResult</span></a>
+        
+        <span class="params">(<span name="suite">suite: String</span>, <span name="testName">testName: String</span>, <span name="time">time: Double</span>, <span name="error">error: Option[String]</span>)</span><span class="result"> extends Product with Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.task.Worker" data-isabs="false">
+      <a id="Worker:Worker"></a>
+      <h4 class="signature">
+      <span class="kind">class</span>
+      <span class="symbol"> 
+        <a href="Worker.html"><span class="name">Worker</span></a>
+        
+        <span class="result"> extends Actor</span>
+      </span>
+      </h4>
+      
+    </li></ol>
+            </div>
+        
+        
+
+        <div class="values members" id="values">
+              <h3>Value Members</h3>
+              <ol><li visbl="pub" name="maker.task.CannotConnectToRemoteServer" data-isabs="false">
+      <a id="CannotConnectToRemoteServer:CannotConnectToRemoteServer"></a>
+      <h4 class="signature">
+      <span class="kind">object</span>
+      <span class="symbol"> 
+        <a href="CannotConnectToRemoteServer$.html"><span class="name">CannotConnectToRemoteServer</span></a>
+        
+        <span class="result"> extends Throwable with Product with Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.task.DependencyTree" data-isabs="false">
+      <a id="DependencyTree:DependencyTree"></a>
+      <h4 class="signature">
+      <span class="kind">object</span>
+      <span class="symbol"> 
+        <a href="DependencyTree$.html"><span class="name">DependencyTree</span></a>
+        
+        <span class="result"> extends Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.task.LocalTaskManager" data-isabs="false">
+      <a id="LocalTaskManager:LocalTaskManager"></a>
+      <h4 class="signature">
+      <span class="kind">object</span>
+      <span class="symbol"> 
+        <a href="LocalTaskManager$.html"><span class="name">LocalTaskManager</span></a>
+        
+        <span class="result"> extends App with Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.task.LocalTaskManagerApp" data-isabs="false">
+      <a id="LocalTaskManagerApp:LocalTaskManagerApp"></a>
+      <h4 class="signature">
+      <span class="kind">object</span>
+      <span class="symbol"> 
+        <a href="LocalTaskManagerApp$.html"><span class="name">LocalTaskManagerApp</span></a>
+        
+        <span class="result"> extends App</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.task.ProjectAndTask" data-isabs="false">
+      <a id="ProjectAndTask:ProjectAndTask"></a>
+      <h4 class="signature">
+      <span class="kind">object</span>
+      <span class="symbol"> 
+        <a href="ProjectAndTask$.html"><span class="name">ProjectAndTask</span></a>
+        
+        <span class="result"> extends Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.task.RemoteTaskManager" data-isabs="false">
+      <a id="RemoteTaskManager:RemoteTaskManager"></a>
+      <h4 class="signature">
+      <span class="kind">object</span>
+      <span class="symbol"> 
+        <a href="RemoteTaskManager$.html"><span class="name">RemoteTaskManager</span></a>
+        
+        <span class="result"> extends App</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.task.ScalatestResults" data-isabs="false">
+      <a id="ScalatestResults:ScalatestResults"></a>
+      <h4 class="signature">
+      <span class="kind">object</span>
+      <span class="symbol"> 
+        <a href="ScalatestResults$.html"><span class="name">ScalatestResults</span></a>
+        
+        <span class="result"> extends App with Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.task.Shutdown" data-isabs="false">
+      <a id="Shutdown:Shutdown"></a>
+      <h4 class="signature">
+      <span class="kind">object</span>
+      <span class="symbol"> 
+        <a href="Shutdown$.html"><span class="name">Shutdown</span></a>
+        
+        <span class="result"> extends Product with Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.task.StartBuild" data-isabs="false">
+      <a id="StartBuild:StartBuild"></a>
+      <h4 class="signature">
+      <span class="kind">object</span>
+      <span class="symbol"> 
+        <a href="StartBuild$.html"><span class="name">StartBuild</span></a>
+        
+        <span class="result"> extends BuildMessage with Product with Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.task.Task" data-isabs="false">
+      <a id="Task:Task"></a>
+      <h4 class="signature">
+      <span class="kind">object</span>
+      <span class="symbol"> 
+        <a href="Task$.html"><span class="name">Task</span></a>
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.task.TaskManagement" data-isabs="false">
+      <a id="TaskManagement:TaskManagement"></a>
+      <h4 class="signature">
+      <span class="kind">object</span>
+      <span class="symbol"> 
+        <a href="TaskManagement$.html"><span class="name">TaskManagement</span></a>
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.task.TaskManager" data-isabs="false">
+      <a id="TaskManager:TaskManager"></a>
+      <h4 class="signature">
+      <span class="kind">object</span>
+      <span class="symbol"> 
+        <a href="TaskManager$.html"><span class="name">TaskManager</span></a>
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.task.TaskResults" data-isabs="false">
+      <a id="TaskResults:TaskResults"></a>
+      <h4 class="signature">
+      <span class="kind">object</span>
+      <span class="symbol"> 
+        <a href="TaskResults$.html"><span class="name">TaskResults</span></a>
+        
+        <span class="result"> extends AnyRef</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.task.TaskSuccess" data-isabs="false">
+      <a id="TaskSuccess:TaskSuccess"></a>
+      <h4 class="signature">
+      <span class="kind">object</span>
+      <span class="symbol"> 
+        <a href="TaskSuccess$.html"><span class="name">TaskSuccess</span></a>
+        
+        <span class="result"> extends TaskResult with Product with Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.task.TellMeYourProcessID" data-isabs="false">
+      <a id="TellMeYourProcessID:TellMeYourProcessID"></a>
+      <h4 class="signature">
+      <span class="kind">object</span>
+      <span class="symbol"> 
+        <a href="TellMeYourProcessID$.html"><span class="name">TellMeYourProcessID</span></a>
+        
+        <span class="result"> extends Product with Serializable</span>
+      </span>
+      </h4>
+      
+    </li><li visbl="pub" name="maker.task.tasks" data-isabs="false">
+      <a id="tasks:tasks"></a>
+      <h4 class="signature">
+      <span class="kind">package</span>
+      <span class="symbol"> 
+        <a href="tasks/package.html"><span class="name">tasks</span></a>
+        
+        
+      </span>
+      </h4>
+      
+    </li></ol>
+            </div>
+
+        
+
+        
+
+      </div>
+      
+      <div id="tooltip"></div>
+      
+    </body>
+      </html>
