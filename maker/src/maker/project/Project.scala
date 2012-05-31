@@ -32,6 +32,9 @@ trait ProjectDef {
   val srcDirs : List[File] = if (sourceDirs.isEmpty) defaultSrcRootDirNames.map(file(mainRoot, _)) else sourceDirs
   val testDirs : List[File] = if (tstDirs.isEmpty) defaultSrcRootDirNames.map(file(testRoot, _)) else tstDirs
   val resourceDirs : List[File] = if (resDirs.isEmpty) (mainRoot :: testRoot :: Nil).map(r => file(r, resourceDir)) else resDirs
+
+  val packagingRoot = file(root, "package")
+  val docRoot = file(root, "docs")
 }
 
 /**
@@ -84,7 +87,6 @@ case class Project(
 
   val jarDirs : List[File] = if (libDirs.isEmpty) List(file(root, "lib"), managedLibDir) else libDirs
   val moduleId : GroupAndArtifact = if (moduleIdentity.isEmpty) props.GroupId() % name else moduleIdentity.get
-  val packagingRoot = file(root, "package")
 
   // convenience copy functions
   def dependsOn(projects: Project*) = copy(children = children ::: projects.toList)

@@ -19,9 +19,7 @@ case object DocTask extends Task {
     val runDocLogFile = file("rundoc.out")
     Log.info("running scala-doc gen for project " + project)
 
-    val docPath = file(project.root, "docs")
-    if (!docPath.exists) docPath.mkdir
-    Log.debug("docPath " + docPath.getAbsolutePath)
+    if (!project.docRoot.exists) project.docRoot.mkdir
     val writer = new PrintWriter(new TeeToFileOutputStream(runDocLogFile))
 
     val projects = if (aggregate) project.projectAndDescendents else project :: Nil
@@ -31,7 +29,7 @@ case object DocTask extends Task {
 
     val cmd = ScalaDocCmd(
       new CommandOutputHandler(Some(writer)).withSavedOutput,
-      docPath,
+      project.docRoot,
       project.props.javaExec,
       classpath,
       Nil,
