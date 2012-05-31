@@ -10,7 +10,7 @@ import org.eclipse.jetty.webapp.WebAppContext
  * run a simple web app using Jetty as a container
  */
 case object RunJettyTask extends Task {
-  def exec(project: Project, acc: List[AnyRef], parameters: Map[String, String] = Map()) = {
+  def exec(implicit project: Project, acc: List[AnyRef], parameters: Map[String, String] = Map()) = {
     project.webAppDir match {
       case Some(webAppDir) => {
         Log.info("running webapp of project " + project.name)

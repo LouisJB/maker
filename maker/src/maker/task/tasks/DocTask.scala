@@ -13,33 +13,44 @@ import maker.task.{ProjectAndTask, TaskFailed, Task}
   * Outputs scala-docs per module in the "docs" sub-dir of the project root dir
   */
 case object DocTask extends Task {
-  def exec(project: Project, acc: List[AnyRef], parameters: Map[String, String] = Map()) = {
+  def exec(implicit project: Project, acc: List[AnyRef], parameters: Map[String, String] = Map()) = {
 
     val aggregate = parameters.getOrElse("aggregate", "false").toBoolean
     val runDocLogFile = file("rundoc.out")
-    Log.info("running scala-doc gen for project " + project)
 
-    if (!project.docRoot.exists) project.docRoot.mkdir
+    log("running scala-doc gen for project " + project)
+
     val writer = new PrintWriter(new TeeToFileOutputStream(runDocLogFile))
 
     val projects = if (aggregate) project.projectAndDescendents else project :: Nil
-    val (classpath, files) = (
+    val (classpath, inputFiles) = (
       projects.map(_.compilationClasspath).mkString(":"),
-      projects.flatMap(_.srcFiles()).toSeq)
+      projects.flatMap(_.srcFiles()))
 
-    val cmd = ScalaDocCmd(
-      new CommandOutputHandler(Some(writer)).withSavedOutput,
-      project.docRoot,
-      project.props.javaExec,
-      classpath,
-      Nil,
-      files : _*)
+    Log.debug("input files " + inputFiles)
+    Log.debug("times " + (lastModifiedFileTime(inputFiles), lastModifiedFileTime(List(project.docRoot)).toString))
 
-    writeToFile(file(project.root, "doccmd.sh"), "#!/bin/bash\n" + cmd.asString)
+    if (aggregate || !project.docRoot.exists || lastModifiedFileTime(inputFiles) > lastModifiedFileTime(List(project.docRoot))) {
+      Log.debug("generating doc for project " + project.toString)
+      if (!project.docRoot.exists) project.docRoot.mkdir
+      val cmd = ScalaDocCmd(
+        new CommandOutputHandler(Some(writer)).withSavedOutput,
+        project.docRoot,
+        project.props.javaExec,
+        classpath,
+        Nil,
+        inputFiles.toSeq : _*)
 
-    cmd.exec() match {
-      case 0 => Right("Ok")
-      case _ => Left(TaskFailed(ProjectAndTask(project, this), cmd.savedOutput))
+      writeToFile(file(project.root, "doccmd.sh"), "#!/bin/bash\n" + cmd.asString)
+
+      cmd.exec() match {
+        case 0 => Right("Ok")
+        case _ => Left(TaskFailed(ProjectAndTask(project, this), cmd.savedOutput))
+      }
+    }
+    else {
+      Log.debug("not generating doc for project " + project.toString)
+      Right("Ok (nothing to do)")
     }
   }
 }

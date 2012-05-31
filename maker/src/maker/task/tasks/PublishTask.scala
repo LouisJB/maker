@@ -12,7 +12,7 @@ import org.apache.ivy.Ivy
 
 
 case object PublishTask extends Task {
-  def exec(project: Project, acc: List[AnyRef], parameters: Map[String, String] = Map()) = {
+  def exec(implicit project: Project, acc: List[AnyRef], parameters: Map[String, String] = Map()) = {
 
     val homeDir = project.props.HomeDir()
     val moduleLocal = file(homeDir, ".ivy2/maker-local/" + project.moduleDef.projectDef.moduleLibDef.gav.toPath)

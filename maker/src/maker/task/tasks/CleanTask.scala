@@ -12,7 +12,7 @@ import maker.Maker
   *  removes all build content and directories that contained it
   */
 case object CleanTask extends Task {
-  def exec(project: Project, acc: List[AnyRef], parameters: Map[String, String] = Map()) = {
+  def exec(implicit project: Project, acc: List[AnyRef], parameters: Map[String, String] = Map()) = {
     if (Maker.verboseTaskOutput)
       Log.debug("cleaning " + project)
     else

@@ -12,7 +12,7 @@ import org.apache.ivy.core.retrieve.RetrieveOptions
 import xml.NodeSeq
 
 case object UpdateTask extends Task {
-  def exec(project: Project, acc: List[AnyRef], parameters: Map[String, String] = Map()) = {
+  def exec(implicit project: Project, acc: List[AnyRef], parameters: Map[String, String] = Map()) = {
     try {
       project.ivyGeneratedFile match {
         case Some(ivyGeneratedFile) => {

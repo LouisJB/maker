@@ -1,9 +1,10 @@
 package maker.task
 
 import maker.project.Project
-import maker.utils.Memoize1
 import tasks._
 import maker.utils.RichString._
+import org.apache.log4j.Level
+import maker.utils.{Log, Memoize1}
 
 case class TaskFailed(task : ProjectAndTask, reason : String){
   override def toString = { 
@@ -18,7 +19,12 @@ case class TaskFailed(task : ProjectAndTask, reason : String){
   
 
 trait Task {
-  def exec(project : Project, acc : List[AnyRef] = Nil, parameters : Map[String, String]) : Either[TaskFailed, AnyRef]
+  def exec(implicit project : Project, acc : List[AnyRef] = Nil, parameters : Map[String, String]) : Either[TaskFailed, AnyRef]
+
+  def log(msg : String)(implicit project : Project) : Unit = log(Level.INFO, msg)
+  def log(level : Level, msg : String)(implicit project : Project) : Unit =
+    if (! project.suppressTaskOutput)
+      Log.logger.log(level, msg)
 }
 
 object Task {
@@ -41,6 +47,7 @@ object Task {
   lazy val standardDependentProjectDependencies = Map[Task, Set[Task]](
     CompileTestsTask -> Set(CompileTestsTask),
     CompileSourceTask → Set(CompileSourceTask)
+    //DocTask → Set(DocTask)
   )
 
   val termSym = "ctrl-]"

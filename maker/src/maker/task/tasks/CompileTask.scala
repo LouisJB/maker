@@ -17,7 +17,7 @@ abstract class CompileTask extends Task{
   def deletedSrcFiles(proj : Project) : Set[File]
   def taskName : String
 
-  def exec(proj : Project, acc : List[AnyRef], parameters : Map[String, String] = Map()) : Either[TaskFailed, AnyRef] = {
+  def exec(implicit proj : Project, acc : List[AnyRef], parameters : Map[String, String] = Map()) : Either[TaskFailed, AnyRef] = {
     def listOfFiles(files : Iterable[File]) = files.mkString("\n\t", "\n\t", "")
     def info(msg : String) = Log.info("\t" + taskName + proj + ": " + msg)
     def debug(msg : String) = Log.debug("\t" + taskName + proj + ": " + msg)
@@ -109,7 +109,7 @@ case object CompileTestsTask extends CompileTask{
 
 case object CompileJavaSourceTask extends Task {
 
-  def exec(project : Project, acc : List[AnyRef], parameters : Map[String, String] = Map()) = {
+  def exec(implicit project : Project, acc : List[AnyRef], parameters : Map[String, String] = Map()) = {
     import project._
     javaOutputDir.mkdirs
     val javaFilesToCompile = state.changedJavaFiles

@@ -63,13 +63,12 @@ object FileUtils {
   }
 
   def allFiles(f : File) : List[File] =
-    Option(f.listFiles).map(_.toList.flatMap(x =>
-      if (x.isDirectory) allFiles(x)
-      else x :: Nil)
-    ).getOrElse(Nil)
+    if (f.isDirectory)
+      f :: Option(f.listFiles).map(_.toList.flatMap(allFiles)).getOrElse(Nil)
+    else f :: Nil
 
   def lastModifiedFileTime(files : List[File]) = 
-    files.flatMap(allFiles).map(_.lastModified).sortWith(_ > _).head
+    files.flatMap(allFiles).map(_.lastModified).sortWith(_ > _).headOption.getOrElse(0L)
   
   def fileIsLaterThan(target : File, dirs : List[File]) = {
     Log.debug("dirs = " + dirs + ", latest target time " + target.lastModified() + ", latest file time = " + lastModifiedFileTime(dirs))

@@ -15,7 +15,7 @@ import maker.utils.os.CommandOutputHandler
  *   WEB-INF/web.xml and other essential webapp content)
  */
 case object PackageTask extends Task {
-  def exec(project: Project, acc: List[AnyRef], parameters: Map[String, String] = Map()) = {
+  def exec(implicit project: Project, acc: List[AnyRef], parameters: Map[String, String] = Map()) = {
     import project._
     if (!packageDir.exists)
       packageDir.mkdirs

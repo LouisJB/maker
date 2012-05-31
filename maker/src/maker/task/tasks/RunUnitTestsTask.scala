@@ -51,7 +51,7 @@ case object RunUnitTestsTask extends Task {
     (runner, method)
   }
 
-  def exec(project: Project, acc: List[AnyRef], parameters: Map[String, String] = Map()) = {
+  def exec(implicit project: Project, acc: List[AnyRef], parameters: Map[String, String] = Map()) = {
     if (Maker.verboseTaskOutput && ! project.suppressTaskOutput)
       Log.info("Testing " + project)
     else

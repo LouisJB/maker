@@ -16,7 +16,7 @@ import maker.utils.os.ScalaCommand
  */
 case object RunMainTask extends Task {
   val runLogFile = file("runlog.out")
-  def exec(project: Project, acc: List[AnyRef], parameters: Map[String, String] = Map()) = {
+  def exec(implicit project: Project, acc: List[AnyRef], parameters: Map[String, String] = Map()) = {
     parameters.get("mainClassName") match {
       case Some(name) => {
         Log.info("running main in class " + name + " of project " + project)

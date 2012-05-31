@@ -8,7 +8,7 @@ import maker.utils.{Version, Log}
 import maker.task.Task
 
 case object PublishLocalTask extends Task {
-  def exec(project: Project, acc: List[AnyRef], parameters: Map[String, String] = Map()) = {
+  def exec(implicit project: Project, acc: List[AnyRef], parameters: Map[String, String] = Map()) = {
     val homeDir = project.props.HomeDir()
     val moduleDef = project.moduleDef
     val moduleLocal = file(homeDir, ".ivy2/maker-local/" + project.moduleDef.projectDef.moduleLibDef.gav.toPath)
