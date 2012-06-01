@@ -6,6 +6,7 @@ import maker.utils.os.OsUtils._
 import maker.task.ProjectAndTask
 import maker.task.tasks.CompileJavaSourceTask
 import java.io.File
+import maker.utils.Utils
 
 object GraphVizDiGrapher {
   val graphName = "Maker-Project-Graph"
@@ -89,6 +90,7 @@ object GraphVizDiGrapher {
 }
 
 object GraphVizUtils {
+  import Utils._
   val DEFAULT_IMAGE_FORMAT = "png"
   def imageBaseName = "maker-gv-tmp"
   def defaultImageFile = new File(imageBaseName + "." + DEFAULT_IMAGE_FORMAT)
@@ -105,12 +107,4 @@ object GraphVizUtils {
 
   def showGraph(graphDef : String, file : File = defaultImageFile) =
     showImage(createGraphFile(graphDef, removeGraphFile(file)))
-
-  def showImage(f : File) = {
-    if (isLinux)
-      Command("xdg-open", f.getAbsolutePath).execAsync
-    else // assume OSX until we want to support other OSes such as windows
-      Command("open", f.getAbsolutePath).exec()
-    f
-  }
 }

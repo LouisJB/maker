@@ -32,7 +32,7 @@ case object DocTask extends Task {
 
     if (aggregate || !project.docRoot.exists || lastModifiedFileTime(inputFiles) > lastModifiedFileTime(List(project.docRoot))) {
       Log.debug("generating doc for project " + project.toString)
-      if (!project.docRoot.exists) project.docRoot.mkdir
+      if (!project.docRoot.exists) project.docRoot.mkdirs
       val cmd = ScalaDocCmd(
         new CommandOutputHandler(Some(writer)).withSavedOutput,
         project.docRoot,

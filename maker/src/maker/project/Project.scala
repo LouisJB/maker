@@ -22,6 +22,7 @@ trait ProjectDef {
   def sourceDirs: List[File] = Nil
   def tstDirs: List[File] = Nil
   def resDirs: List[File] = Nil
+  def targetDir : Option[File] = None
 
   // use the standard maven convention dir structure as the defaults
   val mainRoot = file(root, "src/main/")
@@ -33,8 +34,9 @@ trait ProjectDef {
   val testDirs : List[File] = if (tstDirs.isEmpty) defaultSrcRootDirNames.map(file(testRoot, _)) else tstDirs
   val resourceDirs : List[File] = if (resDirs.isEmpty) (mainRoot :: testRoot :: Nil).map(r => file(r, resourceDir)) else resDirs
 
+  val outputRoot = targetDir.getOrElse(file(root, "target"))
   val packagingRoot = file(root, "package")
-  val docRoot = file(root, "docs")
+  val docRoot = file(outputRoot, "docs")
 }
 
 /**
@@ -50,6 +52,7 @@ case class Project(
       providedLibDirs: List[File] = Nil, // compile time only, don't add to runtime classpath or any packaging
       managedLibDirName : String = "lib_managed",
       override val resDirs : List[File] = Nil,
+      override val targetDir : Option[File] = None,
       children: List[Project] = Nil,
       props : Props = Props(),
       unmanagedProperties : Properties = new Properties(),
@@ -224,6 +227,15 @@ case class Project(
   def doc : BuildResult[AnyRef] = TaskManager(projectAndDescendents, DocTask)
   def docOnly : BuildResult[AnyRef] = docOnly()
   def docOnly(aggregate : Boolean = false) : BuildResult[AnyRef] = TaskManager(List(this), DocTask, Map("aggregate" -> aggregate.toString))
+
+  def showDoc {
+    import Utils._
+    val docIndex = file(docRoot, "index.html")
+    doc.res match {
+      case Right(_) => openHtmlFile(docIndex)
+      case _ => println("failed to generate docs")
+    }
+  }
 
   def cleanManagedLibs = {
     Option(managedLibDir.listFiles).map(_.foreach(_.delete))

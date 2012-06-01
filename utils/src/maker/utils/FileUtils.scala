@@ -145,8 +145,8 @@ object FileUtils {
   }
 
   def recursiveDelete(file : File){
-    if (file.isDirectory){
-      file.listFiles.foreach(recursiveDelete)
+    if (file.exists && file.isDirectory){
+      Option(file.listFiles).map(_.foreach(recursiveDelete))
       file.delete
     } else
       file.delete
