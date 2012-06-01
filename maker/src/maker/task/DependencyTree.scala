@@ -6,7 +6,7 @@ object DependencyTree{
   }.toMap)
 }
 
-case class DependencyTree[A](tree : Map[A, Set[A]]){
+case class DependencyTree[A](tree : Map[A, Set[A]] = Map[A, Set[A]]()){
   def all : Set[A] = tree.flatMap{
     case (parent, children) ⇒ children + parent
   }.toSet
@@ -15,7 +15,12 @@ case class DependencyTree[A](tree : Map[A, Set[A]]){
     case (parent, _) ⇒ parent
   }.toSet
 
-  def childless : Set[A] = all.filterNot(parents)
+  def childless : Set[A] = {
+    val parentsWithChildren = parents.filter(tree(_).size > 0)
+    all.filterNot(parentsWithChildren)
+  }
+
+  def - (a : A) = filter(_ != a)
 
   def +(parent : A, children : Set[A]) : DependencyTree[A] = {
     val singletonTree : DependencyTree[A] = DependencyTree(Map[A, Set[A]](parent → children))
@@ -26,7 +31,7 @@ case class DependencyTree[A](tree : Map[A, Set[A]]){
     var mergedTree = tree
     otherTree.tree.foreach{
       case (parent, children) ⇒
-        mergedTree = mergedTree.updated(parent, mergedTree.getOrElse(parent, Set[A]()))
+        mergedTree = mergedTree.updated(parent, children ++ mergedTree.getOrElse(parent, Set[A]()))
     }
     DependencyTree(mergedTree)
   }
@@ -39,5 +44,23 @@ case class DependencyTree[A](tree : Map[A, Set[A]]){
     }.toMap
 
     DependencyTree(filtered) ++ DependencyTree(orphansToKeep)
+  }
+
+  override def toString = {
+    def sortedByName(as : Iterable[A]) : List[A] = {
+      as.toList.sortWith(_.toString < _.toString)
+    }
+    val b = new StringBuffer
+    b.append("\n")
+    sortedByName(tree.keys).foreach{
+      key ⇒ 
+        b.append(key + "\n")
+        sortedByName(tree(key)).foreach{
+          value ⇒ 
+            b.append("\t" + value + "\n")
+        }
+        
+    }
+    b.toString
   }
 }

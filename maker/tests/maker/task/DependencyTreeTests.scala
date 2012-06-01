@@ -73,5 +73,40 @@ class DependencyTreeTests extends FunSuite{
       filteredPcs.forall(pcs)
     }
   }
+
+  test("Merging two trees"){
+    val map1 = Map[Int, Set[Int]](
+      1 → Set(3),
+      2 → Set(4, 5),
+      4 → Set(1),
+      6 → Set(8)
+    )
+    val map2 = Map[Int, Set[Int]](
+      1 → Set(5),
+      4 → Set(),
+      6 → Set(1, 4),
+      7 → Set(9)
+    )
+    val mergedMap = Map[Int, Set[Int]](
+      1 → Set(3, 5),
+      2 → Set(4, 5),
+      4 → Set(1),
+      6 → Set(1, 4, 8),
+      7 → Set(9)
+    )
+    assert(DependencyTree(map1) ++ DependencyTree(map2) === DependencyTree(mergedMap))
+  }
+
+  test("remove child term from tree"){
+    val map = Map[Int, Set[Int]](
+      1 → Set(2)
+    )
+    val mapAfterRemoving2 = Map[Int, Set[Int]](
+      1 → Set()
+    )
+
+    assert(DependencyTree(map) - 2 === DependencyTree(mapAfterRemoving2))
+  }
+
 }
 

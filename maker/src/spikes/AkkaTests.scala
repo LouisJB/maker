@@ -39,9 +39,7 @@ case class Counter(router : ActorRef, numCalls : Int, maxWait : Int) extends Act
       }
     case Done => {
       callsReceived += 1
-      println("" + callsReceived + " " + (numCalls == callsReceived))
       if (callsReceived == numCalls){
-        println("Sending done")
         originalCaller ! TotalSleep(totalSleep)
       }
     }
@@ -61,8 +59,6 @@ class AkkaTests extends FunSuite{
       val future = counter ? Go 
       Await.result(future, Duration.Inf) match {
         case TotalSleep(s) => {
-          println("total = " + s)
-          println("per slave = " + (s / numSlaves))
         }
       }
     }

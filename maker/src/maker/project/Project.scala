@@ -15,6 +15,7 @@ import maker.utils.FileUtils._
 import tasks._
 import org.apache.commons.io.FileUtils._
 import xml.NodeSeq
+import maker.task.ProjectAndTask
 
 trait ProjectDef {
   def name : String
@@ -140,19 +141,30 @@ case class Project(
   /**********************
     Tasks
   **********************/
-  def mkTask(t : Task) = ProjectAndTask(this, t)
+  def dependencyTree(t : Task) = ProjectAndTask(this, t).dependencyTree
+  def withinProjectDependencyTree(t : Task) = dependencyTree(t).filter{case ProjectAndTask(p, _) ⇒ p == this}
 
-  def clean = TaskManager(projectAndDescendents, CleanTask)
-  def cleanOnly = TaskManager(List(this), CleanTask)
-
-  def compile = TaskManager(projectAndDescendents, CompileSourceTask)
+  private def executeTaskAndDependencies(t : Task, parameters : Map[String, String] = Map()) = {
+    TaskManager(dependencyTree(t), ProjectAndTask(this, t), parameters)
+  }
+  private def executeTaskAndDependenciesWithinProject(t : Task, parameters : Map[String, String] = Map()) = TaskManager(
+    dependencyTree(t).filter{case ProjectAndTask(p, _) ⇒ p == this}, 
+    ProjectAndTask(this, t),
+    parameters
+  )
+  def clean = executeTaskAndDependencies(CleanTask)
+  def cleanOnly = executeTaskAndDependenciesWithinProject(CleanTask)
+  def compile = executeTaskAndDependencies(CompileTestsTask)
   def compileContinuously{ this.~(compile _) }
 
-  def testCompile = TaskManager(projectAndDescendents, CompileTestsTask)
+  def testCompile = executeTaskAndDependencies(CompileTestsTask)
   def testCompileContinuously{ this.~(testCompile _) }
-  def test = TaskManager(projectAndDescendents, RunUnitTestsTask)
-  def testOnly = TaskManager(List(this), RunUnitTestsTask)
-  def testClass(testClassNames : String*) = TaskManager(List(this), RunUnitTestsTask, Map("testClassOrSuiteName" -> testClassNames.mkString(":")))
+  def test = executeTaskAndDependencies(RunUnitTestsTask)
+  def testOnly = executeTaskAndDependenciesWithinProject(RunUnitTestsTask)
+  def testClass(testClassNames : String*) = executeTaskAndDependencies(
+    RunUnitTestsTask, 
+    Map("testClassOrSuiteName" -> testClassNames.mkString(":"))
+  )
   def testClassContinuously(testClassNames : String*) {
     this.~(() ⇒ testClass(testClassNames : _*))
   }
@@ -161,8 +173,8 @@ case class Project(
   def testResults = projectAndDescendents.map(ScalatestResults(_)).reduce(_++_)
 
 
-  def testFailingSuites = TaskManager(projectAndDescendents, RunFailingTestsTask)
-  def testFailingSuitesOnly = TaskManager(List(this), RunFailingTestsTask)
+  def testFailingSuites = executeTaskAndDependencies(RunFailingTestsTask)
+  def testFailingSuitesOnly = executeTaskAndDependenciesWithinProject(RunFailingTestsTask)
 
   // Only prints the first, for any more look in testResults.failed
   def showFailingTest{
@@ -174,33 +186,37 @@ case class Project(
     }
   }
 
-  def pack = TaskManager(projectAndDescendents, PackageTask)
-  def packOnly = TaskManager(List(this), PackageTask)
+  def pack = executeTaskAndDependencies(PackageTask)
+  def packOnly = executeTaskAndDependenciesWithinProject(PackageTask)
 
   def withDefaultConfig = withNelDefault("default") _
 
   def update : BuildResult[AnyRef] = update("default")
-  def update(configurations : String*) = TaskManager(projectAndDescendents, UpdateTask, Map("configurations" -> withDefaultConfig(configurations.toList).mkString(":")))
+  def update(configurations : String*) = executeTaskAndDependencies(
+    UpdateTask, 
+    Map("configurations" -> withDefaultConfig(configurations.toList).mkString(":"))
+  )
   def updateOnly : BuildResult[AnyRef] = updateOnly("default")
-  def updateOnly(configurations : String*) = TaskManager(List(this), UpdateTask, Map("configurations" -> withDefaultConfig(configurations.toList).mkString(":")))
+  def updateOnly(configurations : String*) = executeTaskAndDependencies(
+    UpdateTask, 
+    Map("configurations" -> withDefaultConfig(configurations.toList).mkString(":"))
+  )
 
   def publishLocal : BuildResult[AnyRef] = publishLocal()
-  def publishLocal(configurations : String = "default", version : String = props.Version()) =
-    publishLocal_(projectAndDescendents, configurations, version)
+  def publishLocal(configurations : String = "default", version : String = props.Version()) = {
+    executeTaskAndDependencies(PublishLocalTask, Map("configurations"-> configurations, "version" -> version))
+  }
   def publishLocalOnly : BuildResult[AnyRef] = publishLocalOnly()
-  def publishLocalOnly(configurations : String = "default", version : String = props.Version()) =
-    publishLocal_(List(this), configurations, version)
-  private def publishLocal_(projects : List[Project], configurations : String = "default", version : String = props.Version()) =
-    TaskManager(projects, PublishLocalTask, Map("configurations"-> configurations, "version" -> version))
+  def publishLocalOnly(configurations : String = "default", version : String = props.Version()) = {
+    executeTaskAndDependenciesWithinProject(PublishLocalTask, Map("configurations"-> configurations, "version" -> version))
+  }
 
   def publish : BuildResult[AnyRef] = publish()
   def publish(resolver : String = props.DefaultPublishResolver().getOrElse("default"), version : String = props.Version()) =
-    publish_(projectAndDescendents, resolver, version)
+    executeTaskAndDependencies(PublishTask, Map("publishResolver" -> resolver, "version" -> version))
   def publishOnly : BuildResult[AnyRef] = publishOnly()
   def publishOnly(resolver : String = props.DefaultPublishResolver().getOrElse("default"), version : String = props.Version()) =
-    publish_(List(this), resolver, version)
-  private def publish_(projects : List[Project], resolver : String = props.DefaultPublishResolver().getOrElse("default"), version : String = props.Version()) =
-    TaskManager(projects, PublishTask, Map("publishResolver" -> resolver, "version" -> version))
+    executeTaskAndDependenciesWithinProject(PublishTask, Map("publishResolver" -> resolver, "version" -> version))
 
   def runMain(className : String)(opts : String*)(args : String*) : BuildResult[AnyRef] = {
     var parameters = Map("mainClassName" -> className)
@@ -209,7 +225,7 @@ case class Project(
     if (! args.isEmpty)
       parameters += ("args" → args.mkString("|"))
 
-    val r = TaskManager(List(this), RunMainTask, parameters)
+    val r = executeTaskAndDependenciesWithinProject(RunMainTask, parameters)
     println("runMain task completed for class: " + className)
     r
   }
@@ -219,14 +235,16 @@ case class Project(
 
   def runJetty : BuildResult[AnyRef] = runJetty()
   def runJetty(portNo : Int = 8080) = {
-    val r = TaskManager(List(this), RunJettyTask, Map("portNo" -> portNo.toString))
+    val r = executeTaskAndDependenciesWithinProject(RunJettyTask, Map("portNo" -> portNo.toString))
     println("runJetty task completed")
     r
   }
 
-  def doc : BuildResult[AnyRef] = TaskManager(projectAndDescendents, DocTask)
+  def doc : BuildResult[AnyRef] = executeTaskAndDependencies(DocTask)
   def docOnly : BuildResult[AnyRef] = docOnly()
-  def docOnly(aggregate : Boolean = false) : BuildResult[AnyRef] = TaskManager(List(this), DocTask, Map("aggregate" -> aggregate.toString))
+  def docOnly(aggregate : Boolean = false) : BuildResult[AnyRef] = executeTaskAndDependenciesWithinProject(
+    DocTask, Map("aggregate" -> aggregate.toString)
+  )
 
   def showDoc {
     import Utils._

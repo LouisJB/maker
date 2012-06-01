@@ -14,28 +14,24 @@ import akka.pattern.ask
 import java.util.concurrent.TimeUnit._
 import java.util.concurrent.TimeoutException
 
-class TaskManager(projectTasks : Set[ProjectAndTask], router : ActorRef,
+class TaskManager(tree : DependencyTree[ProjectAndTask], router : ActorRef,
                    originalProjectAndTask : ProjectAndTask,
                    parameters : Map[String, String] = Map()) extends Actor {
 
+  Log.debug("About to exec deps of " + originalProjectAndTask)
+  Log.debug("Tree is " + tree)
   var accumuland : Map[Task, List[AnyRef]] = Map[Task, List[AnyRef]]()
-  var remainingProjectTasks = projectTasks
+  var remainingTree = tree
   var completedProjectTasks : Set[ProjectAndTask] = Set()
+  var allProjectTasks = tree.all
   var originalCaller : ActorRef = _
   var roundNo = 0
   private def execNextLevel{
-    Log.debug("Remaining tasks are " + remainingProjectTasks)
-    Log.debug("Completed tasks are " + completedProjectTasks)
-    val (canBeProcessed, mustWait) = remainingProjectTasks.partition(
-      _.immediateDependencies.filterNot(completedProjectTasks).filter(projectTasks).isEmpty
-    )
-    Log.debug("Can be processed = " + canBeProcessed)
-    Log.debug("must wait " + mustWait)
-    remainingProjectTasks = mustWait
-    canBeProcessed.foreach{
+    val nextToBeExecuted = remainingTree.childless
+    nextToBeExecuted.foreach{
       pt =>
+
         pt.roundNo = roundNo
-        Log.debug("Launching " + pt)
         router ! ExecTaskMessage(pt, accumuland, parameters)
     }
     roundNo += 1
@@ -43,18 +39,17 @@ class TaskManager(projectTasks : Set[ProjectAndTask], router : ActorRef,
   def receive = {
     case TaskResultMessage(projectTask, Left(taskFailure)) => {
       ProjectAndTask.removeTask(projectTask)
-      Log.debug("Task failed " + taskFailure)
       //router.stop
-      originalCaller ! BuildResult(Left(taskFailure), projectTasks, originalProjectAndTask)
+      originalCaller ! BuildResult(Left(taskFailure), tree, originalProjectAndTask)
     }
     case TaskResultMessage(projectTask, Right(result)) => {
       ProjectAndTask.removeTask(projectTask)
       accumuland = accumuland + (projectTask.task -> (result :: accumuland.getOrElse(projectTask.task, Nil)))
       completedProjectTasks += projectTask
-      if (completedProjectTasks == projectTasks)
-        originalCaller ! BuildResult(Right(TaskSuccess), projectTasks, originalProjectAndTask)
+      if (completedProjectTasks == allProjectTasks)
+        originalCaller ! BuildResult(Right(TaskSuccess), tree, originalProjectAndTask)
       else {
-        remainingProjectTasks = remainingProjectTasks.filterNot(_ == projectTask)
+        remainingTree = remainingTree - projectTask
         if (! router.isTerminated)
           execNextLevel
       }
@@ -67,24 +62,9 @@ class TaskManager(projectTasks : Set[ProjectAndTask], router : ActorRef,
 }
 
 object TaskManager{
-  def apply(projects : List[Project], task : Task, parameters : Map[String, String] = Map()) : BuildResult[AnyRef] = {
-    val sw = new Stopwatch()
-    val originalProjectAndTask = ProjectAndTask(projects.head, task)
-    val projectTasks = {
-      def recurse(moreProjectTasks : Set[ProjectAndTask], acc : Set[ProjectAndTask]) : Set[ProjectAndTask] = {
-        if (moreProjectTasks.isEmpty) acc
-        else
-          recurse(moreProjectTasks.flatMap(_.immediateDependencies), acc ++ moreProjectTasks)
-      }
-      recurse(projects.toSet.map{proj : Project => ProjectAndTask(proj, task)}, Set[ProjectAndTask]())
-    }
-    Log.debug("took %s to compute %d project tasks".format(sw, projectTasks.size))
-    Log.debug("About to do " + task + " for projects " + projects.toList.mkString(","))
-    projects.head.props.CompilationOutputStream.emptyVimErrorFile
-    apply(projectTasks, originalProjectAndTask, parameters)
-  }
 
-  def apply(projectTasks : Set[ProjectAndTask], originalProjectAndTask : ProjectAndTask, parameters : Map[String, String]) : BuildResult[AnyRef] = {
+  def apply(tree : DependencyTree[ProjectAndTask], originalProjectAndTask : ProjectAndTask, parameters : Map[String, String]) : BuildResult[AnyRef] = {
+    assert(tree.parents.contains(originalProjectAndTask), "Task tree mis-specified")
     Thread.currentThread.setContextClassLoader(TaskManager.getClass.getClassLoader)
     val system = ActorSystem("QueueManager")
     val sw = Stopwatch()
@@ -93,11 +73,11 @@ object TaskManager{
 
     Log.debug("Running with " + nWorkers + " workers")
     val router = system.actorOf(Props[Worker].withRouter(SmallestMailboxRouter(nWorkers)))
-    val qm = system.actorOf(Props(new TaskManager(projectTasks, router, originalProjectAndTask, parameters)))
+    val qm = system.actorOf(Props(new TaskManager(tree, router, originalProjectAndTask, parameters)))
     
     // wait for build to complete or user termination
     def startAndMonitor() : BuildResult[AnyRef] = {
-      Log.info("Starting task %s, press %s to terminate".format(originalProjectAndTask, Task.termSym))
+      Log.debug("Starting task %s, press %s to terminate".format(originalProjectAndTask, Task.termSym))
       val future = qm ? StartBuild
       def getResult() : Option[BuildResult[AnyRef]] = {
         try {
@@ -111,7 +91,7 @@ object TaskManager{
             if (System.in.available > 0 && System.in.read == Task.termChar) {
               Log.info("Terminating build...")
               system.shutdown()
-              Some(BuildResult(Left(TaskFailed(originalProjectAndTask, "User terminated")) : Either[TaskFailed, AnyRef], projectTasks, originalProjectAndTask))
+              Some(BuildResult(Left(TaskFailed(originalProjectAndTask, "User terminated")) : Either[TaskFailed, AnyRef], tree, originalProjectAndTask))
             }
             else None
           }
@@ -125,7 +105,7 @@ object TaskManager{
 
     system.shutdown()
 
-    Log.debug("Stats: \n" + projectTasks.map(_.runStats).mkString("\n"))
+    Log.debug("Stats: \n" + tree.all.map(_.runStats).mkString("\n"))
     if (! originalProjectAndTask.project.suppressTaskOutput)
       Log.info("Completed " + originalProjectAndTask + ", took" + sw + "\n")
     result

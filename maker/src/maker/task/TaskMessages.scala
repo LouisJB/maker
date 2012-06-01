@@ -37,14 +37,18 @@ class Worker() extends Actor{
   }
 }
 
-case class BuildResult[+A](res : Either[TaskFailed, A],
-                       projectAndTasks : Set[ProjectAndTask],
-                       originalProjectAndTask : ProjectAndTask) extends BuildMessage {
+case class BuildResult[+A](
+  res : Either[TaskFailed, A],
+  tree : DependencyTree[ProjectAndTask],
+  originalProjectAndTask : ProjectAndTask
+) extends BuildMessage {
 
   self =>
+
   import maker.graphviz.GraphVizDiGrapher._
   import maker.graphviz.GraphVizUtils._
 
+  val projectAndTasks = tree.all
   def stats : List[String] = projectAndTasks.map(_.allStats).toList
   def linearTime : Long = projectAndTasks.map(_.runTimeMs).toList.sum
 
@@ -68,10 +72,10 @@ case class BuildResult[+A](res : Either[TaskFailed, A],
   final def flatMap[B](f : A => BuildResult[B]) : BuildResult[B] = {
     res match {
       case Left(l) =>
-        BuildResult(Left(l) : Either[TaskFailed, B], projectAndTasks, originalProjectAndTask)
+        BuildResult(Left(l) : Either[TaskFailed, B], tree, originalProjectAndTask)
       case Right(a) => {
         val br : BuildResult[B] = f(a)
-        br.copy(projectAndTasks = projectAndTasks ++ br.projectAndTasks)
+        br.copy(tree = tree ++ br.tree)
       }
     }
   }
@@ -82,7 +86,7 @@ case class BuildResult[+A](res : Either[TaskFailed, A],
       case Left(l) => Left(l) : Either[TaskFailed, B]
       case Right(_) => res.right.map(f)
     }
-    BuildResult(mappedRes, projectAndTasks, originalProjectAndTask)
+    BuildResult(mappedRes, tree, originalProjectAndTask)
   }
 
   def filter(f: A => Boolean): BuildResult[A] = this

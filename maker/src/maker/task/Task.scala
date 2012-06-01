@@ -39,7 +39,6 @@ object Task {
     RunJettyTask -> Set(PackageTask),
     DocTask -> Set(CompileSourceTask)
   )
-
   lazy val standardWithinProjectDependencies : Project => Map[Task, Set[Task]] = Memoize1((project : Project) => {
     if (project.props.UpdateOnCompile()) standardFixedWithinProjectDependencies + (CompileSourceTask -> Set(UpdateTask)) else standardFixedWithinProjectDependencies
   })

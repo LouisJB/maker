@@ -7,9 +7,11 @@ import scala.xml.Attribute
 import java.io.File
 import maker.project.Project
 import maker.utils.FileUtils._
+import maker.utils.Log
+import org.apache.log4j.Level._
 
 
-case class ScalatestResultsTests extends FunSuite{
+class ScalatestResultsTests extends FunSuite{
   def metadataToMap(md : MetaData, acc : Map[String, String] = Map[String, String]()) : Map[String, String] = {
     md match {
       case scala.xml.Null ⇒ acc

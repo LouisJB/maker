@@ -3,6 +3,8 @@ package maker.task
 import maker.project.Project
 import maker.utils.{Stopwatch, Log}
 import maker.Maker
+import maker.task.tasks.CompileSourceTask
+import maker.task.tasks.UpdateTask
 
 
 object ProjectAndTask {
@@ -34,7 +36,9 @@ object ProjectAndTask {
 
   def getTaskTree(p: Project, task: Task): List[(ProjectAndTask, List[ProjectAndTask])] = {
     def recurse(acc: Set[(ProjectAndTask, List[ProjectAndTask])]): Set[(ProjectAndTask, List[ProjectAndTask])] = {
-      val newElements: Set[ProjectAndTask] = acc.flatMap(_._2).filterNot(acc.map(_._1))
+      val parents = acc.map(_._1)
+      val children = acc.flatMap(_._2).toSet
+      val newElements: Set[ProjectAndTask] = children.filterNot(parents)
       if (newElements.isEmpty)
         acc
       else
@@ -43,7 +47,6 @@ object ProjectAndTask {
         }.toSet)
     }
     recurse(Set(ProjectAndTask(p, task) → p.dependencies.childProjectTasks(task).toList)).toList
-    //(ProjectAndTask(p, task) -> p.dependencies.descendents.map{proj => proj.dependencies.childTasksInChildProjects(task).toList.map(ProjectAndTask(proj, _)) :: p.children.flatMap(d => getTaskTree(d, task))
   }
 }
 
@@ -61,7 +64,28 @@ case class ProjectAndTask(project: Project, task: Task) {
   def finishingTime = finishingTime_
 
   val immediateDependencies: Set[ProjectAndTask] = {
-    project.dependencies.childProjectTasks(task)
+    var set : Set[ProjectAndTask] = Task.standardFixedWithinProjectDependencies.getOrElse(task, Set[Task]()).map(ProjectAndTask(project, _))
+    if (task == CompileSourceTask && project.props.UpdateOnCompile())
+      set = set ++ Set(ProjectAndTask(project, UpdateTask))
+    set = set ++ project.children.flatMap{
+      proj ⇒ Task.standardDependentProjectDependencies.getOrElse(task, Set()).map(ProjectAndTask(proj, _))
+    }
+    set
+  }
+
+  def dependencyTree : DependencyTree[ProjectAndTask] = {
+    def recurse(tree : DependencyTree[ProjectAndTask]) : DependencyTree[ProjectAndTask] = {
+      val nextNodes = tree.childless.map{
+        pt ⇒ pt → pt.immediateDependencies
+      }.filter {
+        case (_, set) ⇒ ! set.isEmpty
+      }.toMap
+      if (nextNodes.isEmpty)
+        tree
+      else
+        recurse(tree ++ DependencyTree(nextNodes))
+    }
+    recurse(DependencyTree(Map(this -> immediateDependencies)))
   }
 
   def exec(acc: Map[Task, List[AnyRef]], parameters: Map[String, String] = Map()) = {
